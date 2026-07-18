@@ -1031,6 +1031,12 @@ extern extern(C) __gshared string[] rt_options;
  */
 void reconcileCommands(ref Param params, ref Target target)
 {
+    // Laser-D is permanently a BetterC compiler.  Set this after all
+    // configuration and command-line options have been parsed so that it
+    // cannot be disabled or partially undone by user-supplied settings.
+    params.betterC = true;
+    params.allInst = true;
+
     if (target.os == Target.OS.OSX)
     {
         driverParams.pic = PIC.pic;
@@ -1130,16 +1136,13 @@ void reconcileCommands(ref Param params, ref Target target)
             params.useNullCheck = CHECKENABLE.off;
     }
 
-    if (params.betterC)
-    {
-        if (params.checkAction != CHECKACTION.halt)
-            params.checkAction = CHECKACTION.C;
+    if (params.checkAction != CHECKACTION.halt)
+        params.checkAction = CHECKACTION.C;
 
-        params.useModuleInfo = false;
-        params.useTypeInfo = false;
-        params.useExceptions = false;
-        params.useGC = false;
-    }
+    params.useModuleInfo = false;
+    params.useTypeInfo = false;
+    params.useExceptions = false;
+    params.useGC = false;
 }
 
 /***********************************************

@@ -173,13 +173,13 @@ extern (C++) struct Param
     ubyte covPercent;       // 0..100 code coverage percentage required
     bool ctfe_cov = false;  // generate coverage data for ctfe
     bool ignoreUnsupportedPragmas = true;  // rather than error on them
-    bool useModuleInfo = true;   // generate runtime module information
-    bool useTypeInfo = true;     // generate runtime type information
-    bool useExceptions = true;   // support exception handling
-    bool useGC = true;           // support features that require the D runtime GC
-    bool betterC;           // be a "better C" compiler; no dependency on D runtime
+    bool useModuleInfo;          // generate runtime module information
+    bool useTypeInfo;            // generate runtime type information
+    bool useExceptions;          // support exception handling
+    bool useGC;                  // support features that require the D runtime GC
+    bool betterC = true;         // always be a "better C" compiler; no dependency on D runtime
     bool addMain;           // add a default main() function
-    bool allInst;           // generate code for all template instantiations
+    bool allInst = true;    // generate code for all template instantiations
     bool bitfields = true;  // support C style bit fields
     bool nothrowOptimizations; // Allow finally statements that do not throw an Exception
                                   // in try body to rewrite to a sequence.
