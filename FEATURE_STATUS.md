@@ -56,10 +56,10 @@ Each chapter should be split into individual features as it is investigated.
 | Statements (`statement.dd`) | Undecided | Review exception statements, synchronization, scope guards, and ordinary control flow. |
 | Arrays (`arrays.dd`) | Undecided | Separate static arrays, slices, dynamic arrays, literals, concatenation, resizing, and array operations. |
 | Associative arrays (`hash-map.dd`) | Undecided | Determine whether any useful implementation is possible without the D runtime or GC. |
-| Structs and unions (`struct.dd`) | Undecided | Review construction, destruction, postblit/copying, nested structs, and generated helpers. |
+| Structs and unions (`struct.dd`) | Restricted | Value storage, layout, fields, literals, methods, constructors, destructors, postblits, named and anonymous unions, and ordinary initialization are supported without the D runtime. Advanced copy/move constructors, invariants, bit fields, `alias this`, and operator-specific behavior remain classified with their dependent feature categories. |
 | Classes (`class.dd`) | Undecided | Review allocation, object model, `Object`, RTTI, virtual dispatch, and destruction separately. |
 | Interfaces (`interface.dd`) | Undecided | Review runtime metadata, class dependency, COM/C++ interfaces, and dispatch. |
-| Enums (`enum.dd`) | Undecided | Review named, anonymous, manifest, and special enum properties. |
+| Enums (`enum.dd`) | Supported | Named, anonymous, manifest, based, and opaque enum declarations and ordinary enum properties are supported. Opaque enums have no default initializer, and automatic numbering is rejected when the base type is itself an enum. |
 | Type qualifiers (`const3.dd`) | Undecided | Review `const`, `immutable`, `inout`, `shared`, conversions, and initialization. |
 | Functions (`function.dd`) | Restricted | Implicit `nothrow` and `@nogc` are decided; review parameters, delegates, closures, nesting, variadics, and generated functions. |
 | Operator overloading (`operatoroverloading.dd`) | Undecided | Check lowering for hidden runtime or allocation dependencies. |
@@ -121,6 +121,21 @@ Each chapter should be split into individual features as it is investigated.
 | Manifest constants | Supported | Basic `enum` manifest constants are retained; enum types will be reviewed with aggregates and enums. | `basic_declarations_accepted.d` |
 | Basic aliases | Supported | Aliases of primitive types and variables are retained. More advanced alias behavior remains with templates and other feature categories. | `basic_declarations_accepted.d`; upstream `aliasassign.d` used as differential evidence |
 | Invalid and duplicate declarations | Rejected | Undeclared type names, `void` variables, missing inference initializers, and duplicate names are rejected. | `basic_unknown_type_rejected.d`, `basic_void_variable_rejected.d`, `basic_auto_without_initializer_rejected.d`, `basic_duplicate_declaration_rejected.d` |
+
+## Struct, union, and enum decisions
+
+| Feature | Status | Decision | Tests |
+| --- | --- | --- | --- |
+| Struct storage and layout | Supported | Structs are value types with D field ordering, alignment, size, and offset rules. Direct recursive storage is rejected because it has no finite size. | `aggregate_types_accepted.d`, `recursive_struct_rejected.d` |
+| Struct initialization and literals | Supported | Default initialization, field-value literals, and scalar-field initialization are supported. Initialization involving a separately restricted field type remains subject to that type's restriction. | `aggregate_types_accepted.d` |
+| Struct methods and lifecycle | Supported | Runtime-free methods, constructors, destructors, and postblits are supported and generated helper functions inherit Laser-D's implicit function attributes. | `aggregate_types_accepted.d`; upstream `struct_allMembers.d` used as differential evidence |
+| Advanced struct behavior | Undecided | Bit fields, invariants, advanced copy/move constructors, `alias this`, and operator-specific behavior will be decided with their dependent function, expression, or operator categories. | None |
+| Union storage and layout | Supported | Named and anonymous unions overlay their fields according to D layout rules. Union constructors and ordinary initialization are supported. | `aggregate_types_accepted.d`; upstream `union_initialization.d` used as differential evidence |
+| Union default initialization | Restricted | At most one overlapping field may have a default initializer. | `union_overlapping_initializers_rejected.d` |
+| Named and based enums | Supported | Named enums with primitive or enum base types, explicit values, ordinary auto-increment, and `.init`, `.min`, `.max`, and `.sizeof` properties are supported. | `aggregate_types_accepted.d` |
+| Anonymous enums and manifest constants | Supported | Anonymous enum members and basic manifest constants are supported. | `aggregate_types_accepted.d` |
+| Opaque enums | Restricted | Opaque enums with a known base type are supported as types, but have no default initializer until defined. | `aggregate_types_accepted.d`, `opaque_enum_default_rejected.d` |
+| Enum-based auto-increment | Restricted | When an enum's base type is another enum, members after the first require explicit values. | `enum_auto_increment_rejected.d` |
 
 ## Evidence required for a decision
 

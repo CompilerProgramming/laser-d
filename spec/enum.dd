@@ -2,6 +2,11 @@ Ddoc
 
 $(SPEC_S Enums,
 
+$(P Laser-D supports named, anonymous, manifest, based, and opaque enum
+declarations. Enum base types must themselves be available in Laser-D. Opaque
+enums have no default initializer, and members of an enum based on another enum
+must use explicit values after the first member.)
+
 $(HEADERNAV_TOC)
 
 $(GRAMMAR

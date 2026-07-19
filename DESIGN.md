@@ -88,3 +88,19 @@ Laser-D source cannot name or introduce them.
 This decision does not cover pointers, arrays, aggregates, type qualifiers,
 function types, storage-duration behavior, module initialization, or advanced
 alias/template behavior. Those features are reviewed in their own categories.
+
+## Structs, unions, and enums
+
+Laser-D supports structs and unions as runtime-free value types. Their ordinary
+storage, layout, initialization, literals, methods, constructors, destructors,
+postblits, and generated helpers do not require the D runtime. Named and
+anonymous unions retain D's overlapping-storage rules.
+
+Named, based, anonymous, manifest, and opaque enums are supported when their
+base type is otherwise available in Laser-D. Opaque enums have no default
+initializer. An enum based on another enum requires explicit member values
+after its first member.
+
+Advanced aggregate behavior coupled to later categories—including bit fields,
+invariants, advanced copy and move constructors, `alias this`, and overloaded
+operators—remains undecided until those dependent categories are reviewed.

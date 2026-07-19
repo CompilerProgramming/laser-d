@@ -6,6 +6,17 @@ $(HEADERNAV_TOC)
 
 $(H2 $(LNAME2 intro, Overview))
 
+$(P Laser-D supports runtime-free structs and unions as value types, including
+fields, layout, ordinary initialization and literals, methods, constructors,
+destructors, postblits, and named or anonymous unions. Every generated or
+declared special member function has Laser-D's implicit `nothrow` and `@nogc`
+attributes. A field whose type is restricted elsewhere in Laser-D remains
+subject to that restriction.)
+
+$(P Bit fields, invariants, advanced copy and move constructors, `alias this`,
+and operator-specific behavior are specified separately with the features on
+which they depend.)
+
     $(P Whereas $(DDLINK spec/class, Classes, classes) are reference types,
     structs and unions are value types.
     )
