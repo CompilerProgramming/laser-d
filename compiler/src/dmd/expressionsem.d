@@ -6040,6 +6040,9 @@ private extern (C++) final class ExpressionSemanticVisitor : Visitor
         e.type = t0.arrayOf();
         e.type = e.type.typeSemantic(e.loc, sc);
 
+        error(e.loc, "dynamic array literals are not supported in Laser-D");
+        return setError();
+
         /* Disallow array literals of type void being used.
          */
         if (e.elements.length > 0 && t0.ty == Tvoid)
@@ -6088,6 +6091,9 @@ private extern (C++) final class ExpressionSemanticVisitor : Visitor
         {
             printf("AssocArrayLiteralExp::semantic('%s')\n", e.toChars());
         }
+        error(e.loc, "associative array literals are not supported in Laser-D");
+        return setError();
+
         if (e.type)
         {
             // already done, but we might have missed generating type info
@@ -6540,6 +6546,12 @@ private extern (C++) final class ExpressionSemanticVisitor : Visitor
                 edim = ts.dim;
                 exp.newtype = ts.next;
             }
+        }
+
+        if (edim)
+        {
+            error(exp.loc, "dynamic array allocation with `new` is not supported in Laser-D");
+            return setError();
         }
 
         ClassDeclaration cdthis = null;
@@ -9840,6 +9852,19 @@ private extern (C++) final class ExpressionSemanticVisitor : Visitor
             }
         }
 
+        if (exp.ident == Id.dup || exp.ident == Identifier.idPool("idup") ||
+            exp.ident == Identifier.idPool("capacity"))
+        {
+            exp.e1 = exp.e1.expressionSemantic(sc);
+            if (exp.e1.op == EXP.error)
+                return setError();
+            if (exp.e1.type.toBasetype().isStaticOrDynamicArray())
+            {
+                error(exp.loc, "GC-backed array property `%s` is not supported in Laser-D", exp.ident.toChars());
+                return setError();
+            }
+        }
+
         Expression e = exp.dotIdSemanticProp(sc, 1);
 
         if (e && isDotOpDispatch(e))
@@ -12784,6 +12809,8 @@ private extern (C++) final class ExpressionSemanticVisitor : Visitor
          */
         if (auto ale = exp.e1.isArrayLengthExp())
         {
+            error(exp.loc, "assignment to dynamic array `.length` is not supported in Laser-D");
+            return setError();
 
             // Ensure e1 is a modifiable lvalue
             auto ale1x = ale.e1.modifiableLvalue(sc, exp.e1);
@@ -13392,6 +13419,12 @@ private extern (C++) final class ExpressionSemanticVisitor : Visitor
         if (exp.suggestOpOpAssign(sc, parent))
             return setError();
 
+        if (exp.e1.type && exp.e1.type.toBasetype().isStaticOrDynamicArray())
+        {
+            error(exp.loc, "array append is not supported in Laser-D");
+            return setError();
+        }
+
         if (SliceExp se = exp.e1.isSliceExp())
         {
             if (se.e1.type.toBasetype().ty == Tsarray)
@@ -13948,6 +13981,12 @@ private extern (C++) final class ExpressionSemanticVisitor : Visitor
 
         Type tb1 = exp.e1.type.toBasetype();
         Type tb2 = exp.e2.type.toBasetype();
+
+        if (tb1.isStaticOrDynamicArray() || tb2.isStaticOrDynamicArray())
+        {
+            error(exp.loc, "array concatenation is not supported in Laser-D");
+            return setError();
+        }
 
         auto f1 = checkNonAssignmentArrayOp(exp.e1);
         auto f2 = checkNonAssignmentArrayOp(exp.e2);

@@ -76,8 +76,9 @@ $(H3 $(LNAME2 dynamic-arrays, Dynamic Arrays))
 $(P_LASER_D Dynamic-array values are supported only as non-owning
 pointer-and-length slices over separately owned storage. Slicing fixed arrays
 and pointer ranges, sub-slicing, indexing, mutation of mutable backing storage,
-$(D $), $(D .ptr), and read-only $(D .length) are supported. Operations that
-allocate, acquire GC ownership, or resize storage are classified separately.)
+$(D $), $(D .ptr), and read-only $(D .length) are supported. Dynamic array
+literals, $(D new T[n]), concatenation, append, $(D .dup), $(D .idup),
+$(D .capacity), and assignment to $(D .length) are rejected.)
 
 $(SPEC_RUNNABLE_EXAMPLE_COMPILE
 ---------
@@ -491,6 +492,8 @@ assert(s == [2, 2, 1]);
 
 $(H2 $(LNAME2 array-concatenation, Array Concatenation))
 
+$(P_LASER_D Array concatenation is not supported.)
+
         $(P The binary operator `~` is the $(I cat) operator. It is used
         to concatenate arrays:
         )
@@ -534,6 +537,8 @@ assert(a == b);
         $(P See also: $(DDSUBLINK spec/expression, identity_expressions, `is` operator).)
 
 $(H2 $(LNAME2 array-appending, Array Appending))
+
+$(P_LASER_D Array append with $(D ~=) is not supported.)
 
         $(P Similarly, the `~=` operator means append, as in:
         )
@@ -679,6 +684,10 @@ void main()
 $(P More information can be found at $(LINK2 https://wiki.dlang.org/Dense_multidimensional_arrays, Dlang Wiki - Dense Multidimensional Arrays).)
 
 $(H2 $(LNAME2 array-properties, Array Properties))
+
+$(P_LASER_D $(D .ptr) and read-only $(D .length) are supported. The
+GC-backed $(D .dup), $(D .idup), and $(D .capacity) properties and assignment
+to dynamic-array $(D .length) are not supported.)
 
         $(P Static array properties are:)
 

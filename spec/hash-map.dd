@@ -2,6 +2,8 @@ Ddoc
 
 $(SPEC_S Associative Arrays,
 
+$(P_LASER_D Associative-array types and literals are not supported in Laser-D.)
+
 $(HEADERNAV_TOC)
 
         $(P Associative arrays have an index that is not necessarily an integer,

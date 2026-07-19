@@ -52,10 +52,10 @@ Each chapter should be split into individual features as it is investigated.
 | Properties (`property.dd`) | Undecided | Identify properties that require runtime support or hidden allocation. |
 | Attributes (`attribute.dd`) | Restricted | `nothrow` and `@nogc` are decided; all other attributes remain to be classified. |
 | Pragmas (`pragma.dd`) | Undecided | Review each predefined pragma and implementation dependency. |
-| Expressions (`expression.dd`) | Restricted | Basic primary scalar expressions are supported. Remaining primary forms, operators, allocation, casts, calls, arrays, delegates, assertions, and hidden runtime behavior remain to be reviewed by category. |
+| Expressions (`expression.dd`) | Restricted | Basic primary scalar expressions are supported. Dynamic and associative-array literals, GC-backed array allocation, concatenation, and append are rejected. Remaining forms and operators are reviewed by category. |
 | Statements (`statement.dd`) | Undecided | Review exception statements, synchronization, scope guards, and ordinary control flow. |
-| Arrays (`arrays.dd`) | Restricted | Fixed-size arrays and non-owning slices are supported, including indexing, sub-slicing, `$`, `.ptr`, read-only `.length`, pointer slicing, and static-storage string literals. Allocating and resizing operations remain to be classified. |
-| Associative arrays (`hash-map.dd`) | Undecided | Determine whether any useful implementation is possible without the D runtime or GC. |
+| Arrays (`arrays.dd`) | Restricted | Fixed-size arrays and non-owning slices are supported, including indexing, sub-slicing, `$`, `.ptr`, read-only `.length`, pointer slicing, and static-storage string literals. GC-backed allocation, copying, capacity management, resizing, concatenation, and append are rejected. |
+| Associative arrays (`hash-map.dd`) | Rejected | Associative-array types and literals are rejected. |
 | Structs and unions (`struct.dd`) | Restricted | Value storage, layout, fields, literals, methods, ordinary constructors, bit fields, named and anonymous unions, and ordinary initialization are supported. Struct destructors, postblits, invariants, and `alias this` are rejected. Advanced copy/move constructors and operator-specific behavior remain classified with their dependent feature categories. |
 | Classes (`class.dd`) | Rejected | Native D, COM, Objective-C, and C++ classes are rejected, including anonymous classes. |
 | Interfaces (`interface.dd`) | Rejected | Native D, COM, Objective-C, and C++ interfaces are rejected. |
@@ -171,17 +171,17 @@ Each chapter should be split into individual features as it is investigated.
 | --- | --- | --- | --- |
 | Primary scalar expressions | Supported | Identifiers, parentheses, `null`, Boolean literals, supported integer, floating-point, and character literals, and construction or conversion with supported scalar types are retained. | `primary_scalar_expressions_accepted.d` |
 | Rejected scalar expressions | Rejected | Literal or construction forms that introduce `real`, imaginary, or complex types remain rejected by their corresponding type decisions. | `real_rejected.d`, `imaginary_rejected.d`, `complex_rejected.d` |
-| Remaining primary expressions | Undecided | Dynamic and associative-array literals, function literals, interpolation, `this`, `super`, `new`, import and mixin expressions, `typeid`, `is`, traits, non-array type properties, and template instances require separate review. Static-storage string literals and array `$` are classified with arrays. | None |
+| Remaining primary expressions | Undecided | Function literals, interpolation, `this`, `super`, non-array `new`, import and mixin expressions, `typeid`, `is`, traits, non-array type properties, and template instances require separate review. Static-storage string literals and array `$` are classified with arrays; dynamic and associative-array literals are rejected. | `dynamic_array_literal_rejected.d`, `associative_array_literal_rejected.d` |
 
 ## Array decisions
 
 | Feature | Status | Decision | Tests |
 | --- | --- | --- | --- |
-| Fixed-size arrays | Supported | Fixed-size arrays provide inline value storage in globals, stack variables, and containing aggregates. Direct fixed-size initialization with array literals is supported. | `static_arrays_and_slices_accepted.d` |
+| Fixed-size arrays | Supported | Fixed-size arrays provide inline value storage in globals, stack variables, and containing aggregates. Compile-time array initializers for statically allocated fixed arrays are supported. | `static_arrays_and_slices_accepted.d` |
 | Non-owning slices | Supported | Dynamic-array slice values are retained as pointer-and-length views over separately owned storage. Slicing fixed arrays and pointer ranges, sub-slicing, indexing, mutation of mutable backing storage, `$`, `.ptr`, and read-only `.length` are supported. | `static_arrays_and_slices_accepted.d` |
 | String literals | Restricted | String literals are supported as non-owning slices over compiler-provided static storage. Other string operations remain subject to their array or operator categories. | `static_arrays_and_slices_accepted.d` |
-| GC-backed array operations | Undecided | Dynamic array literals, `new` array allocation, concatenation, append, duplication, capacity management, and `.length` assignment will be decided in the next array review. | None |
-| Associative arrays | Undecided | Associative arrays will be decided with GC-backed array operations. | None |
+| GC-backed array operations | Rejected | Dynamic array literals, `new T[n]`, concatenation, append, `.dup`, `.idup`, `.capacity`, and assignment to dynamic-array `.length` are rejected. | `dynamic_array_literal_rejected.d`, `new_array_rejected.d`, `array_concatenation_rejected.d`, `array_gc_properties_rejected.d` |
+| Associative arrays | Rejected | Associative-array types and literals are rejected. | `associative_arrays_rejected.d`, `associative_array_literal_rejected.d` |
 
 ## Evidence required for a decision
 

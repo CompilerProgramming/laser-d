@@ -187,8 +187,8 @@ may refer to fixed global or stack storage, static string-literal storage, or a
 pointer range supplied by manually managed or external code. Indexing,
 sub-slicing, `$`, `.ptr`, and read-only `.length` access are supported.
 
-Array literals are currently supported by this decision only when they are
-materialized directly into fixed-size storage. Dynamic array literals,
-allocation with `new`, concatenation, append, duplication, capacity management,
-and assignment to `.length` remain to be rejected or classified in the next
-array-expression review. Associative arrays also remain for that change.
+Compile-time initializers for statically allocated fixed-size arrays remain
+supported. Dynamic array literal expressions, array allocation with `new`,
+concatenation, append, `.dup`, `.idup`, `.capacity`, and assignment to dynamic
+array `.length` are rejected because they allocate, resize, or depend on GC
+allocation metadata. Associative-array types and literals are rejected.

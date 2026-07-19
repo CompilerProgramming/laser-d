@@ -1106,6 +1106,7 @@ assert(d == 2);
 
 
 $(H3 $(LNAME2 cat_expressions, Cat Expressions))
+    $(P_LASER_D Array cat expressions are not supported.)
     $(P In the case of the Additive operation $(D ~):
     )
 
@@ -2304,9 +2305,8 @@ $(H3 $(LNAME2 hex_string_literals, Hex String Literals))
 
 $(H3 $(LNAME2 array_literals, Array Literals))
 
-$(P_LASER_D An array literal is currently supported only when it is
-materialized directly into fixed-size array storage. Dynamically allocated
-array literals are classified with GC-backed array operations.)
+$(P_LASER_D Dynamic array literal expressions are not supported. Compile-time
+initializers for statically allocated fixed-size arrays remain supported.)
 
 $(GRAMMAR
 $(GNAME ArrayLiteral):
@@ -2430,6 +2430,8 @@ $(H4 $(LNAME2 cast_array_literal, Casting))
 
 
 $(H3 $(LNAME2 associative_array_literals, Associative Array Literals))
+
+$(P_LASER_D Associative array literals are not supported.)
 
 $(GRAMMAR
 $(GNAME AssocArrayLiteral):
@@ -3038,6 +3040,9 @@ $(GNAME ImportExpression):
         ---
 
 $(H3 $(LNAME2 new_expressions, New Expressions))
+
+$(P_LASER_D Dynamic array allocation with $(D new T[n]) is not supported.
+Other forms of $(D new) are classified with their allocated type.)
 
 $(GRAMMAR
 $(GNAME NewExpression):

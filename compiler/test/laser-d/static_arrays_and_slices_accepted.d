@@ -4,7 +4,11 @@ int[3] globalStorage = [10, 20, 30];
 
 extern(C) int main()
 {
-    int[4] storage = [1, 2, 3, 4];
+    int[4] storage;
+    storage[0] = 1;
+    storage[1] = 2;
+    storage[2] = 3;
+    storage[3] = 4;
     int[] whole = storage[];
     int[] middle = storage[1 .. 3];
     int[] pointerSlice = storage.ptr[0 .. storage.length];
