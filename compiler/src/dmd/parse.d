@@ -6448,9 +6448,15 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
                 if (id == Id.exit)
                     t = TOK.onScopeExit;
                 else if (id == Id.failure)
+                {
                     t = TOK.onScopeFailure;
+                    error(token.loc, "`scope(failure)` is not supported in Laser-D because D exception handling is disabled");
+                }
                 else if (id == Id.success)
+                {
                     t = TOK.onScopeSuccess;
+                    error(token.loc, "`scope(success)` is not supported in Laser-D; use `scope(exit)` for deterministic cleanup");
+                }
                 else
                     error("valid scope identifiers are `exit`, `failure`, or `success`, not `%s`", id.toChars());
                 nextToken();

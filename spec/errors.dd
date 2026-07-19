@@ -4,6 +4,11 @@ $(SPEC_S Error Handling,
 
 $(HEADERNAV_TOC)
 
+$(P_LASER_D D exception handling is not supported. Source `try`, `catch`,
+`finally`, and `throw` statements are rejected. Programs represent and
+propagate errors explicitly, for example through return values or C APIs.
+`scope(exit)` is the supported deterministic-cleanup construct.)
+
 $(BLOCKQUOTE_BY Julius C'ster,
 I came, I coded, I crashed.
 )

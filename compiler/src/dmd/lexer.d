@@ -312,6 +312,18 @@ class Lexer
             case TOK.pure_:
                 error(token.loc, "`pure` is not supported in Laser-D; functions remain conservatively impure for C interoperability");
                 break;
+            case TOK.try_:
+                error(token.loc, "`try` is not supported in Laser-D; use `scope(exit)` for deterministic cleanup");
+                break;
+            case TOK.catch_:
+                error(token.loc, "`catch` is not supported in Laser-D because D exception handling is disabled");
+                break;
+            case TOK.finally_:
+                error(token.loc, "`finally` is not supported in Laser-D; use `scope(exit)` for deterministic cleanup");
+                break;
+            case TOK.throw_:
+                error(token.loc, "`throw` is not supported in Laser-D because D exception handling is disabled");
+                break;
             default:
                 break;
             }

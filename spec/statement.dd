@@ -2111,6 +2111,11 @@ void g(Object o)
 
 $(H2 $(LEGACY_LNAME2 TryStatement, try-statement, Try Statement))
 
+$(P_LASER_D Source `try`, `catch`, `finally`, and `throw` statements are not
+supported. Use `scope(exit)` for deterministic cleanup and explicit values for
+error propagation. Internal try/finally nodes used to lower `scope(exit)` are
+compiler implementation details.)
+
 $(P Exception handling is done with the try-catch-finally statement.)
 
 $(GRAMMAR
@@ -2216,6 +2221,10 @@ done
         )
 
 $(H2 $(LEGACY_LNAME2 ScopeGuardStatement, scope-guard-statement, Scope Guard Statement))
+
+$(P_LASER_D Only `scope(exit)` is supported. `scope(success)` and
+`scope(failure)` are rejected because Laser-D does not support D exception
+handling and retains one source syntax for deterministic cleanup.)
 
 $(GRAMMAR
 $(GNAME ScopeGuardStatement):

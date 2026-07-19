@@ -68,6 +68,15 @@ rejection on declarations, function pointers, and delegate types.
 
 ## Lexical analysis
 
+## Deterministic cleanup and error handling
+
+Laser-D supports `scope(exit)` as its single source-language cleanup construct.
+Source `try`, `catch`, `finally`, `throw`, `scope(success)`, and
+`scope(failure)` are rejected. The frontend may still create internal
+try/finally nodes when lowering `scope(exit)`; this is implementation machinery,
+not an additional source feature. Laser-D programs report and propagate errors
+explicitly, for example with return values or C APIs, rather than D exceptions.
+
 Laser-D source cannot declare mutable global, module, function-static, or
 aggregate-static storage. Manifest constants and deeply `immutable` static data
 remain available. Native D multithreading constructs (`shared`, `__gshared`,
