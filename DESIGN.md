@@ -50,3 +50,16 @@ therefore always expose both guarantees to the type system.
 external functions, pointers, delegates, inferred return types, member
 functions, nested functions, and lambdas. The explicit-attribute tests verify
 rejection on declarations, function pointers, and delegate types.
+
+## Lexical analysis
+
+Laser-D retains D lexical analysis unchanged. This includes the source
+character set, whitespace, comments, identifiers, tokens, literal forms,
+escape sequences, keywords, and special tokens. Laser-D restrictions are
+applied during parsing or semantic analysis after tokenization; they do not
+introduce a separate lexical dialect.
+
+The focused tests in `compiler/test/laser-d/lexical_*.d` cover accepted forms
+and representative malformed constructs. The upstream lexer diagnostic tests
+were also compared between upstream DMD in BetterC mode and Laser-D; the
+rejection results matched for the reviewed cases.

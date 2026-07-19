@@ -13,6 +13,12 @@ phase of translation.)
 
 $(H2 $(LNAME2 source_text, Source Text))
 
+$(P Laser-D retains D lexical analysis unchanged. Source text, whitespace,
+comments, identifiers, tokens, literals, escape sequences, keywords, and
+special tokens described in this chapter are part of Laser-D. A construct may
+be lexically valid but still be rejected by a later Laser-D grammar or semantic
+restriction.)
+
 $(GRAMMAR
 $(GNAME SourceFile):
     $(GLINK ByteOrderMark) $(GLINK2 module, Module)$(OPT)

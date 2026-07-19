@@ -43,7 +43,7 @@ Each chapter should be split into individual features as it is investigated.
 | D specification area | Status | Initial Laser-D review questions |
 | --- | --- | --- |
 | Introduction (`intro.dd`) | Undecided | Replace full-D assumptions with the Laser-D execution and runtime model. |
-| Lexical analysis (`lex.dd`) | Undecided | Identify whether all tokens, literals, comments, and identifiers remain available. |
+| Lexical analysis (`lex.dd`) | Supported | Laser-D retains D source text, whitespace, comments, identifiers, tokens, literals, escape sequences, keywords, and special tokens unchanged. Malformed lexical constructs are rejected according to the D lexical grammar. See the detailed lexical decisions below. |
 | Interpolated expression sequences (`istring.dd`) | Undecided | Determine generated constructs and any runtime or allocation dependencies. |
 | Grammar (`grammar.dd`) | Undecided | Record grammar retained through the no-new-syntax compatibility rule and identify semantically rejected productions. |
 | Modules (`module.dd`) | Undecided | Review imports, module constructors/destructors, `ModuleInfo`, and separate compilation. |
@@ -88,6 +88,21 @@ Each chapter should be split into individual features as it is investigated.
 | Windows programming (`windows.dd`) | Undecided | Separate portable language guarantees from Windows-specific interoperability. |
 | Legacy features (`legacy.dd`) | Undecided | Decide whether any deprecated or legacy constructs belong in the reduced language. |
 | Editions (`editions.dd`) | Undecided | Decide whether edition selection is supported or fixed. |
+
+## Lexical feature decisions
+
+| Feature | Status | Decision | Tests |
+| --- | --- | --- | --- |
+| Source text and character set | Supported | UTF-8, UTF-16LE, UTF-16BE, and UTF-32LE source text with byte-order marks, plus Unicode characters, are retained. | `lexical_accepted.d`; upstream BOM fixtures used as differential evidence |
+| Whitespace and line endings | Supported | D whitespace and end-of-line rules are retained. | `lexical_accepted.d` |
+| Comments | Supported | Line, block, and nesting block comments are retained; unterminated comments are rejected. | `lexical_accepted.d`, `lexical_unterminated_comment.d` |
+| Identifiers | Supported | ASCII and universal-alpha identifiers, case sensitivity, and D reserved-identifier rules are retained. | `lexical_accepted.d`; `lexer23465.d` used as differential evidence |
+| Integer literals | Supported | D decimal, binary, and hexadecimal integer literals, separators, and suffixes are retained; malformed digits and overflow are rejected. | `lexical_accepted.d`, `lexical_invalid_number.d`; upstream `lexer4.d` and `lexer23465.d` used as differential evidence |
+| Floating-point literals | Supported | D decimal and hexadecimal floating-point literals and suffixes are retained; malformed or unrepresentable literals are rejected. | `lexical_accepted.d`; upstream `lexer4.d` and `lexer5.d` used as differential evidence |
+| Character literals and escapes | Supported | D character literals, escape sequences, Unicode escapes, and named character entities are retained; malformed escapes are rejected. | `lexical_accepted.d`, `lexical_invalid_escape.d`; upstream `lexer1.d` used as differential evidence |
+| String literals | Supported | Quoted, WYSIWYG, delimited, token, hexadecimal, and postfix string literals are retained. | `lexical_accepted.d`; upstream `lexer1.d`, `lexer2.d`, and `lexer3.d` used as differential evidence |
+| Keywords and tokens | Supported | D keywords, operators, punctuation, and tokenization rules are retained unchanged. | Exercised throughout the Laser-D suite; upstream lexer diagnostics used as differential evidence |
+| Special tokens | Supported | D special tokens such as `__FILE__`, `__LINE__`, and `__MODULE__` are retained. | `lexical_accepted.d` |
 
 ## Evidence required for a decision
 
