@@ -2304,6 +2304,10 @@ $(H3 $(LNAME2 hex_string_literals, Hex String Literals))
 
 $(H3 $(LNAME2 array_literals, Array Literals))
 
+$(P_LASER_D An array literal is currently supported only when it is
+materialized directly into fixed-size array storage. Dynamically allocated
+array literals are classified with GC-backed array operations.)
+
 $(GRAMMAR
 $(GNAME ArrayLiteral):
     $(D [) $(GLINK ArgumentList)$(OPT) $(D ])

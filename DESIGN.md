@@ -178,3 +178,17 @@ associative-array literals, function literals, interpolated expressions,
 `this`, `super`, `new`, `$`, imports, mixins, `typeid`, `is`, traits, type
 properties, operators, assignment, calls, casts, or other postfix expressions.
 Those forms will be reviewed in smaller dependent categories.
+
+### Static arrays and slices
+
+Fixed-size arrays and non-owning dynamic-array slices are supported. A slice is
+a pointer-and-length view and does not imply garbage-collected ownership. It
+may refer to fixed global or stack storage, static string-literal storage, or a
+pointer range supplied by manually managed or external code. Indexing,
+sub-slicing, `$`, `.ptr`, and read-only `.length` access are supported.
+
+Array literals are currently supported by this decision only when they are
+materialized directly into fixed-size storage. Dynamic array literals,
+allocation with `new`, concatenation, append, duplication, capacity management,
+and assignment to `.length` remain to be rejected or classified in the next
+array-expression review. Associative arrays also remain for that change.

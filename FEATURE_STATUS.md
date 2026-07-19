@@ -54,7 +54,7 @@ Each chapter should be split into individual features as it is investigated.
 | Pragmas (`pragma.dd`) | Undecided | Review each predefined pragma and implementation dependency. |
 | Expressions (`expression.dd`) | Restricted | Basic primary scalar expressions are supported. Remaining primary forms, operators, allocation, casts, calls, arrays, delegates, assertions, and hidden runtime behavior remain to be reviewed by category. |
 | Statements (`statement.dd`) | Undecided | Review exception statements, synchronization, scope guards, and ordinary control flow. |
-| Arrays (`arrays.dd`) | Undecided | Separate static arrays, slices, dynamic arrays, literals, concatenation, resizing, and array operations. |
+| Arrays (`arrays.dd`) | Restricted | Fixed-size arrays and non-owning slices are supported, including indexing, sub-slicing, `$`, `.ptr`, read-only `.length`, pointer slicing, and static-storage string literals. Allocating and resizing operations remain to be classified. |
 | Associative arrays (`hash-map.dd`) | Undecided | Determine whether any useful implementation is possible without the D runtime or GC. |
 | Structs and unions (`struct.dd`) | Restricted | Value storage, layout, fields, literals, methods, ordinary constructors, bit fields, named and anonymous unions, and ordinary initialization are supported. Struct destructors, postblits, invariants, and `alias this` are rejected. Advanced copy/move constructors and operator-specific behavior remain classified with their dependent feature categories. |
 | Classes (`class.dd`) | Rejected | Native D, COM, Objective-C, and C++ classes are rejected, including anonymous classes. |
@@ -171,7 +171,17 @@ Each chapter should be split into individual features as it is investigated.
 | --- | --- | --- | --- |
 | Primary scalar expressions | Supported | Identifiers, parentheses, `null`, Boolean literals, supported integer, floating-point, and character literals, and construction or conversion with supported scalar types are retained. | `primary_scalar_expressions_accepted.d` |
 | Rejected scalar expressions | Rejected | Literal or construction forms that introduce `real`, imaginary, or complex types remain rejected by their corresponding type decisions. | `real_rejected.d`, `imaginary_rejected.d`, `complex_rejected.d` |
-| Remaining primary expressions | Undecided | Strings, array and associative-array literals, function literals, interpolation, `this`, `super`, `new`, `$`, import and mixin expressions, `typeid`, `is`, traits, type properties, and template instances require separate review. | None |
+| Remaining primary expressions | Undecided | Dynamic and associative-array literals, function literals, interpolation, `this`, `super`, `new`, import and mixin expressions, `typeid`, `is`, traits, non-array type properties, and template instances require separate review. Static-storage string literals and array `$` are classified with arrays. | None |
+
+## Array decisions
+
+| Feature | Status | Decision | Tests |
+| --- | --- | --- | --- |
+| Fixed-size arrays | Supported | Fixed-size arrays provide inline value storage in globals, stack variables, and containing aggregates. Direct fixed-size initialization with array literals is supported. | `static_arrays_and_slices_accepted.d` |
+| Non-owning slices | Supported | Dynamic-array slice values are retained as pointer-and-length views over separately owned storage. Slicing fixed arrays and pointer ranges, sub-slicing, indexing, mutation of mutable backing storage, `$`, `.ptr`, and read-only `.length` are supported. | `static_arrays_and_slices_accepted.d` |
+| String literals | Restricted | String literals are supported as non-owning slices over compiler-provided static storage. Other string operations remain subject to their array or operator categories. | `static_arrays_and_slices_accepted.d` |
+| GC-backed array operations | Undecided | Dynamic array literals, `new` array allocation, concatenation, append, duplication, capacity management, and `.length` assignment will be decided in the next array review. | None |
+| Associative arrays | Undecided | Associative arrays will be decided with GC-backed array operations. | None |
 
 ## Evidence required for a decision
 

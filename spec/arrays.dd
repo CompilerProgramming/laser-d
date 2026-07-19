@@ -18,6 +18,10 @@ $(H2 $(LNAME2 array-kinds, Kinds))
 
 $(H3 $(LNAME2 static-arrays, Static Arrays))
 
+$(P_LASER_D Fixed-size arrays are supported as inline value storage. They may
+be initialized directly with array literals whose values are materialized in
+the fixed storage.)
+
 $(SPEC_RUNNABLE_EXAMPLE_COMPILE
 ---------
 int[3] s;
@@ -68,6 +72,12 @@ static assert(is(typeof(m) == int[3][2]));
         ))
 
 $(H3 $(LNAME2 dynamic-arrays, Dynamic Arrays))
+
+$(P_LASER_D Dynamic-array values are supported only as non-owning
+pointer-and-length slices over separately owned storage. Slicing fixed arrays
+and pointer ranges, sub-slicing, indexing, mutation of mutable backing storage,
+$(D $), $(D .ptr), and read-only $(D .length) are supported. Operations that
+allocate, acquire GC ownership, or resize storage are classified separately.)
 
 $(SPEC_RUNNABLE_EXAMPLE_COMPILE
 ---------
@@ -289,6 +299,9 @@ assert(*p == 2);
 
 
 $(H2 $(LNAME2 slicing, Slicing))
+
+$(P_LASER_D Slicing is supported and does not allocate. The resulting dynamic
+array is a non-owning view of the original storage.)
 
         $(P $(I Slicing) an array means to specify a subarray of it.
         This is done by supplying two index expressions.
