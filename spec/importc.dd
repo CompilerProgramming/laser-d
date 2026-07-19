@@ -4,6 +4,16 @@ $(SPEC_S ImportC,
 
 $(HEADERNAV_TOC)
 
+$(P_LASER_D ImportC is retained. Laser-D supports direct compilation of C
+translation units and importing C modules into Laser-D modules. Restrictions
+on Laser-D source types do not remove the corresponding C types from ImportC;
+for example, C $(D long double) remains available even though Laser-D source
+cannot name D $(D real). The initial reviewed baseline uses preprocessed
+$(TT .i) translation units and covers C11 functions,
+globals, structs, unions, enums, function pointers, initializers, and static
+assertions. Preprocessing and the extended ImportC surface remain subject to
+separate feature review.)
+
     $(P ImportC is a C compiler embedded into the D implementation.
     It enables direct importation of C files, without
     needing to manually prepare a D file corresponding to the declarations

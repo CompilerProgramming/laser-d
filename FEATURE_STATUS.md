@@ -83,7 +83,7 @@ Each chapter should be split into individual features as it is investigated.
 | ABI (`abi.dd`) | Undecided | The backend and frontend/backend interface are unchanged; determine which source-level ABI guarantees remain part of Laser-D. |
 | Vector extensions (`simd.dd`) | Undecided | Review portability and backend support across required targets. |
 | BetterC (`betterc.dd`) | Restricted | BetterC is mandatory, but its upstream documentation is not treated as a complete Laser-D specification. |
-| ImportC (`importc.dd`) | Undecided | Decide whether ImportC is retained and test interaction with mandatory BetterC. |
+| ImportC (`importc.dd`) | Restricted | ImportC is retained. Standalone C11 compilation and mixed Laser-D/C modules are supported for the reviewed baseline; preprocessing, headers, macros, atomics, vector extensions, inline assembly, and implementation extensions remain to be audited. |
 | Live functions (`ob.dd`) | Undecided | Review compiler analysis and any runtime assumptions. |
 | Windows programming (`windows.dd`) | Undecided | Separate portable language guarantees from Windows-specific interoperability. |
 | Legacy features (`legacy.dd`) | Undecided | Decide whether any deprecated or legacy constructs belong in the reduced language. |
@@ -154,6 +154,16 @@ Each chapter should be split into individual features as it is investigated.
 | C++ classes and interfaces | Rejected | Class and interface declarations under C++ linkage are rejected, including forward declarations, definitions, templates, and explicit class/struct mangling forms. | `cpp_class_rejected.d`, `cpp_interface_rejected.d` |
 | C++ free functions | Supported | `extern(C++)` free-function declarations, function types, mangling, and overload sets remain available without enabling the C++ object model. | `cpp_free_functions_accepted.d` |
 | C++ structs | Rejected | Struct declarations under C++ linkage are rejected, including forward declarations, definitions, templates, and explicit class-mangling forms. | `cpp_struct_rejected.d` |
+
+## ImportC decisions
+
+| Feature | Status | Decision | Tests |
+| --- | --- | --- | --- |
+| Standalone ImportC | Supported | Preprocessed C translation units can be compiled, linked, and executed directly. The reviewed C11 baseline includes functions, local and aggregate initialization, structs, unions, enums, function pointers, and static assertions. | `importc_standalone.i` |
+| Importing C modules | Supported | A Laser-D module can import declarations from a preprocessed C translation unit compiled in the same invocation and can call its functions and access its globals and value types. | `importc_module_accepted.d`, `extra-files/importc_api.i` |
+| ImportC scalar representation | Supported | C source retains the C types needed by ImportC. In particular, C `long double` remains available through the frontend's internal extended representation even though Laser-D source cannot name D `real`. | `importc_module_accepted.d` |
+| Upstream preprocessed ImportC compatibility | Restricted | The 41 upstream `.i` tests that currently pass under Laser-D are copied into the Laser-D suite. Two upstream tests requiring `__importc_builtins.di` remain blocked by its use of rejected D `real`; the generated-interface golden test requires a Laser-D-specific expected output. | `importc_upstream_*.i` |
+| ImportC preprocessing and extended surface | Undecided | Automatic preprocessing, headers, macros, conditional compilation, atomics, vector extensions, inline assembly, and implementation-specific extensions require separate review. | None |
 
 ## Evidence required for a decision
 

@@ -1,0 +1,2 @@
+=== laser-d/importc_upstream_compilable_testcdefines.i.cg
+extern (C) enum int _ATFILE_SOURCE = 1;

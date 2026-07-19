@@ -14,7 +14,7 @@ be run by passing its path, for example:
 ./run.d laser-d/betterc_default.d
 ```
 
-Every `.d` test in this directory must declare one of these modes:
+Every `.d`, `.c`, or `.i` test in this directory must declare one of these modes:
 
 ```d
 // TEST_MODE: compilable
@@ -31,3 +31,9 @@ intended reason.
 Keep each test focused on one feature or one closely related boundary. Update
 the applicable source under `spec/`, `DESIGN.md`, and `FEATURE_STATUS.md` when
 a test records a new or changed language decision.
+
+Files named `importc_upstream_*` are passing preprocessed ImportC tests copied
+from the corresponding upstream `compilable`, `runnable`, or
+`fail_compilation` category. Their category prefix avoids collisions in this
+flat directory. Runner metadata, expected source paths and module names, and
+fixture paths are adjusted only as required by their Laser-D location.

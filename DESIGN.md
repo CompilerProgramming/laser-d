@@ -146,3 +146,21 @@ This decision does not remove C++ linkage itself. `extern(C++)` free functions
 remain supported, including overloads. C++ structs are rejected as well: their
 non-virtual value-type model still requires platform- and compiler-specific
 layout, mangling, constructor, destructor, and copying ABI support.
+
+## ImportC
+
+ImportC is retained. Laser-D can compile C translation units directly and can
+compile C modules alongside Laser-D modules so their declarations can be
+imported without a handwritten D binding. ImportC remains a C11 compiler; the
+restrictions on Laser-D source syntax do not remove C types required to compile
+C. For example, C `long double` continues to use the frontend's internal
+extended floating-point representation even though Laser-D source cannot name
+the D `real` type.
+
+The initial ImportC baseline uses preprocessed `.i` translation units and
+covers standalone compilation and execution plus
+mixed D/C use of functions, globals, structs, unions, enums, function pointers,
+initializers, and static assertions. The external preprocessing pipeline,
+headers, macros, conditional compilation, atomics, vector extensions, inline
+assembly, and implementation-specific C extensions remain to be audited in
+separate reviewable categories.
