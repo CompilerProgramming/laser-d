@@ -297,8 +297,21 @@ Modules support separate compilation. Each source module can be compiled to an
 object file while imported source files provide the declarations needed for
 semantic analysis. This does not add a Laser-D runtime dependency.
 
-This review does not yet classify module constructors or destructors, shared
-module lifecycle hooks, `ModuleInfo`, package modules and package visibility,
-deprecated or user-annotated module declarations, or edition-qualified
-modules. Those facilities retain undecided status until their dependent
-runtime, package, attribute, or edition categories are reviewed.
+Laser-D does not generate or expose `ModuleInfo` runtime descriptors. Core
+module namespace and import behavior does not require them. This review does
+not yet classify module constructors or destructors, shared module lifecycle
+hooks, package modules and package visibility, deprecated or user-annotated
+module declarations, or edition-qualified modules. Those facilities retain
+undecided status until their dependent runtime, package, attribute, or edition
+categories are reviewed.
+
+### Runtime type information
+
+Runtime type information is rejected. Laser-D does not expose Druntime's
+`TypeInfo` hierarchy and does not generate type-information objects. Both type
+and expression forms of `typeid` are rejected, including uses that upstream D
+would evaluate only during CTFE.
+
+This does not restrict compile-time inspection through `typeof`, `is`, or the
+supported read-only `__traits` operations. Those mechanisms operate directly
+in the frontend and do not create runtime metadata objects.

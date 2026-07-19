@@ -8802,6 +8802,10 @@ private extern (C++) final class ExpressionSemanticVisitor : Visitor
         {
             printf("TypeidExp::semantic() %s\n", exp.toChars());
         }
+
+        error(exp.loc, "`typeid` is not supported in Laser-D because runtime `TypeInfo` is disabled");
+        return setError();
+
         Type ta = isType(exp.obj);
         Expression ea = isExpression(exp.obj);
         Dsymbol sa = isDsymbol(exp.obj);

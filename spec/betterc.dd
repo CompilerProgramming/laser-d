@@ -139,6 +139,10 @@ However, in `-betterC`, `assert` expressions don't use Druntime's assert and are
 
 $(H2 $(LNAME2 consequences, Unavailable Features))
 
+    $(P_LASER_D `TypeInfo` and `ModuleInfo` are unconditionally unavailable.
+    Laser-D additionally rejects `typeid` during CTFE rather than retaining
+    upstream BetterC's compile-time-only `TypeInfo` behavior.)
+
     $(P D features not available with $(B BetterC):)
 
 $(OL

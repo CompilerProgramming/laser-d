@@ -6,9 +6,10 @@ $(HEADERNAV_TOC)
 
 $(P_LASER_D Core modules and imports are supported. This includes explicit and
 file-name-derived module names; ordinary, aliased, selective, renamed, static,
-private, and public imports; cyclic imports; and separate compilation. Module
-lifecycle hooks, `ModuleInfo`, package-specific facilities, module attributes,
-and edition-qualified modules are not yet classified.)
+private, and public imports; cyclic imports; and separate compilation.
+`ModuleInfo` runtime descriptors are not generated or exposed. Module lifecycle
+hooks, package-specific facilities, module attributes, and edition-qualified
+modules are not yet classified.)
 
 $(GRAMMAR
 $(GNAME Module):

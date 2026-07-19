@@ -46,7 +46,7 @@ Each chapter should be split into individual features as it is investigated.
 | Lexical analysis (`lex.dd`) | Supported | Laser-D retains D source text, whitespace, comments, identifiers, tokens, literals, escape sequences, keywords, and special tokens unchanged. Malformed lexical constructs are rejected according to the D lexical grammar. See the detailed lexical decisions below. |
 | Interpolated expression sequences (`istring.dd`) | Undecided | Determine generated constructs and any runtime or allocation dependencies. |
 | Grammar (`grammar.dd`) | Undecided | Record grammar retained through the no-new-syntax compatibility rule and identify semantically rejected productions. |
-| Modules (`module.dd`) | Restricted | Core module declarations, namespaces, imports, re-exports, cycles, and separate compilation are supported. Module constructors/destructors, `ModuleInfo`, and package-specific facilities require separate review. |
+| Modules (`module.dd`) | Restricted | Core module declarations, namespaces, imports, re-exports, cycles, and separate compilation are supported. `ModuleInfo` is rejected; module constructors/destructors and package-specific facilities require separate review. |
 | Declarations (`declaration.dd`) | Restricted | Basic variables, manifest constants, inference, aliases, multiple declarations, and scalar initialization are supported. Linkage, most storage classes, static initialization, and declarations involving derived types remain to be reviewed. |
 | Types (`type.dd`) | Restricted | Current non-deprecated primitive scalar types and compile-time inspection with `typeof` and `is` are supported. Deprecated scalar types and derived or user-defined types follow their individual classifications. |
 | Properties (`property.dd`) | Undecided | Identify properties that require runtime support or hidden allocation. |
@@ -164,7 +164,8 @@ Each chapter should be split into individual features as it is investigated.
 | Import cycles | Supported | Mutually importing modules are supported. An import cycle does not change import visibility or implicitly re-export symbols. | `modules_accepted.d`, `extra-files/module_cycle_a.d`, `extra-files/module_cycle_b.d` |
 | Separate compilation | Supported | Modules may be compiled into separate object files while resolving declarations through their imported source interfaces. | `modules_accepted.d` |
 | Missing modules | Rejected | Importing a module that cannot be resolved on the configured import paths is diagnosed. | `module_missing_import_rejected.d` |
-| Module lifecycle and runtime metadata | Undecided | Module constructors, module destructors, shared module lifecycle hooks, and `ModuleInfo` require a separate runtime-dependency review. | None |
+| Module runtime metadata | Rejected | Laser-D never generates `ModuleInfo` instances and does not expose the Druntime `ModuleInfo` type. Ordinary module namespaces and separate compilation do not require this metadata. | `runtime_metadata_absent.d`, `modules_accepted.d` |
+| Module lifecycle | Undecided | Module constructors, module destructors, and shared module lifecycle hooks require a separate runtime-dependency review. | None |
 | Packages and advanced module facilities | Undecided | Package modules, package visibility, deprecation, UDAs on module declarations, and edition-qualified modules require separate review. | None |
 
 ## ImportC decisions
@@ -183,7 +184,7 @@ Each chapter should be split into individual features as it is investigated.
 | --- | --- | --- | --- |
 | Primary scalar expressions | Supported | Identifiers, parentheses, `null`, Boolean literals, supported integer, floating-point, and character literals, and construction or conversion with supported scalar types are retained. | `primary_scalar_expressions_accepted.d` |
 | Rejected scalar expressions | Rejected | Literal or construction forms that introduce `real`, imaginary, or complex types remain rejected by their corresponding type decisions. | `real_rejected.d`, `imaginary_rejected.d`, `complex_rejected.d` |
-| Remaining primary expressions | Undecided | Interpolation, `this`, `super`, non-array `new`, `typeid`, and non-array type properties require separate review. Function literals, ordinary template instances, `is` expressions, traits, and import expressions are classified separately; array literals and string mixins retain their existing restrictions. | `dynamic_array_literal_rejected.d`, `associative_array_literal_rejected.d` |
+| Remaining primary expressions | Undecided | Interpolation, `this`, `super`, non-array `new`, and non-array type properties require separate review. Function literals, ordinary template instances, `is` expressions, traits, import expressions, and `typeid` are classified separately; array literals and string mixins retain their existing restrictions. | `dynamic_array_literal_rejected.d`, `associative_array_literal_rejected.d` |
 
 ## Mixin decisions
 
@@ -245,6 +246,14 @@ Each chapter should be split into individual features as it is investigated.
 | Compile-time file input | Rejected | Import expressions such as `import("file")` are rejected. Compilation cannot read source-selected host files through the language, regardless of `-J` paths. | `compile_time_io_rejected.d` |
 | Compile-time message output | Rejected | Declaration and statement forms of `pragma(msg)` are rejected. CTFE cannot emit user-selected diagnostic output. | `compile_time_io_rejected.d`, `compile_time_statement_output_rejected.d` |
 | Pure compile-time execution | Supported | CTFE over compiler-known values remains supported when it does not perform host I/O. Normal compiler diagnostics and compiler-generated artifacts are not language-level compile-time I/O. | `ctfe_accepted.d` |
+
+## Runtime metadata decisions
+
+| Feature | Status | Decision | Tests |
+| --- | --- | --- | --- |
+| `TypeInfo` | Rejected | Laser-D does not expose Druntime's `TypeInfo` hierarchy or generate runtime type descriptors. | `runtime_metadata_absent.d` |
+| `typeid` expressions | Rejected | Both type and expression forms of `typeid` are rejected, including during CTFE; compile-time type inspection remains available through `typeof`, `is`, and supported `__traits`. | `typeid_rejected.d`, `runtime_metadata_absent.d` |
+| `ModuleInfo` | Rejected | No runtime module descriptors are generated or exposed. This does not affect module namespace, import, or separate-compilation behavior. | `runtime_metadata_absent.d`, `modules_accepted.d` |
 
 ## Evidence required for a decision
 

@@ -3274,6 +3274,11 @@ $(H4 $(LNAME2 placement-expression, Placement New))
 
 $(H3 $(LNAME2 typeid_expressions, Typeid Expressions))
 
+$(P_LASER_D `typeid` expressions are not supported because Laser-D does not
+provide runtime `TypeInfo` objects. This restriction also applies during CTFE;
+use `typeof`, `is`, or a supported read-only `__traits` operation for
+compile-time inspection.)
+
 $(GRAMMAR
 $(GNAME TypeidExpression):
     $(D typeid $(LPAREN)) $(GLINK2 type, Type) $(D $(RPAREN))
