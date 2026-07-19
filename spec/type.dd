@@ -103,9 +103,10 @@ $(H2 $(LEGACY_LNAME2 Basic Data Types, basic-data-types, Basic Data Types))
     with the meanings and default initializers specified in this section.
     The `real` type is not supported in Laser-D; source code shall use
     `double` instead. This also excludes `L`-suffixed real literals and
-    properties formed from the `real` type. The deprecated 128-bit integer,
-    imaginary, and complex scalar types are not yet specified as part of
-    Laser-D.)
+    properties formed from the `real` type. The 128-bit integer types `cent`
+    and `ucent`, the imaginary types `ifloat`, `idouble`, and `ireal`, and the
+    complex types `cfloat`, `cdouble`, and `creal` are also not supported in
+    Laser-D. Imaginary literals are rejected.)
 
     $(TABLE_3COLS Basic Data Types,
     $(THEAD Keyword, Default Initializer ($(D .init)), Description)

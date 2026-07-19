@@ -79,6 +79,12 @@ floating-point representation where required by compile-time evaluation,
 ImportC, or the unchanged frontend/backend interface; it cannot be named or
 introduced by Laser-D source.
 
+The deprecated `cent`, `ucent`, imaginary, and complex source types are also
+rejected. Imaginary literals are unavailable because they introduce an
+imaginary type. Their internal representations remain in the frontend and
+backend where upstream implementation code or ABI machinery requires them;
+Laser-D source cannot name or introduce them.
+
 This decision does not cover pointers, arrays, aggregates, type qualifiers,
 function types, storage-duration behavior, module initialization, or advanced
 alias/template behavior. Those features are reviewed in their own categories.

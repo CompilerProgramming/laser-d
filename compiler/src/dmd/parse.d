@@ -2067,10 +2067,12 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             goto LabelX;
 
         case TOK.int128:
+            error("type `cent` is not supported in Laser-D");
             ta = AST.Type.tint128;
             goto LabelX;
 
         case TOK.uns128:
+            error("type `ucent` is not supported in Laser-D");
             ta = AST.Type.tuns128;
             goto LabelX;
 
@@ -2088,26 +2090,32 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             goto LabelX;
 
         case TOK.imaginary32:
+            error("imaginary type `%s` is not supported in Laser-D", token.toChars());
             ta = AST.Type.timaginary32;
             goto LabelX;
 
         case TOK.imaginary64:
+            error("imaginary type `%s` is not supported in Laser-D", token.toChars());
             ta = AST.Type.timaginary64;
             goto LabelX;
 
         case TOK.imaginary80:
+            error("imaginary type `%s` is not supported in Laser-D", token.toChars());
             ta = AST.Type.timaginary80;
             goto LabelX;
 
         case TOK.complex32:
+            error("complex type `%s` is not supported in Laser-D", token.toChars());
             ta = AST.Type.tcomplex32;
             goto LabelX;
 
         case TOK.complex64:
+            error("complex type `%s` is not supported in Laser-D", token.toChars());
             ta = AST.Type.tcomplex64;
             goto LabelX;
 
         case TOK.complex80:
+            error("complex type `%s` is not supported in Laser-D", token.toChars());
             ta = AST.Type.tcomplex80;
             goto LabelX;
 
@@ -2138,9 +2146,6 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
         case TOK.uns128Literal:
         case TOK.float32Literal:
         case TOK.float64Literal:
-        case TOK.imaginary32Literal:
-        case TOK.imaginary64Literal:
-        case TOK.imaginary80Literal:
         case TOK.null_:
         case TOK.true_:
         case TOK.false_:
@@ -2161,6 +2166,12 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
 
         case TOK.float80Literal:
             error("`real` literals are not supported in Laser-D; use a `double` literal without the `L` suffix");
+            return parsePrimaryExp();
+
+        case TOK.imaginary32Literal:
+        case TOK.imaginary64Literal:
+        case TOK.imaginary80Literal:
+            error("imaginary literals are not supported in Laser-D");
             return parsePrimaryExp();
         default:
             return null;
@@ -3726,8 +3737,8 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             }
             else if (token.value == TOK.float64)   // if `long double`
             {
-                error("use `real` instead of `long double`");
-                t = AST.Type.tfloat80;
+                error("`long double` is not supported in Laser-D; use `double` instead");
+                t = AST.Type.tfloat64;
                 nextToken();
             }
             break;
@@ -3737,10 +3748,12 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             goto LabelX;
 
         case TOK.int128:
+            error("type `cent` is not supported in Laser-D");
             t = AST.Type.tint128;
             goto LabelX;
 
         case TOK.uns128:
+            error("type `ucent` is not supported in Laser-D");
             t = AST.Type.tuns128;
             goto LabelX;
 
@@ -3758,26 +3771,32 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             goto LabelX;
 
         case TOK.imaginary32:
+            error("imaginary type `%s` is not supported in Laser-D", token.toChars());
             t = AST.Type.timaginary32;
             goto LabelX;
 
         case TOK.imaginary64:
+            error("imaginary type `%s` is not supported in Laser-D", token.toChars());
             t = AST.Type.timaginary64;
             goto LabelX;
 
         case TOK.imaginary80:
+            error("imaginary type `%s` is not supported in Laser-D", token.toChars());
             t = AST.Type.timaginary80;
             goto LabelX;
 
         case TOK.complex32:
+            error("complex type `%s` is not supported in Laser-D", token.toChars());
             t = AST.Type.tcomplex32;
             goto LabelX;
 
         case TOK.complex64:
+            error("complex type `%s` is not supported in Laser-D", token.toChars());
             t = AST.Type.tcomplex64;
             goto LabelX;
 
         case TOK.complex80:
+            error("complex type `%s` is not supported in Laser-D", token.toChars());
             t = AST.Type.tcomplex80;
             goto LabelX;
 
@@ -8253,16 +8272,19 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             break;
 
         case TOK.imaginary32Literal:
+            error("imaginary literals are not supported in Laser-D");
             e = new AST.RealExp(loc, token.floatvalue, AST.Type.timaginary32);
             nextToken();
             break;
 
         case TOK.imaginary64Literal:
+            error("imaginary literals are not supported in Laser-D");
             e = new AST.RealExp(loc, token.floatvalue, AST.Type.timaginary64);
             nextToken();
             break;
 
         case TOK.imaginary80Literal:
+            error("imaginary literals are not supported in Laser-D");
             e = new AST.RealExp(loc, token.floatvalue, AST.Type.timaginary80);
             nextToken();
             break;
@@ -8407,10 +8429,12 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             goto LabelX;
 
         case TOK.int128:
+            error("type `cent` is not supported in Laser-D");
             t = AST.Type.tint128;
             goto LabelX;
 
         case TOK.uns128:
+            error("type `ucent` is not supported in Laser-D");
             t = AST.Type.tuns128;
             goto LabelX;
 
@@ -8428,26 +8452,32 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             goto LabelX;
 
         case TOK.imaginary32:
+            error("imaginary type `%s` is not supported in Laser-D", token.toChars());
             t = AST.Type.timaginary32;
             goto LabelX;
 
         case TOK.imaginary64:
+            error("imaginary type `%s` is not supported in Laser-D", token.toChars());
             t = AST.Type.timaginary64;
             goto LabelX;
 
         case TOK.imaginary80:
+            error("imaginary type `%s` is not supported in Laser-D", token.toChars());
             t = AST.Type.timaginary80;
             goto LabelX;
 
         case TOK.complex32:
+            error("complex type `%s` is not supported in Laser-D", token.toChars());
             t = AST.Type.tcomplex32;
             goto LabelX;
 
         case TOK.complex64:
+            error("complex type `%s` is not supported in Laser-D", token.toChars());
             t = AST.Type.tcomplex64;
             goto LabelX;
 
         case TOK.complex80:
+            error("complex type `%s` is not supported in Laser-D", token.toChars());
             t = AST.Type.tcomplex80;
             goto LabelX;
 
