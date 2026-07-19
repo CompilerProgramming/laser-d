@@ -4973,6 +4973,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
          */
         if (token.value == TOK.identifier && peekNext() == TOK.this_)
         {
+            error(loc, "`alias this` declarations are not supported in Laser-D");
             auto s = new AST.AliasThis(loc, token.ident);
             nextToken();
             check(TOK.this_);
@@ -4987,6 +4988,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
          */
         if (token.value == TOK.this_ && peekNext() == TOK.assign && peekNext2() == TOK.identifier)
         {
+            error(loc, "`alias this` declarations are not supported in Laser-D");
             check(TOK.this_);
             check(TOK.assign);
             auto s = new AST.AliasThis(loc, token.ident);

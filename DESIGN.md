@@ -102,10 +102,14 @@ initializer. An enum based on another enum requires explicit member values
 after its first member.
 
 Advanced aggregate behavior coupled to later categories—including bit fields,
-advanced copy and move constructors, `alias this`, and overloaded operators—
-remains undecided until those dependent categories are reviewed.
+advanced copy and move constructors and overloaded operators—remains undecided
+until those dependent categories are reviewed.
 
 Aggregate `invariant` declarations are rejected. They introduce implicitly
 invoked checking functions and runtime behavior around constructors,
 destructors, and public methods. Laser-D programs use ordinary validation
 functions when such checks are required, making every invocation explicit.
+
+`alias this` declarations are rejected in both supported D syntaxes. Laser-D
+does not implicitly forward member lookup or conversions through an aggregate
+member; programs must name the member or conversion operation explicitly.

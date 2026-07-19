@@ -15,9 +15,10 @@ subject to that restriction.)
 
 $(P Aggregate `invariant` declarations are not supported in Laser-D. Programs
 that require consistency checks shall use explicitly called validation
-functions. Bit fields, advanced copy and move constructors, `alias this`, and
-operator-specific behavior are specified separately with the features on which
-they depend.)
+functions. `alias this` declarations are also unsupported; Laser-D does not
+implicitly forward member lookup or conversions through an aggregate member.
+Bit fields, advanced copy and move constructors, and operator-specific behavior
+are specified separately with the features on which they depend.)
 
     $(P Whereas $(DDLINK spec/class, Classes, classes) are reference types,
     structs and unions are value types.
@@ -2545,6 +2546,8 @@ $(H2 $(LEGACY_LNAME2 AssignOverload, assign-overload, Identity Assignment Overlo
         )
 
 $(H2 $(LEGACY_LNAME2 AliasThis, alias-this, Alias This))
+
+$(P `alias this` declarations are not supported in Laser-D.)
 
 $(GRAMMAR
 $(GNAME AliasThis):
