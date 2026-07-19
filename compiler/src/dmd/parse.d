@@ -3353,6 +3353,14 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
         const loc = token.loc;
         TOK tok = token.value;
 
+        if (linkage == LINK.d)
+        {
+            if (tok == TOK.class_)
+                error(loc, "native D class declarations are not supported in Laser-D");
+            else if (tok == TOK.interface_)
+                error(loc, "native D interface declarations are not supported in Laser-D");
+        }
+
         //printf("Parser::parseAggregate()\n");
         nextToken();
         Identifier id;
@@ -9661,6 +9669,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
         // An anonymous nested class starts with "class"
         if (token.value == TOK.class_)
         {
+            error(token.loc, "native D class declarations are not supported in Laser-D");
             nextToken();
             if (token.value == TOK.leftParenthesis)
             {

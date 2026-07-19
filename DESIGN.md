@@ -119,3 +119,17 @@ use the existing frontend/backend interface. Their layout is implementation-
 defined, so portable Laser-D code must not assume that bit-field layout is
 identical across targets. Code matching an external ABI must verify its layout
 on every supported target.
+
+## Classes and interfaces
+
+Native D class and interface declarations are rejected. This includes forward
+declarations, definitions, templates, nested declarations, explicit
+`extern(D)` declarations, and anonymous class expressions. The native object
+model depends on facilities outside Laser-D's reduced runtime model, including
+the D class hierarchy and associated runtime metadata.
+
+This rejection is deliberately limited to the native D object model.
+Declarations using foreign linkage, including C++, COM, and Objective-C forms,
+remain undecided and will be reviewed separately with their interoperability
+categories. Their exclusion from this rejection is not a guarantee that those
+features are supported.

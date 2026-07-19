@@ -57,8 +57,8 @@ Each chapter should be split into individual features as it is investigated.
 | Arrays (`arrays.dd`) | Undecided | Separate static arrays, slices, dynamic arrays, literals, concatenation, resizing, and array operations. |
 | Associative arrays (`hash-map.dd`) | Undecided | Determine whether any useful implementation is possible without the D runtime or GC. |
 | Structs and unions (`struct.dd`) | Restricted | Value storage, layout, fields, literals, methods, constructors, destructors, postblits, bit fields, named and anonymous unions, and ordinary initialization are supported without the D runtime. Invariant and `alias this` declarations are rejected. Advanced copy/move constructors and operator-specific behavior remain classified with their dependent feature categories. |
-| Classes (`class.dd`) | Undecided | Review allocation, object model, `Object`, RTTI, virtual dispatch, and destruction separately. |
-| Interfaces (`interface.dd`) | Undecided | Review runtime metadata, class dependency, COM/C++ interfaces, and dispatch. |
+| Classes (`class.dd`) | Restricted | Native D class declarations and anonymous classes are rejected. Foreign object models remain undecided and will be reviewed with C++, COM, and Objective-C interoperability. |
+| Interfaces (`interface.dd`) | Restricted | Native D interface declarations are rejected. C++, COM, and Objective-C interfaces remain undecided. |
 | Enums (`enum.dd`) | Supported | Named, anonymous, manifest, based, and opaque enum declarations and ordinary enum properties are supported. Opaque enums have no default initializer, and automatic numbering is rejected when the base type is itself an enum. |
 | Type qualifiers (`const3.dd`) | Undecided | Review `const`, `immutable`, `inout`, `shared`, conversions, and initialization. |
 | Functions (`function.dd`) | Restricted | Implicit `nothrow` and `@nogc` are decided; review parameters, delegates, closures, nesting, variadics, and generated functions. |
@@ -140,6 +140,14 @@ Each chapter should be split into individual features as it is investigated.
 | Anonymous enums and manifest constants | Supported | Anonymous enum members and basic manifest constants are supported. | `aggregate_types_accepted.d` |
 | Opaque enums | Restricted | Opaque enums with a known base type are supported as types, but have no default initializer until defined. | `aggregate_types_accepted.d`, `opaque_enum_default_rejected.d` |
 | Enum-based auto-increment | Restricted | When an enum's base type is another enum, members after the first require explicit values. | `enum_auto_increment_rejected.d` |
+
+## Class and interface decisions
+
+| Feature | Status | Decision | Tests |
+| --- | --- | --- | --- |
+| Native D classes | Rejected | Plain and explicit `extern(D)` class declarations are rejected, including forward declarations, definitions, templates, nested classes, and anonymous class expressions. | `native_class_rejected.d`, `native_anonymous_class_rejected.d` |
+| Native D interfaces | Rejected | Plain and explicit `extern(D)` interface declarations are rejected, including forward declarations, definitions, templates, and nested interfaces. | `native_interface_rejected.d` |
+| Foreign classes and interfaces | Undecided | C++, COM, and Objective-C object models are outside this decision and will be reviewed with their interoperability categories. A boundary regression verifies that the native-D parser restriction does not reject C++ declarations; it does not establish full support. | `foreign_object_declarations_retained.d` |
 
 ## Evidence required for a decision
 

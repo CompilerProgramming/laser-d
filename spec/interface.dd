@@ -6,6 +6,11 @@ $(HEADERNAV_TOC)
 
 $(H2 $(LNAME2 declarations, Interface Declarations))
 
+$(P_LASER_D Native D interfaces are not part of Laser-D. Plain interface
+declarations and explicit $(D extern(D)) interface declarations are rejected.
+C++, COM, and Objective-C interfaces are not covered by this decision and
+remain subject to their interoperability specifications.)
+
     $(P An $(I Interface) describes a list of functions that a class which inherits
     from the interface must implement.)
 
