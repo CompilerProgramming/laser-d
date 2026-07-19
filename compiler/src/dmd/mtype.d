@@ -1364,10 +1364,10 @@ extern (C++) final class TypeFunction : TypeNext
 
         if (stc & STC.pure_)
             this.purity = PURE.fwdref;
-        if (stc & STC.nothrow_)
-            this.isNothrow = true;
-        if (stc & STC.nogc)
-            this.isNogc = true;
+        // Laser-D functions can neither throw nor use the D garbage
+        // collector. Make both guarantees part of every function type.
+        this.isNothrow = true;
+        this.isNogc = true;
         if (stc & STC.property)
             this.isProperty = true;
         if (stc & STC.live)

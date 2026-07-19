@@ -1246,6 +1246,12 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
      */
     private STC appendStorageClass(STC orig, STC added)
     {
+        if (added & (STC.nothrow_ | STC.nogc))
+        {
+            const(char)* attribute = added & STC.nothrow_ ? "nothrow" : "@nogc";
+            error("attribute `%s` is implicit in Laser-D and cannot be specified", attribute);
+        }
+
         void checkConflictSTCGroup(bool at = false)(STC group)
         {
             if (added & group && orig & group & ((orig & group) - 1))

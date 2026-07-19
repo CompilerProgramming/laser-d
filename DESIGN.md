@@ -22,3 +22,14 @@ setting used by upstream DMD whenever `-betterC` is selected.
 Regression tests for this behavior live in `compiler/test/laser-d` rather than
 the upstream D test categories, because the upstream suite assumes full D
 language and runtime support.
+
+## Implicit function attributes
+
+Every function type in Laser-D is implicitly `nothrow` and `@nogc`. These are
+language invariants rather than optional annotations: they apply to function
+declarations, function pointers, delegates, lambdas, inferred functions, and
+functions synthesized by the frontend.
+
+Writing either `nothrow` or `@nogc` explicitly is an error because source code
+cannot opt into or out of these invariants. Calls and function-type conversions
+therefore always expose both guarantees to the type system.
