@@ -6,11 +6,12 @@ $(HEADERNAV_TOC)
 
 $(H2 $(LNAME2 overview, Overview))
 
-$(P_LASER_D Native D, COM, and Objective-C classes are not part of Laser-D.
+$(P_LASER_D Native D, COM, Objective-C, and C++ classes are not part of Laser-D.
 Plain class declarations, explicit $(D extern(D)) class declarations,
 anonymous class expressions, the COM $(D IUnknown) root, and
-$(D extern(Objective-C)) linkage are rejected. C++ classes remain undecided
-pending review of C++ interoperability.)
+$(D extern(Objective-C)) linkage are rejected. Class declarations under
+$(D extern(C++)) linkage are also rejected, including explicit C++ class and
+struct mangling forms.)
 
         $(P The object-oriented features of D all come from classes. The class
         hierarchy

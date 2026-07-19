@@ -57,8 +57,8 @@ Each chapter should be split into individual features as it is investigated.
 | Arrays (`arrays.dd`) | Undecided | Separate static arrays, slices, dynamic arrays, literals, concatenation, resizing, and array operations. |
 | Associative arrays (`hash-map.dd`) | Undecided | Determine whether any useful implementation is possible without the D runtime or GC. |
 | Structs and unions (`struct.dd`) | Restricted | Value storage, layout, fields, literals, methods, constructors, destructors, postblits, bit fields, named and anonymous unions, and ordinary initialization are supported without the D runtime. Invariant and `alias this` declarations are rejected. Advanced copy/move constructors and operator-specific behavior remain classified with their dependent feature categories. |
-| Classes (`class.dd`) | Restricted | Native D, COM, and Objective-C classes are rejected. C++ classes remain undecided. |
-| Interfaces (`interface.dd`) | Restricted | Native D, COM, and Objective-C interfaces are rejected. C++ interfaces remain undecided. |
+| Classes (`class.dd`) | Rejected | Native D, COM, Objective-C, and C++ classes are rejected, including anonymous classes. |
+| Interfaces (`interface.dd`) | Rejected | Native D, COM, Objective-C, and C++ interfaces are rejected. |
 | Enums (`enum.dd`) | Supported | Named, anonymous, manifest, based, and opaque enum declarations and ordinary enum properties are supported. Opaque enums have no default initializer, and automatic numbering is rejected when the base type is itself an enum. |
 | Type qualifiers (`const3.dd`) | Undecided | Review `const`, `immutable`, `inout`, `shared`, conversions, and initialization. |
 | Functions (`function.dd`) | Restricted | Implicit `nothrow` and `@nogc` are decided; review parameters, delegates, closures, nesting, variadics, and generated functions. |
@@ -75,7 +75,7 @@ Each chapter should be split into individual features as it is investigated.
 | x86 inline assembler (`iasm.dd`) | Undecided | Decide whether this target-specific feature belongs in the portable subset. |
 | Embedded documentation (`ddoc.dd`) | Undecided | Decide whether documentation generation remains a supported compiler facility. |
 | C interoperability (`interfaceToC.dd`) | Undecided | Expected to be central; verify types, calling conventions, linking, and C runtime use. |
-| C++ interoperability (`cpp_interface.dd`) | Undecided | Review ABI/backend-only features versus constructs requiring D runtime support. |
+| C++ interoperability (`cpp_interface.dd`) | Restricted | C++ classes and interfaces are rejected. C++ free-function linkage is supported; C++ structs and the remaining interoperability surface are undecided. |
 | Objective-C interoperability (`objc_interface.dd`) | Rejected | Objective-C linkage and its classes, protocols, methods, and functions cannot be declared in Laser-D source. |
 | Portability (`portability.dd`) | Restricted | Windows, Linux, macOS, and initially x86-64 are decided; detailed guarantees remain to be written. |
 | Named character entities (`entity.dd`) | Undecided | Decide whether this documentation/compiler facility is retained unchanged. |
@@ -149,7 +149,9 @@ Each chapter should be split into individual features as it is investigated.
 | Native D interfaces | Rejected | Plain and explicit `extern(D)` interface declarations are rejected, including forward declarations, definitions, templates, and nested interfaces. | `native_interface_rejected.d` |
 | COM classes and interfaces | Rejected | Declaration of the magic `IUnknown` interface is rejected, preventing the frontend from creating the COM root from which COM interface and class behavior is inherited. | `com_interface_rejected.d` |
 | Objective-C object model and linkage | Rejected | `extern(Objective-C)` is rejected for all declarations, excluding Objective-C classes, protocols, methods, and standalone functions. `D_ObjectiveC` is never predefined. | `objective_c_linkage_rejected.d`, `objective_c_version_absent.d` |
-| C++ classes and interfaces | Undecided | C++ object-model support will be reviewed with C++ interoperability. A boundary regression verifies that the current parser restrictions do not reject C++ declarations; it does not establish full support. | `foreign_object_declarations_retained.d` |
+| C++ classes and interfaces | Rejected | Class and interface declarations under C++ linkage are rejected, including forward declarations, definitions, templates, and explicit class/struct mangling forms. | `cpp_class_rejected.d`, `cpp_interface_rejected.d` |
+| C++ free functions | Supported | `extern(C++)` free-function declarations, function types, mangling, and overload sets remain available without enabling the C++ object model. | `cpp_free_functions_accepted.d` |
+| C++ structs | Undecided | C++ struct declarations and their ABI behavior will be reviewed separately. | None |
 
 ## Evidence required for a decision
 

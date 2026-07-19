@@ -136,6 +136,11 @@ functions therefore cannot be introduced by Laser-D source.
 The predefined `D_ObjectiveC` version is never defined, including on targets
 whose unchanged backend has Objective-C capabilities.
 
-C++ classes and interfaces remain undecided and will be reviewed separately
-with C++ interoperability. Their exclusion from these rejections is not a
-guarantee that they are supported.
+C++ classes and interfaces are rejected because maintaining their object-model
+ABI across platforms and C++ compiler implementations is outside Laser-D's
+scope. This includes forward declarations, definitions, templates, and the
+`extern(C++, class)` and `extern(C++, struct)` class-mangling forms.
+
+This decision does not remove C++ linkage itself. `extern(C++)` free functions
+remain supported, including overloads. C++ structs remain undecided and will
+be reviewed separately from the rejected C++ object model.

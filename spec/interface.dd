@@ -6,10 +6,10 @@ $(HEADERNAV_TOC)
 
 $(H2 $(LNAME2 declarations, Interface Declarations))
 
-$(P_LASER_D Native D, COM, and Objective-C interfaces are not part of Laser-D.
+$(P_LASER_D Native D, COM, Objective-C, and C++ interfaces are not part of Laser-D.
 Plain interface declarations, explicit $(D extern(D)) interface declarations,
 the COM $(D IUnknown) root, and $(D extern(Objective-C)) linkage are rejected.
-C++ interfaces remain undecided pending review of C++ interoperability.)
+Interface declarations under $(D extern(C++)) linkage are also rejected.)
 
     $(P An $(I Interface) describes a list of functions that a class which inherits
     from the interface must implement.)
@@ -327,6 +327,9 @@ $(SECTION2 $(LEGACY_LNAME2 COM-Interfaces, com-interfaces, COM Interfaces),
 )
 
 $(SECTION2 $(LEGACY_LNAME2 CPP-Interfaces, cpp-interfaces, C++ Interfaces),
+
+    $(P_LASER_D C++ interfaces are not supported and declarations using this
+    form are rejected.)
 
     $(P C++ interfaces are interfaces declared with C++ linkage:
     )
