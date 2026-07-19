@@ -1,7 +1,9 @@
+// TEST_MODE: fail_compilation
+
 /*
 TEST_OUTPUT:
 ---
-laser-d/betterc_mandatory.d(11): Error: cannot use `throw` statements with `-betterC`
+laser-d/betterc_mandatory.d(13): Error: cannot use `throw` statements with `-betterC`
 ---
 */
 

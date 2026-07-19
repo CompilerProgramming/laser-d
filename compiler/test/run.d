@@ -18,7 +18,7 @@ import std.algorithm, std.conv, std.datetime, std.exception, std.file, std.forma
 import tools.paths;
 
 const scriptDir = __FILE_FULL_PATH__.dirName.buildNormalizedPath;
-immutable testDirs = ["runnable", "runnable_cxx", "dshell", "compilable", "fail_compilation"];
+immutable testDirs = ["runnable", "runnable_cxx", "dshell", "compilable", "fail_compilation", "laser-d"];
 shared bool verbose; // output verbose logging
 shared bool force; // always run all tests (ignores timestamp checking)
 shared string hostDMD; // path to host DMD binary (used for building the tools)
@@ -104,6 +104,7 @@ Examples:
     ./run.d runnable/template2962.d                              # runs a specific tests
     ./run.d runnable/template2962.d fail_compilation/fail282.d   # runs multiple specific tests
     ./run.d fail_compilation                                     # runs all tests in fail_compilation
+    ./run.d laser-d                                              # runs the Laser-D language tests
     ./run.d all                                                  # runs all tests
     ./run.d clean                                                # remove all test results
     ./run.d -u -- unit/deinitialization.d -f Module              # runs the unit tests in the file "unit/deinitialization.d" with a UDA containing "Module"
@@ -153,7 +154,13 @@ Options:
         return spawnProcess(unitTestRunnerCommand ~ args, env, Config.none, scriptDir).wait();
     }
 
-    ensureToolsExists(env, unitTestRunner, testRunner, testRunnerUnittests, jsonSanitizer, dshellPrebuilt);
+    const laserDOnly = args.length && args.all!(arg =>
+        arg == "laser-d" || arg == "run_laser_d_tests" ||
+        arg.startsWith("laser-d/") || arg.startsWith("laser-d\\"));
+    if (laserDOnly)
+        ensureToolsExists(env, testRunner, testRunnerUnittests, jsonSanitizer);
+    else
+        ensureToolsExists(env, unitTestRunner, testRunner, testRunnerUnittests, jsonSanitizer, dshellPrebuilt);
 
     if (args == ["tools"])
         return 0;
@@ -446,6 +453,10 @@ Target[] predefinedTargets(string[] targets)
 
             case "run_dshell_tests", "dshell":
                 newTargets.put(findFiles("dshell").map!createTestTarget);
+                break;
+
+            case "run_laser_d_tests", "laser-d":
+                newTargets.put(findFiles("laser-d").map!createTestTarget);
                 break;
 
             case "all":

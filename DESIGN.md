@@ -26,7 +26,9 @@ setting used by upstream DMD whenever `-betterC` is selected.
 
 Regression tests for this behavior live in `compiler/test/laser-d` rather than
 the upstream D test categories, because the upstream suite assumes full D
-language and runtime support.
+language and runtime support. Run the dedicated suite from `compiler/test`
+with `./run.d laser-d`. Each Laser-D test declares whether it is compilable,
+fail-compilation, or runnable using its `TEST_MODE` directive.
 
 ## Implicit function attributes
 

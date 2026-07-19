@@ -1,3 +1,5 @@
+// TEST_MODE: compilable
+
 // Laser-D must define D_BetterC without requiring a command-line switch.
 version (D_BetterC)
 {

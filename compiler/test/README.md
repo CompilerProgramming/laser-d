@@ -41,6 +41,7 @@ Note:
 ```console
 ./run.d fail
 ./run.d compilable
+./run.d laser-d
 ```
 
 As linking is slow the [`runnable`](runnable/README.md) tests take a bit longer to run:
@@ -155,6 +156,7 @@ need to be started.
     run_runnable_tests:         run just the runnable tests
     run_compilable_tests:       run just the compilable tests
     run_fail_compilation_tests: run just the fail compilation tests
+    run_laser_d_tests:          run just the Laser-D language tests
     unit_test:                  run all unit tests (those in the "unit" directory)
 
     quick:              run all tests with no default permuted args
@@ -274,6 +276,10 @@ The following is a list of all available settings:
 
     LINK:                enables linking (used for the compilable and fail_compilable tests).
                          default: (none)
+
+    TEST_MODE:           selects `compilable`, `fail_compilation`, or `runnable` behavior.
+                         required for tests in the `laser-d` directory; ignored by the
+                         established test directories whose mode is set by their directory.
 
     OUTPUT_FILES:       files generated during the compilation (separated by ';').
                         The content of each file is appended to the output of the

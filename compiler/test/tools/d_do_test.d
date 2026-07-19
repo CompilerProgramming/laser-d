@@ -659,6 +659,13 @@ bool gatherTestParameters(ref TestArgs testArgs, string input_dir, string input_
     enforce(dflagsStr.empty, "The DFLAGS test argument must be empty: It is '" ~ dflagsStr ~ "'");
 
     findTestParameter(envData, file, "REQUIRED_ARGS", testArgs.requiredArgs);
+    if (input_dir == "laser-d")
+    {
+        const minimalRuntime = "-I" ~ input_dir.buildPath("extra-files", "minimal");
+        testArgs.requiredArgs = testArgs.requiredArgs.length
+            ? minimalRuntime ~ " " ~ testArgs.requiredArgs
+            : minimalRuntime;
+    }
     if (envData.required_args.length)
     {
         if (testArgs.requiredArgs.length)
@@ -1677,8 +1684,29 @@ int tryMain(string[] args)
             testArgs.mode = TestMode.DSHELL;
             return runDShellTest(input_dir, test_name, envData, output_dir, output_file);
 
+        case "laser-d":
+            string file = cast(string) std.file.read(input_file);
+            string testMode;
+            if (!findTestParameter(envData, file, "TEST_MODE", testMode))
+            {
+                writefln("Error: Laser-D test '%s' must specify TEST_MODE", input_file);
+                return 1;
+            }
+            switch (testMode)
+            {
+                case "compilable":       testArgs.mode = TestMode.COMPILE;      break;
+                case "fail_compilation": testArgs.mode = TestMode.FAIL_COMPILE; break;
+                case "runnable":
+                    testArgs.mode = envData.coverage_build ? TestMode.COMPILE : TestMode.RUN;
+                    break;
+                default:
+                    writefln("Error: invalid TEST_MODE '%s' in '%s', expected 'compilable', 'fail_compilation' or 'runnable'", testMode, input_file);
+                    return 1;
+            }
+            break;
+
         default:
-            writefln("Error: invalid test directory '%s', expected 'compilable', 'fail_compilation', 'runnable', 'runnable_cxx' or 'dshell'", input_dir);
+            writefln("Error: invalid test directory '%s', expected 'compilable', 'fail_compilation', 'runnable', 'runnable_cxx', 'dshell' or 'laser-d'", input_dir);
             return 1;
     }
 

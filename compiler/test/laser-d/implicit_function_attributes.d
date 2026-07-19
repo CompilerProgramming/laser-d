@@ -1,3 +1,5 @@
+// TEST_MODE: compilable
+
 // Every function type carries the mandatory Laser-D attributes.
 void ordinary()
 {
