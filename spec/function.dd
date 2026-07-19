@@ -3742,6 +3742,10 @@ $(H2 $(LNAME2 function-templates, Function Templates))
 
 $(H2 $(LNAME2 interpretation, Compile Time Function Execution (CTFE)))
 
+$(P_LASER_D CTFE is supported. Compile-time execution does not relax Laser-D
+language restrictions: a function evaluated at compile time cannot use a
+construct that is otherwise rejected by Laser-D.)
+
     $(P In contexts where a compile time value is required, functions
     can be used to compute those values. This is called $(I Compile Time Function
     Execution), or $(I CTFE).)

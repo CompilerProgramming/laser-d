@@ -522,6 +522,8 @@ debug ($(CODE_HIGHLIGHT identifier)) { } // add in debug code if debug keyword i
 
 $(H2 $(LNAME2 staticif, Static If Condition))
 
+$(P_LASER_D $(D static if) is supported.)
+
 $(GRAMMAR
 $(GNAME StaticIfCondition):
     $(D static if $(LPAREN)) $(ASSIGNEXPRESSION) $(D $(RPAREN))
@@ -605,6 +607,8 @@ Int!(17) c;  // error, static assert trips
         )
 
 $(H2 $(LNAME2 staticforeach, Static Foreach))
+
+$(P_LASER_D $(D static foreach) is supported.)
 
 $(GRAMMAR
 $(GNAME StaticForeachDeclaration):
@@ -765,6 +769,8 @@ static foreach (i; 0 .. 10)
 
 
 $(H2 $(LEGACY_LNAME2 StaticAssert, static-assert, Static Assert))
+
+$(P_LASER_D $(D static assert) is supported.)
 
 $(GRAMMAR
 $(GNAME StaticAssert):

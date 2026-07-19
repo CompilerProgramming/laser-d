@@ -232,3 +232,23 @@ discipline as other non-owning pointers.
 This first function review does not yet classify the complete parameter model,
 variadic functions, nested named functions, function contracts, or generated
 special member functions.
+
+### Templates and compile-time execution
+
+The template and CTFE machinery is supported. This includes type, value, alias,
+and variadic template parameters; explicit and inferred instantiation;
+specialization, defaults, constraints, recursive and eponymous templates;
+function, aggregate, alias, enum, and variable templates; and template mixins.
+Required instances continue to be emitted in mandatory BetterC mode.
+
+Compile-time function execution, manifest constants, `__ctfe`, `static if`,
+`static foreach`, and `static assert` are supported. Compile-time execution is
+not a second language mode: every existing Laser-D restriction also applies in
+template declarations, template instances, and CTFE. In particular, templates
+and CTFE cannot restore string mixins, GC-backed arrays, associative arrays,
+classes, capturing delegates, or any other rejected construct.
+
+Compile-time introspection mechanisms such as individual `__traits` operations,
+`is` expressions, `typeof`, and import expressions are documented and tested in
+their own feature reviews, even though templates and CTFE may consume their
+results.

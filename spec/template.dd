@@ -2,6 +2,12 @@ Ddoc
 
 $(SPEC_S Templates,
 
+$(P_LASER_D The template machinery is supported, including template
+parameters, selection, constraints, specialization, explicit and inferred
+instantiation, recursion, and instance emission. Every declaration and
+expression in a template remains subject to the ordinary Laser-D language
+restrictions.)
+
 $(HEADERNAV_TOC)
 
 $(H2 $(LNAME2 declarations, Template Declarations))

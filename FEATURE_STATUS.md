@@ -63,7 +63,7 @@ Each chapter should be split into individual features as it is investigated.
 | Type qualifiers (`const3.dd`) | Undecided | Review `const`, `immutable`, `inout`, `shared`, conversions, and initialization. |
 | Functions (`function.dd`) | Restricted | Ordinary functions, function pointers, non-capturing literals, non-capturing delegates, and method delegates are supported. All capturing delegates and closures are rejected. Parameters, nesting, variadics, contracts, and generated functions require further review. |
 | Operator overloading (`operatoroverloading.dd`) | Undecided | Check lowering for hidden runtime or allocation dependencies. |
-| Templates (`template.dd`) | Undecided | Review instantiation, emission, constraints, specialization, and CTFE dependencies. |
+| Templates (`template.dd`) | Supported | Template declaration, selection, instantiation, inference, specialization, constraints, recursion, and emission are supported. Template contents remain subject to every Laser-D language restriction. |
 | Template mixins (`template-mixin.dd`) | Supported | Mixin template declarations and template mixin instantiations are supported; string mixins are rejected separately. |
 | Contracts (`contracts.dd`) | Undecided | Determine assertion failure behavior and runtime dependencies. |
 | Conditional compilation (`version.dd`) | Restricted | `D_BetterC` is always defined; review remaining predefined versions and debug behavior. |
@@ -171,7 +171,7 @@ Each chapter should be split into individual features as it is investigated.
 | --- | --- | --- | --- |
 | Primary scalar expressions | Supported | Identifiers, parentheses, `null`, Boolean literals, supported integer, floating-point, and character literals, and construction or conversion with supported scalar types are retained. | `primary_scalar_expressions_accepted.d` |
 | Rejected scalar expressions | Rejected | Literal or construction forms that introduce `real`, imaginary, or complex types remain rejected by their corresponding type decisions. | `real_rejected.d`, `imaginary_rejected.d`, `complex_rejected.d` |
-| Remaining primary expressions | Undecided | Function literals, interpolation, `this`, `super`, non-array `new`, import expressions, `typeid`, `is`, traits, non-array type properties, and ordinary template instances require separate review. Static-storage string literals and array `$` are classified with arrays; array literals and string mixins are classified separately. | `dynamic_array_literal_rejected.d`, `associative_array_literal_rejected.d` |
+| Remaining primary expressions | Undecided | Interpolation, `this`, `super`, non-array `new`, import expressions, `typeid`, `is`, traits, and non-array type properties require separate review. Function literals and ordinary template instances are classified separately; array literals and string mixins retain their existing restrictions. | `dynamic_array_literal_rejected.d`, `associative_array_literal_rejected.d` |
 
 ## Mixin decisions
 
@@ -200,6 +200,17 @@ Each chapter should be split into individual features as it is investigated.
 | Delegates | Supported | Non-capturing delegate literals and delegates to struct methods are supported as context-and-function-pointer values. | `delegates_accepted.d` |
 | Capturing delegates and closures | Rejected | Lexical capture is rejected regardless of whether the context is stack-scoped or would require heap allocation. Taking the address of a captured named nested function is also rejected. | `capturing_delegates_rejected.d` |
 | Remaining function features | Undecided | Complete parameter/storage-class behavior, named nested functions, variadics, contracts, and generated functions require later review. | None |
+
+## Template and compile-time execution decisions
+
+| Feature | Status | Decision | Tests |
+| --- | --- | --- | --- |
+| Core templates | Supported | Type, value, alias, variadic, recursive, eponymous, function, aggregate, enum, variable, and alias templates are supported. | `templates_accepted.d` |
+| Selection and instantiation | Supported | Explicit instantiation, IFTI, specialization, default arguments, and constraints are supported. | `templates_accepted.d` |
+| Template emission | Supported | Instances needed across separately compiled modules are emitted without requiring the D runtime. | `betterc_template_emission.d` |
+| CTFE | Supported | Functions may execute at compile time for manifest constants, assertions, template arguments, initializers, and fixed-array dimensions; `__ctfe` is supported. | `ctfe_accepted.d` |
+| Compile-time control flow | Supported | `static if`, `static foreach`, and `static assert` are supported. | `ctfe_accepted.d` |
+| Existing language restrictions | Restricted | Templates and CTFE do not bypass rejected Laser-D features; string mixins remain rejected inside templates. | `template_string_mixin_rejected.d` |
 
 ## Evidence required for a decision
 
