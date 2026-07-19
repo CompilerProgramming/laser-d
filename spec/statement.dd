@@ -2042,6 +2042,9 @@ void main()
 
 $(H2 $(LEGACY_LNAME2 SynchronizedStatement, synchronized-statement, Synchronized Statement))
 
+$(P_LASER_D The `synchronized` statement is not supported because native
+language-level multithreading is disabled.)
+
         $(P The synchronized statement wraps a statement with
         mutex locking and unlocking to synchronize access among multiple threads.
         )

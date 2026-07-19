@@ -7,4 +7,4 @@ laser-d/basic_unknown_type_rejected.d(10): Error: undefined identifier `missingT
 ---
 */
 
-missingType unknownType;
+void inspect(missingType unknownType);

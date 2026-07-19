@@ -1512,7 +1512,9 @@ private void initInferAttributes(FuncDeclaration fd)
 {
     //printf("initInferAttributes() for %s (%s)\n", toPrettyChars(), ident.toChars());
     TypeFunction tf = fd.type.toTypeFunction();
-    if (tf.purity == PURE.impure) // purity not specified
+    // Preserve upstream purity inference for ImportC. Laser-D functions are
+    // deliberately kept conservatively impure for sound C interoperability.
+    if (tf.purity == PURE.impure && fd.getModule().filetype == FileType.c)
         fd.purityInprocess = true;
 
     if (tf.trust == TRUST.default_)

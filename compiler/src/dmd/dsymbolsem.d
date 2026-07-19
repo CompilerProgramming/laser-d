@@ -3318,6 +3318,14 @@ private extern(C++) final class DsymbolSemanticVisitor : Visitor
         }
 
     Ldtor:
+        if (sc._module.filetype != FileType.c && dsym.loc.isValid() &&
+            dsym.isDataseg() &&
+            !(dsym.storage_class & (STC.manifest | STC.immutable_ | STC.ctfe)))
+        {
+            .error(dsym.loc, "%s `%s` uses mutable global or static storage, which is not supported in Laser-D",
+                dsym.kind, dsym.toPrettyChars);
+        }
+
         /* Build code to execute destruction, if necessary
          */
         dsym.edtor = dsym.callScopeDtor(sc);

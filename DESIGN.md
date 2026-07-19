@@ -43,6 +43,10 @@ function declarations, function pointers, delegates, lambdas, inferred
 functions, and functions synthesized by the frontend. Safety inference is
 disabled, so no function becomes `@safe` based on its implementation.
 
+Functions are also conservatively impure. Laser-D rejects the explicit `pure`
+attribute and does not infer purity for D functions. This keeps C interoperation
+sound. ImportC retains upstream handling of C purity-related attributes.
+
 Writing either `nothrow` or `@nogc` explicitly is an error because source code
 cannot opt into or out of these invariants. Calls and function-type conversions
 therefore always expose the fixed attributes to the type system.
@@ -63,6 +67,12 @@ functions, nested functions, and lambdas. The explicit-attribute tests verify
 rejection on declarations, function pointers, and delegate types.
 
 ## Lexical analysis
+
+Laser-D source cannot declare mutable global, module, function-static, or
+aggregate-static storage. Manifest constants and deeply `immutable` static data
+remain available. Native D multithreading constructs (`shared`, `__gshared`,
+and `synchronized`) are rejected. Programs may still use C APIs for external
+state, threads, atomics, and locks; ImportC globals are exempt.
 
 Laser-D retains D lexical analysis unchanged. This includes the source
 character set, whitespace, comments, identifiers, tokens, literal forms,

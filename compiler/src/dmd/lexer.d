@@ -296,6 +296,26 @@ class Lexer
         {
             scan(&token);
         }
+        if (!Ccompile)
+        {
+            switch (token.value)
+            {
+            case TOK.shared_:
+                error(token.loc, "`shared` is not supported in Laser-D because native multithreading is disabled");
+                break;
+            case TOK.gshared:
+                error(token.loc, "`__gshared` is not supported in Laser-D because D-owned shared global storage is disabled");
+                break;
+            case TOK.synchronized_:
+                error(token.loc, "`synchronized` is not supported in Laser-D because native synchronization is disabled");
+                break;
+            case TOK.pure_:
+                error(token.loc, "`pure` is not supported in Laser-D; functions remain conservatively impure for C interoperability");
+                break;
+            default:
+                break;
+            }
+        }
         //printf(token.toChars());
         return token.value;
     }

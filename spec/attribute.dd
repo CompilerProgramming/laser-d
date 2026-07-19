@@ -60,6 +60,9 @@ $(GNAME DeclarationBlock):
 
 $(P_LASER_D The `@live` attribute is not supported. Laser-D does not enable
 live-function ownership or borrowing analysis.)
+$(P_LASER_D The `pure`, `shared`, `__gshared`, and `synchronized` attributes
+are not supported. D functions remain conservatively impure and native D
+multithreading is disabled. ImportC input is exempt.)
 
         $(P Attributes are a way to modify one or more declarations.
         The general forms are:

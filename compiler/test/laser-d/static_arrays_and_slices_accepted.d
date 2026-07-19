@@ -1,9 +1,11 @@
 // TEST_MODE: runnable
 
-int[3] globalStorage = [10, 20, 30];
-
 extern(C) int main()
 {
+    int[3] globalStorage;
+    globalStorage[0] = 10;
+    globalStorage[1] = 20;
+    globalStorage[2] = 30;
     int[4] storage;
     storage[0] = 1;
     storage[1] = 2;

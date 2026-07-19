@@ -1037,7 +1037,7 @@ static assert(__traits(getFunctionVariadicStyle, typeof(cstyle)) == "stdarg");
 
 $(SECTION3 $(GNAME getFunctionAttributes),
     $(P_LASER_D Valid Laser-D functions are always `nothrow`, `@nogc`, and
-        `@system`. They cannot report `@safe`, `@trusted`, or `@live`.)
+        `@system`. They cannot report `pure`, `@safe`, `@trusted`, or `@live`.)
     $(P
         Takes one argument which must either be a function symbol, function literal,
         or a function pointer. It returns a string *ValueSeq* of all the attributes of

@@ -31,10 +31,10 @@ static if (factorialOfFive == 120)
 else
     static assert(false);
 
-int[factorial(3)] fixedStorage;
+alias FixedStorage = int[factorial(3)];
 
 static assert(factorialOfFive == 120);
 static assert(foreachResult == 10);
 static assert(selectedValue == 42);
 static assert(compileTimeBranch() == 42);
-static assert(fixedStorage.length == 6);
+static assert(FixedStorage.length == 6);

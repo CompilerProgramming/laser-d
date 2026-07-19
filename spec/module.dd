@@ -532,6 +532,9 @@ void main()
 
 $(H2 $(LNAME2 staticorder, Static Construction and Destruction))
 
+$(P_LASER_D Laser-D rejects mutable module storage, `shared`, `__gshared`, and
+shared module lifecycle declarations. ImportC globals remain available.)
+
     $(P Static constructors are executed to initialize a module's state.
     Static destructors terminate a module's state.
     )

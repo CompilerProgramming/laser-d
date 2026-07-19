@@ -517,6 +517,10 @@ int f(int i)
 
 $(H2 $(LNAME2 pure-functions, Pure Functions))
 
+$(P_LASER_D The `pure` attribute and purity inference are not supported.
+Laser-D functions remain conservatively impure. ImportC retains upstream
+handling of C purity-related implementation attributes.)
+
         $(P Pure functions are annotated with the `pure` attribute.
         Pure functions cannot directly access global or static
         mutable state.

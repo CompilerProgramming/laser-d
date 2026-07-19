@@ -1,9 +1,8 @@
 // TEST_MODE: runnable
 
-int moduleValue = 9;
-
 extern(C) int main()
 {
+    int moduleValue = 9;
     bool booleanFalse = false;
     bool booleanTrue = true;
     int decimalInteger = 42;

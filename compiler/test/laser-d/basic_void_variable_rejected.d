@@ -3,8 +3,11 @@
 /*
 TEST_OUTPUT:
 ---
-laser-d/basic_void_variable_rejected.d(10): Error: variable `basic_void_variable_rejected.noValue` - variables cannot be of type `void`
+laser-d/basic_void_variable_rejected.d(12): Error: variable `basic_void_variable_rejected.inspect.noValue` - variables cannot be of type `void`
 ---
 */
 
-void noValue;
+void inspect()
+{
+    void noValue;
+}

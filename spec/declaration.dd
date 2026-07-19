@@ -334,6 +334,10 @@ auto c = new C();  // c is a handle to an instance of class C
 
 $(H3 $(LNAME2 global_static_init, Global and Static Initializers))
 
+$(P_LASER_D Laser-D source cannot declare mutable global or static storage.
+Manifest constants and deeply `immutable` static data are supported. ImportC
+globals are exempt.)
+
         $(P The $(GLINK Initializer) for a global or static variable must be
         evaluatable at compile time.
         Runtime initialization is done with $(DDSUBLINK spec/module, staticorder, static constructors).

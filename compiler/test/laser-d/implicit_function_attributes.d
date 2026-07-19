@@ -6,8 +6,6 @@ void ordinary()
 }
 
 extern(C) void externalFunction();
-void function() functionPointer;
-void delegate() delegateValue;
 
 auto inferredReturnType()
 {
@@ -23,6 +21,8 @@ struct Aggregate
 
 void functionForms()
 {
+    void function() functionPointer;
+    void delegate() delegateValue;
     void nestedFunction()
     {
     }
@@ -35,6 +35,15 @@ void functionForms()
     static assert(hasAttribute!(lambda, "nothrow"));
     static assert(hasAttribute!(lambda, "@nogc"));
     static assert(hasAttribute!(lambda, "@system"));
+    static assert(!hasAttribute!(nestedFunction, "pure"));
+    static assert(!hasAttribute!(lambda, "pure"));
+
+    static assert(hasAttribute!(functionPointer, "nothrow"));
+    static assert(hasAttribute!(functionPointer, "@nogc"));
+    static assert(hasAttribute!(functionPointer, "@system"));
+    static assert(hasAttribute!(delegateValue, "nothrow"));
+    static assert(hasAttribute!(delegateValue, "@nogc"));
+    static assert(hasAttribute!(delegateValue, "@system"));
 }
 
 enum bool hasAttribute(alias functionSymbol, immutable(char)[] expected) = ()
@@ -49,15 +58,10 @@ static assert(__traits(getFunctionAttributes, ordinary).length >= 2);
 static assert(hasAttribute!(ordinary, "nothrow"));
 static assert(hasAttribute!(ordinary, "@nogc"));
 static assert(hasAttribute!(ordinary, "@system"));
+static assert(!hasAttribute!(ordinary, "pure"));
 static assert(hasAttribute!(externalFunction, "nothrow"));
 static assert(hasAttribute!(externalFunction, "@nogc"));
 static assert(hasAttribute!(externalFunction, "@system"));
-static assert(hasAttribute!(functionPointer, "nothrow"));
-static assert(hasAttribute!(functionPointer, "@nogc"));
-static assert(hasAttribute!(functionPointer, "@system"));
-static assert(hasAttribute!(delegateValue, "nothrow"));
-static assert(hasAttribute!(delegateValue, "@nogc"));
-static assert(hasAttribute!(delegateValue, "@system"));
 static assert(hasAttribute!(inferredReturnType, "nothrow"));
 static assert(hasAttribute!(inferredReturnType, "@nogc"));
 static assert(hasAttribute!(inferredReturnType, "@system"));
