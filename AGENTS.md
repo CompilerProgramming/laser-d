@@ -25,4 +25,5 @@ I expect most of the changes to occur only in the language front-end.
 - Do not commit
 - Add new tests under compiler\test\laser-d
 - Document changes in DESIGN.md
+- When a language feature is identified, accepted, restricted, rejected, or changed, update the applicable language specification under spec\ so that it remains consistent with Laser-D's tests and implementation
 - Review comments will go into REVIEW.md
