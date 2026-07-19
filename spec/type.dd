@@ -99,10 +99,13 @@ $(H2 $(LEGACY_LNAME2 Basic Data Types, basic-data-types, Basic Data Types))
 
     $(P Laser-D supports the non-deprecated basic scalar types `void`, `bool`,
     `byte`, `ubyte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`,
-    `float`, `double`, `real`, `char`, `wchar`, `dchar`, and `typeof(null)`
+    `float`, `double`, `char`, `wchar`, `dchar`, and `typeof(null)`
     with the meanings and default initializers specified in this section.
-    The deprecated 128-bit integer, imaginary, and complex scalar types are
-    not yet specified as part of Laser-D.)
+    The `real` type is not supported in Laser-D; source code shall use
+    `double` instead. This also excludes `L`-suffixed real literals and
+    properties formed from the `real` type. The deprecated 128-bit integer,
+    imaginary, and complex scalar types are not yet specified as part of
+    Laser-D.)
 
     $(TABLE_3COLS Basic Data Types,
     $(THEAD Keyword, Default Initializer ($(D .init)), Description)

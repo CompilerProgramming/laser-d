@@ -66,11 +66,18 @@ rejection results matched for the reviewed cases.
 
 ## Basic declarations and primitive scalar types
 
-Laser-D retains D's current non-deprecated primitive scalar types, their
-default initialization, explicit and inferred local variables, multiple
-declarations, manifest constants, and basic type or variable aliases. A local
-scalar may use a `void` initializer, with the same uninitialized-value rules as
-D. Deprecated scalar types are not yet classified.
+Laser-D retains D's current non-deprecated primitive scalar types except for
+`real`, their default initialization, explicit and inferred local variables,
+multiple declarations, manifest constants, and basic type or variable aliases.
+A local scalar may use a `void` initializer, with the same uninitialized-value
+rules as D. Deprecated scalar types are not yet classified.
+
+The `real` source type is rejected because its size, representation, precision,
+and ABI behavior vary by target. Laser-D programs use the portable 64-bit
+`double` type instead. The frontend continues to retain its internal extended
+floating-point representation where required by compile-time evaluation,
+ImportC, or the unchanged frontend/backend interface; it cannot be named or
+introduced by Laser-D source.
 
 This decision does not cover pointers, arrays, aggregates, type qualifiers,
 function types, storage-duration behavior, module initialization, or advanced

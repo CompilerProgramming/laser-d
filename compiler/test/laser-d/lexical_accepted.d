@@ -27,12 +27,10 @@ enum decimalFloat = 1.25;
 enum exponentFloat = 1e2;
 enum hexadecimalFloat = 0x1p+4;
 enum floatSuffix = 1.0f;
-enum realSuffix = 1.0L;
 static assert(decimalFloat == 1.25);
 static assert(exponentFloat == 100.0);
 static assert(hexadecimalFloat == 16.0);
 static assert(is(typeof(floatSuffix) == float));
-static assert(is(typeof(realSuffix) == real));
 
 enum character = 'A';
 enum escapedCharacter = '\x41';

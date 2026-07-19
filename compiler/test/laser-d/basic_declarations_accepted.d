@@ -11,7 +11,6 @@ long signedLong;
 ulong unsignedLong;
 float floatValue;
 double doubleValue;
-real realValue;
 char utf8CodeUnit;
 wchar utf16CodeUnit;
 dchar utf32CodeUnit;

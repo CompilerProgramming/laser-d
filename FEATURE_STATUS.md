@@ -98,7 +98,7 @@ Each chapter should be split into individual features as it is investigated.
 | Comments | Supported | Line, block, and nesting block comments are retained; unterminated comments are rejected. | `lexical_accepted.d`, `lexical_unterminated_comment.d` |
 | Identifiers | Supported | ASCII and universal-alpha identifiers, case sensitivity, and D reserved-identifier rules are retained. | `lexical_accepted.d`; `lexer23465.d` used as differential evidence |
 | Integer literals | Supported | D decimal, binary, and hexadecimal integer literals, separators, and suffixes are retained; malformed digits and overflow are rejected. | `lexical_accepted.d`, `lexical_invalid_number.d`; upstream `lexer4.d` and `lexer23465.d` used as differential evidence |
-| Floating-point literals | Supported | D decimal and hexadecimal floating-point literals and suffixes are retained; malformed or unrepresentable literals are rejected. | `lexical_accepted.d`; upstream `lexer4.d` and `lexer5.d` used as differential evidence |
+| Floating-point literal tokens | Supported | D decimal and hexadecimal floating-point tokens remain lexically valid. Literals that produce the rejected `real` type are rejected during parsing; malformed or unrepresentable literals are also rejected. | `lexical_accepted.d`, `real_rejected.d`; upstream `lexer4.d` and `lexer5.d` used as differential evidence |
 | Character literals and escapes | Supported | D character literals, escape sequences, Unicode escapes, and named character entities are retained; malformed escapes are rejected. | `lexical_accepted.d`, `lexical_invalid_escape.d`; upstream `lexer1.d` used as differential evidence |
 | String literals | Supported | Quoted, WYSIWYG, delimited, token, hexadecimal, and postfix string literals are retained. | `lexical_accepted.d`; upstream `lexer1.d`, `lexer2.d`, and `lexer3.d` used as differential evidence |
 | Keywords and tokens | Supported | D keywords, operators, punctuation, and tokenization rules are retained unchanged. | Exercised throughout the Laser-D suite; upstream lexer diagnostics used as differential evidence |
@@ -111,7 +111,7 @@ Each chapter should be split into individual features as it is investigated.
 | `void` | Supported | `void` is retained as the no-value function result type, but variables cannot have type `void`. | `basic_void_variable_rejected.d`; existing function tests |
 | Boolean type | Supported | `bool` and its `false` default initializer are retained. | `basic_declarations_accepted.d` |
 | Integer types | Supported | `byte`, `ubyte`, `short`, `ushort`, `int`, `uint`, `long`, and `ulong` and their D default initializers are retained. | `basic_declarations_accepted.d` |
-| Floating-point types | Supported | `float`, `double`, and `real` are retained with their target-defined D representations. | `basic_declarations_accepted.d` |
+| Floating-point types | Restricted | `float` and `double` are supported. The source type `real`, `L`-suffixed real literals, and `real` type properties are rejected. | `basic_declarations_accepted.d`, `real_rejected.d` |
 | Character types | Supported | `char`, `wchar`, and `dchar` and their D default initializers are retained. | `basic_declarations_accepted.d` |
 | Null type | Supported | `typeof(null)` and the `null` initializer are retained. | `basic_declarations_accepted.d` |
 | Deprecated scalar types | Undecided | `cent`, `ucent`, and the deprecated imaginary and complex scalar types have not yet been accepted into or rejected from Laser-D. | None |

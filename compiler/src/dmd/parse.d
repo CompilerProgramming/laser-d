@@ -2083,6 +2083,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             goto LabelX;
 
         case TOK.float80:
+            error("type `real` is not supported in Laser-D; use `double` instead");
             ta = AST.Type.tfloat80;
             goto LabelX;
 
@@ -2137,7 +2138,6 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
         case TOK.uns128Literal:
         case TOK.float32Literal:
         case TOK.float64Literal:
-        case TOK.float80Literal:
         case TOK.imaginary32Literal:
         case TOK.imaginary64Literal:
         case TOK.imaginary80Literal:
@@ -2157,10 +2157,11 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
         case TOK.functionString:
         case TOK.prettyFunction:
         case TOK.this_:
-            {
-                // Template argument is an expression
-                return parsePrimaryExp();
-            }
+            return parsePrimaryExp();
+
+        case TOK.float80Literal:
+            error("`real` literals are not supported in Laser-D; use a `double` literal without the `L` suffix");
+            return parsePrimaryExp();
         default:
             return null;
         }
@@ -3752,6 +3753,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             goto LabelX;
 
         case TOK.float80:
+            error("type `real` is not supported in Laser-D; use `double` instead");
             t = AST.Type.tfloat80;
             goto LabelX;
 
@@ -8245,6 +8247,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             break;
 
         case TOK.float80Literal:
+            error("`real` literals are not supported in Laser-D; use a `double` literal without the `L` suffix");
             e = new AST.RealExp(loc, token.floatvalue, AST.Type.tfloat80);
             nextToken();
             break;
@@ -8420,6 +8423,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             goto LabelX;
 
         case TOK.float80:
+            error("type `real` is not supported in Laser-D; use `double` instead");
             t = AST.Type.tfloat80;
             goto LabelX;
 
