@@ -315,3 +315,18 @@ would evaluate only during CTFE.
 This does not restrict compile-time inspection through `typeof`, `is`, or the
 supported read-only `__traits` operations. Those mechanisms operate directly
 in the frontend and do not create runtime metadata objects.
+
+### User-defined attributes
+
+User-defined attributes are rejected throughout Laser-D source. This includes
+argument-list UDAs, identifier and template-instance UDAs, and UDA call
+expressions on modules, declarations, functions, parameters, aggregate and
+enum members, and other declaration locations. Laser-D therefore has no
+source-extensible compile-time annotation mechanism.
+
+Built-in language attributes are distinct from UDAs and retain their individual
+feature classifications. Attributes in ImportC input are C implementation
+attributes rather than D UDAs and remain governed by the ImportC review.
+`__traits(getAttributes)` remains recognized for compatibility with generic D
+code, but supported Laser-D source declarations cannot contribute UDAs to its
+result.

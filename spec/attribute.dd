@@ -1136,6 +1136,11 @@ $(H2 $(LNAME2 mustuse-attribute, `@mustuse` Attribute))
 
 $(H2 $(LNAME2 uda, User-Defined Attributes))
 
+$(P_LASER_D User-defined attributes are not supported in any source location.
+This includes `@(ArgumentList)`, identifier and template-instance attributes,
+and UDA call expressions. Built-in language attributes are classified
+separately.)
+
 $(GRAMMAR
 $(GNAME UserDefinedAttribute):
     $(D @ $(LPAREN)) $(GLINK2 template, TemplateArgumentList) $(D $(RPAREN))

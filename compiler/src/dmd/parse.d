@@ -1371,12 +1371,15 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
      */
     private STC parseAttribute(ref AST.Expressions* udas)
     {
+        const attributeLoc = token.loc;
         nextToken();
         if (token.value == TOK.identifier)
         {
             // If we find a builtin attribute, we're done, return immediately.
             if (STC stc = isBuiltinAtAttribute(token.ident))
                 return stc;
+
+            error(attributeLoc, "user-defined attributes are not supported in Laser-D");
 
             // Allow identifier, template instantiation, or function call
             // for `@Argument` (single UDA) form.
@@ -1425,6 +1428,8 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
 
         if (token.value == TOK.leftParenthesis)
         {
+            error(attributeLoc, "user-defined attributes are not supported in Laser-D");
+
             // Multi-UDAs ( `@( ArgumentList )`) form, concatenate with existing
             if (peekNext() == TOK.rightParenthesis)
                 error("empty attribute list is not allowed");
@@ -1439,6 +1444,8 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
 
         if (auto o = parseTemplateSingleArgument())
         {
+            error(attributeLoc, "user-defined attributes are not supported in Laser-D");
+
             if (udas is null)
                 udas = new AST.Expressions();
             udas.push(templateArgToExp(o, token.loc));

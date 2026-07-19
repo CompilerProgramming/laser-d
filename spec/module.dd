@@ -112,6 +112,11 @@ $(GNAME ModuleFullyQualifiedName):
 $(GNAME ModuleName):
     $(GLINK_LEX Identifier)
 )
+
+$(P_LASER_D User-defined attributes on module declarations are not supported.
+The deprecated module attribute remains subject to its separate feature
+review.)
+
 $(GRAMMAR
 $(GNAME Packages):
     $(GLINK PackageName)

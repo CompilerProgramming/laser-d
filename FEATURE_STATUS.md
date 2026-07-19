@@ -50,7 +50,7 @@ Each chapter should be split into individual features as it is investigated.
 | Declarations (`declaration.dd`) | Restricted | Basic variables, manifest constants, inference, aliases, multiple declarations, and scalar initialization are supported. Linkage, most storage classes, static initialization, and declarations involving derived types remain to be reviewed. |
 | Types (`type.dd`) | Restricted | Current non-deprecated primitive scalar types and compile-time inspection with `typeof` and `is` are supported. Deprecated scalar types and derived or user-defined types follow their individual classifications. |
 | Properties (`property.dd`) | Undecided | Identify properties that require runtime support or hidden allocation. |
-| Attributes (`attribute.dd`) | Restricted | `nothrow` and `@nogc` are decided; all other attributes remain to be classified. |
+| Attributes (`attribute.dd`) | Restricted | User-defined attributes are rejected. `nothrow` and `@nogc` are implicit and cannot be spelled explicitly; other built-in attributes remain to be classified. |
 | Pragmas (`pragma.dd`) | Undecided | Review each predefined pragma and implementation dependency. |
 | Expressions (`expression.dd`) | Restricted | Basic primary scalar expressions are supported. Dynamic and associative-array literals, GC-backed array allocation, concatenation, and append are rejected. Remaining forms and operators are reviewed by category. |
 | Statements (`statement.dd`) | Undecided | Review exception statements, synchronization, scope guards, and ordinary control flow. |
@@ -103,6 +103,14 @@ Each chapter should be split into individual features as it is investigated.
 | String literals | Supported | Quoted, WYSIWYG, delimited, token, hexadecimal, and postfix string literals are retained. | `lexical_accepted.d`; upstream `lexer1.d`, `lexer2.d`, and `lexer3.d` used as differential evidence |
 | Keywords and tokens | Supported | D keywords, operators, punctuation, and tokenization rules are retained unchanged. | Exercised throughout the Laser-D suite; upstream lexer diagnostics used as differential evidence |
 | Special tokens | Supported | D special tokens such as `__FILE__`, `__LINE__`, and `__MODULE__` are retained. | `lexical_accepted.d` |
+
+## Attribute decisions
+
+| Feature | Status | Decision | Tests |
+| --- | --- | --- | --- |
+| User-defined attributes | Rejected | `@(ArgumentList)`, `@identifier`, UDA template instances, and UDA call expressions are rejected in every D source location, including modules, declarations, functions, parameters, aggregate members, and enum members. | `user_defined_attributes_rejected.d`, `module_user_defined_attribute_rejected.d` |
+| Built-in attributes | Undecided | Built-in language attributes are not changed by the UDA decision and retain their individual classifications. | Existing attribute-specific tests |
+| ImportC implementation attributes | Restricted | C and GNU attributes parsed from ImportC input are not D UDAs and remain part of the ImportC audit. | `importc_upstream_compilable_cattributes.i` |
 
 ## Basic declaration and primitive-type decisions
 
@@ -166,7 +174,7 @@ Each chapter should be split into individual features as it is investigated.
 | Missing modules | Rejected | Importing a module that cannot be resolved on the configured import paths is diagnosed. | `module_missing_import_rejected.d` |
 | Module runtime metadata | Rejected | Laser-D never generates `ModuleInfo` instances and does not expose the Druntime `ModuleInfo` type. Ordinary module namespaces and separate compilation do not require this metadata. | `runtime_metadata_absent.d`, `modules_accepted.d` |
 | Module lifecycle | Undecided | Module constructors, module destructors, and shared module lifecycle hooks require a separate runtime-dependency review. | None |
-| Packages and advanced module facilities | Undecided | Package modules, package visibility, deprecation, UDAs on module declarations, and edition-qualified modules require separate review. | None |
+| Packages and advanced module facilities | Undecided | Package modules, package visibility, module deprecation, and edition-qualified modules require separate review. Module UDAs are rejected by the cross-cutting UDA decision. | `module_user_defined_attribute_rejected.d` |
 
 ## ImportC decisions
 
@@ -232,7 +240,7 @@ Each chapter should be split into individual features as it is investigated.
 | --- | --- | --- | --- |
 | Type and value predicates | Supported | Arithmetic, integral, floating, scalar, unsigned, array-kind, overlap, copyability, POD, zero-initialization, construction, postblit, destruction, and alias-this queries are supported. Predicates for rejected type kinds remain usable by generic code, but cannot introduce those types. | `traits_type_and_function_accepted.d`, `bitfields_accepted.d` |
 | Function and parameter reflection | Supported | Function kind, virtual index, return ABI, attributes, variadic style, parameter storage classes, and the current function's parameter tuple may be inspected at compile time. Class-only results have no valid Laser-D class operands. | `traits_type_and_function_accepted.d` |
-| Symbol reflection | Supported | Names, membership, members, overloads, parents, protection, visibility, linkage, source location, C++ namespaces, target information, attributes, and symbol identity may be inspected. | `traits_symbol_accepted.d`, `bitfields_accepted.d` |
+| Symbol reflection | Supported | Names, membership, members, overloads, parents, protection, visibility, linkage, source location, C++ namespaces, target information, and symbol identity may be inspected. `getAttributes` remains available but source declarations cannot carry UDAs, so it returns an empty sequence for them. | `traits_symbol_accepted.d`, `bitfields_accepted.d` |
 | Semantic probes | Supported | `__traits(compiles)` and `__traits(isSame)` are supported for compile-time feature detection and identity tests. | `traits_symbol_accepted.d` |
 | Initialization symbol | Supported | `__traits(initSymbol)` is retained for supported aggregate types. | `traits_type_and_function_accepted.d` |
 | String-to-type generation | Rejected | `__traits(toType)` is rejected because it creates a type from string/mangled text and would restore a form of compile-time text-to-language generation. | `traits_removed_operations_rejected.d` |

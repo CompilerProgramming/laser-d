@@ -1469,6 +1469,9 @@ static assert(__traits(identifier, var) == "var");
 )
 
 $(SECTION3 $(GNAME getAttributes),
+    $(P_LASER_D This trait remains recognized, but Laser-D source declarations
+        cannot carry user-defined attributes, so their result is an empty
+        sequence.)
     $(P
         Takes one argument, a symbol. Returns a sequence of all attached
         $(DDSUBLINK spec/attribute, uda, user-defined attributes).
