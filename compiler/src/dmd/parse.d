@@ -2801,6 +2801,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
     private AST.Dsymbol parseInvariant(PrefixAttributes!AST* pAttrs)
     {
         const loc = token.loc;
+        error("invariant declarations are not supported in Laser-D");
         STC stc = getStorageClass!AST(pAttrs);
 
         nextToken();

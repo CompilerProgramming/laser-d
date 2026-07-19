@@ -1069,6 +1069,8 @@ $(GNAME SharedStaticDestructor):
 
 $(H2 $(LNAME2 invariants, Class Invariants))
 
+$(P Class `invariant` declarations are not supported in Laser-D.)
+
 $(GRAMMAR
 $(GNAME Invariant):
     $(D invariant $(LPAREN) $(RPAREN)) $(GLINK2 statement, BlockStatement)

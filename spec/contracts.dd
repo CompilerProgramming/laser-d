@@ -37,7 +37,9 @@ $(H2 $(LNAME2 pre_post_contracts, Pre and Post Contracts))
 
 $(H2 $(LNAME2 Invariants, Invariants))
 
-        $(P See $(DDSUBLINK spec/struct, Invariant, Struct Invariants) and $(DDSUBLINK spec/class, invariants, Class Invariants).)
+        $(P Invariant declarations are not supported in Laser-D. In D, see
+        $(DDSUBLINK spec/struct, Invariant, Struct Invariants) and
+        $(DDSUBLINK spec/class, invariants, Class Invariants).)
 
 
 $(H2 $(LNAME2 references, References))

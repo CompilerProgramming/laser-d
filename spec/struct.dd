@@ -13,9 +13,11 @@ declared special member function has Laser-D's implicit `nothrow` and `@nogc`
 attributes. A field whose type is restricted elsewhere in Laser-D remains
 subject to that restriction.)
 
-$(P Bit fields, invariants, advanced copy and move constructors, `alias this`,
-and operator-specific behavior are specified separately with the features on
-which they depend.)
+$(P Aggregate `invariant` declarations are not supported in Laser-D. Programs
+that require consistency checks shall use explicitly called validation
+functions. Bit fields, advanced copy and move constructors, `alias this`, and
+operator-specific behavior are specified separately with the features on which
+they depend.)
 
     $(P Whereas $(DDLINK spec/class, Classes, classes) are reference types,
     structs and unions are value types.
