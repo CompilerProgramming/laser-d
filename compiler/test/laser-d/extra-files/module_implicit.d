@@ -1,0 +1,1 @@
+enum implicitValue = 23;

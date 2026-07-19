@@ -46,7 +46,7 @@ Each chapter should be split into individual features as it is investigated.
 | Lexical analysis (`lex.dd`) | Supported | Laser-D retains D source text, whitespace, comments, identifiers, tokens, literals, escape sequences, keywords, and special tokens unchanged. Malformed lexical constructs are rejected according to the D lexical grammar. See the detailed lexical decisions below. |
 | Interpolated expression sequences (`istring.dd`) | Undecided | Determine generated constructs and any runtime or allocation dependencies. |
 | Grammar (`grammar.dd`) | Undecided | Record grammar retained through the no-new-syntax compatibility rule and identify semantically rejected productions. |
-| Modules (`module.dd`) | Undecided | Review imports, module constructors/destructors, `ModuleInfo`, and separate compilation. |
+| Modules (`module.dd`) | Restricted | Core module declarations, namespaces, imports, re-exports, cycles, and separate compilation are supported. Module constructors/destructors, `ModuleInfo`, and package-specific facilities require separate review. |
 | Declarations (`declaration.dd`) | Restricted | Basic variables, manifest constants, inference, aliases, multiple declarations, and scalar initialization are supported. Linkage, most storage classes, static initialization, and declarations involving derived types remain to be reviewed. |
 | Types (`type.dd`) | Restricted | Current non-deprecated primitive scalar types and compile-time inspection with `typeof` and `is` are supported. Deprecated scalar types and derived or user-defined types follow their individual classifications. |
 | Properties (`property.dd`) | Undecided | Identify properties that require runtime support or hidden allocation. |
@@ -154,6 +154,18 @@ Each chapter should be split into individual features as it is investigated.
 | C++ classes and interfaces | Rejected | Class and interface declarations under C++ linkage are rejected, including forward declarations, definitions, templates, and explicit class/struct mangling forms. | `cpp_class_rejected.d`, `cpp_interface_rejected.d` |
 | C++ free functions | Supported | `extern(C++)` free-function declarations, function types, mangling, and overload sets remain available without enabling the C++ object model. | `cpp_free_functions_accepted.d` |
 | C++ structs | Rejected | Struct declarations under C++ linkage are rejected, including forward declarations, definitions, templates, and explicit class-mangling forms. | `cpp_struct_rejected.d` |
+
+## Module decisions
+
+| Feature | Status | Decision | Tests |
+| --- | --- | --- | --- |
+| Module declarations and namespaces | Supported | A source file may declare one named module, or omit the declaration and use its file name. Module contents occupy their module namespace and `__MODULE__` reports the declared name. | `modules_accepted.d`, `extra-files/module_basic.d`, `extra-files/module_implicit.d` |
+| Module imports | Supported | Ordinary, aliased, selective, renamed, static, duplicate, private, and public imports are supported. Static imports require qualification; public imports re-export symbols while private imports do not. | `modules_accepted.d`, `module_private_import_rejected.d` |
+| Import cycles | Supported | Mutually importing modules are supported. An import cycle does not change import visibility or implicitly re-export symbols. | `modules_accepted.d`, `extra-files/module_cycle_a.d`, `extra-files/module_cycle_b.d` |
+| Separate compilation | Supported | Modules may be compiled into separate object files while resolving declarations through their imported source interfaces. | `modules_accepted.d` |
+| Missing modules | Rejected | Importing a module that cannot be resolved on the configured import paths is diagnosed. | `module_missing_import_rejected.d` |
+| Module lifecycle and runtime metadata | Undecided | Module constructors, module destructors, shared module lifecycle hooks, and `ModuleInfo` require a separate runtime-dependency review. | None |
+| Packages and advanced module facilities | Undecided | Package modules, package visibility, deprecation, UDAs on module declarations, and edition-qualified modules require separate review. | None |
 
 ## ImportC decisions
 

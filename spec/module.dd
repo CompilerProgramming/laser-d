@@ -4,6 +4,12 @@ $(SPEC_S Modules,
 
 $(HEADERNAV_TOC)
 
+$(P_LASER_D Core modules and imports are supported. This includes explicit and
+file-name-derived module names; ordinary, aliased, selective, renamed, static,
+private, and public imports; cyclic imports; and separate compilation. Module
+lifecycle hooks, `ModuleInfo`, package-specific facilities, module attributes,
+and edition-qualified modules are not yet classified.)
+
 $(GRAMMAR
 $(GNAME Module):
     $(GLINK ModuleDeclaration)
@@ -77,6 +83,10 @@ $(UL
 )
 
 $(H2 $(LNAME2 module_declaration, Module Declaration))
+
+$(P_LASER_D Plain module declarations and module names derived from source file
+names are supported. Module attributes and edition qualifiers are deferred to
+their respective feature reviews.)
 
 $(P The $(I ModuleDeclaration) sets the name of the module and what package it
 belongs to. If absent, the module name is taken to be the same name (stripped of
@@ -186,6 +196,11 @@ import foo;  // Deprecated: module foo is deprecated - Please use foo2 instead.
 
 
 $(H2 $(LEGACY_LNAME2 ImportDeclaration, import-declaration, Import Declaration))
+
+$(P_LASER_D Import declarations are supported, including module aliases,
+selective and renamed bindings, static imports, visibility-controlled imports,
+public re-exports, duplicate imports, and cyclic module graphs. A private import
+does not re-export symbols.)
 
 $(P Symbols from one module are made available in another module by using the
 $(I ImportDeclaration):)

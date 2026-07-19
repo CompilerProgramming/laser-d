@@ -283,3 +283,22 @@ This does not restrict pure CTFE over values already available to the compiler.
 It also does not include ordinary compiler diagnostics or compiler-generated
 object files and documentation, which are outputs of the compiler rather than
 I/O initiated by the compiled language program.
+
+### Modules
+
+The core D module system is supported. A source file may have an explicit
+module declaration or derive its module name from its file name. Module names
+provide namespace scope, and ordinary, aliased, selective, renamed, static,
+private, and public imports retain their D visibility rules. Duplicate imports
+and cyclic module graphs are supported; an import cycle does not implicitly
+re-export another module's symbols.
+
+Modules support separate compilation. Each source module can be compiled to an
+object file while imported source files provide the declarations needed for
+semantic analysis. This does not add a Laser-D runtime dependency.
+
+This review does not yet classify module constructors or destructors, shared
+module lifecycle hooks, `ModuleInfo`, package modules and package visibility,
+deprecated or user-annotated module declarations, or edition-qualified
+modules. Those facilities retain undecided status until their dependent
+runtime, package, attribute, or edition categories are reviewed.
