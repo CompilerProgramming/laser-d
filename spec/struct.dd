@@ -1744,6 +1744,9 @@ $(H3 $(LNAME2 implicit-move-constructors, Implicit Move Constructors))
 
 $(H2 $(LEGACY_LNAME2 StructPostblit, struct-postblit, Struct Postblits))
 
+$(P_LASER_D Struct postblit constructors are not part of Laser-D.
+Declarations using $(D this(this)) are rejected.)
+
 $(GRAMMAR
 $(GNAME Postblit):
     $(D this $(LPAREN) this $(RPAREN)) $(GLINK2 function, MemberFunctionAttributes)$(OPT) $(GLINK2 function, FunctionBody)
@@ -2246,6 +2249,9 @@ void main()
 
 
 $(H2 $(LEGACY_LNAME2 StructDestructor, struct-destructor, Struct Destructors))
+
+$(P_LASER_D Struct destructors are not part of Laser-D. Source declarations
+using $(D ~this()) inside a struct are rejected.)
 
         $(P Destructors are called implicitly when an object goes out of scope, or
         $(RELATIVE_LINK2 assign-overload, before an assignment) (by default).

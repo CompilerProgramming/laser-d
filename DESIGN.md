@@ -92,9 +92,10 @@ alias/template behavior. Those features are reviewed in their own categories.
 ## Structs, unions, and enums
 
 Laser-D supports structs and unions as runtime-free value types. Their ordinary
-storage, layout, initialization, literals, methods, constructors, destructors,
-postblits, and generated helpers do not require the D runtime. Named and
-anonymous unions retain D's overlapping-storage rules.
+storage, layout, initialization, literals, methods, and constructors do not
+require the D runtime. Source-level struct destructors and postblit constructors
+are rejected, avoiding implicit lifecycle work during scope exit and copying.
+Named and anonymous unions retain D's overlapping-storage rules.
 
 Named, based, anonymous, manifest, and opaque enums are supported when their
 base type is otherwise available in Laser-D. Opaque enums have no default
@@ -142,5 +143,6 @@ scope. This includes forward declarations, definitions, templates, and the
 `extern(C++, class)` and `extern(C++, struct)` class-mangling forms.
 
 This decision does not remove C++ linkage itself. `extern(C++)` free functions
-remain supported, including overloads. C++ structs remain undecided and will
-be reviewed separately from the rejected C++ object model.
+remain supported, including overloads. C++ structs are rejected as well: their
+non-virtual value-type model still requires platform- and compiler-specific
+layout, mangling, constructor, destructor, and copying ABI support.

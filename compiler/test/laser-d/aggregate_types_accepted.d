@@ -1,8 +1,5 @@
 // TEST_MODE: runnable
 
-int copies;
-int destructions;
-
 struct Point
 {
     int x;
@@ -23,15 +20,6 @@ struct Resource
         this.value = value;
     }
 
-    this(this)
-    {
-        copies++;
-    }
-
-    ~this()
-    {
-        destructions++;
-    }
 }
 
 union Word
@@ -97,12 +85,9 @@ extern(C) int main()
     if (tagged.integer != 9)
         return 3;
 
-    {
-        Resource first = Resource(11);
-        Resource second = first;
-        if (second.value != 11 || copies != 1)
-            return 4;
-    }
+    Resource resource = Resource(11);
+    if (resource.value != 11)
+        return 4;
 
-    return destructions == 2 ? 0 : 5;
+    return 0;
 }

@@ -4354,6 +4354,13 @@ private extern(C++) final class DsymbolSemanticVisitor : Visitor
             pbd.errors = true;
             return;
         }
+        if (pbd.ident == Id.postblit)
+        {
+            error(pbd.loc, "struct postblit constructors are not supported in Laser-D");
+            pbd.type = Type.terror;
+            pbd.errors = true;
+            return;
+        }
         if (pbd.ident == Id.postblit && pbd.semanticRun < PASS.semantic)
             ad.postblits.push(pbd);
         if (!pbd.type)
@@ -4386,6 +4393,14 @@ private extern(C++) final class DsymbolSemanticVisitor : Visitor
         if (!ad)
         {
             error(dd.loc, "destructor can only be a member of aggregate, not %s `%s`", p.kind(), p.toChars());
+            dd.type = Type.terror;
+            dd.errors = true;
+            return;
+        }
+
+        if (dd.ident == Id.dtor && ad.isStructDeclaration() && !ad.isUnionDeclaration())
+        {
+            error(dd.loc, "struct destructors are not supported in Laser-D");
             dd.type = Type.terror;
             dd.errors = true;
             return;

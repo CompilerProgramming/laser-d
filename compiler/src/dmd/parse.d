@@ -3376,6 +3376,8 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
 
         if (tok == TOK.interface_ && id == Id.IUnknown)
             error(loc, "COM interfaces are not supported in Laser-D");
+        else if (tok == TOK.struct_ && linkage == LINK.cpp)
+            error(loc, "C++ struct declarations are not supported in Laser-D");
         else if (linkage == LINK.cpp)
         {
             if (tok == TOK.class_)

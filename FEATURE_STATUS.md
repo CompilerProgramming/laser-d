@@ -56,7 +56,7 @@ Each chapter should be split into individual features as it is investigated.
 | Statements (`statement.dd`) | Undecided | Review exception statements, synchronization, scope guards, and ordinary control flow. |
 | Arrays (`arrays.dd`) | Undecided | Separate static arrays, slices, dynamic arrays, literals, concatenation, resizing, and array operations. |
 | Associative arrays (`hash-map.dd`) | Undecided | Determine whether any useful implementation is possible without the D runtime or GC. |
-| Structs and unions (`struct.dd`) | Restricted | Value storage, layout, fields, literals, methods, constructors, destructors, postblits, bit fields, named and anonymous unions, and ordinary initialization are supported without the D runtime. Invariant and `alias this` declarations are rejected. Advanced copy/move constructors and operator-specific behavior remain classified with their dependent feature categories. |
+| Structs and unions (`struct.dd`) | Restricted | Value storage, layout, fields, literals, methods, ordinary constructors, bit fields, named and anonymous unions, and ordinary initialization are supported. Struct destructors, postblits, invariants, and `alias this` are rejected. Advanced copy/move constructors and operator-specific behavior remain classified with their dependent feature categories. |
 | Classes (`class.dd`) | Rejected | Native D, COM, Objective-C, and C++ classes are rejected, including anonymous classes. |
 | Interfaces (`interface.dd`) | Rejected | Native D, COM, Objective-C, and C++ interfaces are rejected. |
 | Enums (`enum.dd`) | Supported | Named, anonymous, manifest, based, and opaque enum declarations and ordinary enum properties are supported. Opaque enums have no default initializer, and automatic numbering is rejected when the base type is itself an enum. |
@@ -75,7 +75,7 @@ Each chapter should be split into individual features as it is investigated.
 | x86 inline assembler (`iasm.dd`) | Undecided | Decide whether this target-specific feature belongs in the portable subset. |
 | Embedded documentation (`ddoc.dd`) | Undecided | Decide whether documentation generation remains a supported compiler facility. |
 | C interoperability (`interfaceToC.dd`) | Undecided | Expected to be central; verify types, calling conventions, linking, and C runtime use. |
-| C++ interoperability (`cpp_interface.dd`) | Restricted | C++ classes and interfaces are rejected. C++ free-function linkage is supported; C++ structs and the remaining interoperability surface are undecided. |
+| C++ interoperability (`cpp_interface.dd`) | Restricted | C++ classes, interfaces, and structs are rejected. C++ free-function linkage is supported; the remaining interoperability surface is undecided. |
 | Objective-C interoperability (`objc_interface.dd`) | Rejected | Objective-C linkage and its classes, protocols, methods, and functions cannot be declared in Laser-D source. |
 | Portability (`portability.dd`) | Restricted | Windows, Linux, macOS, and initially x86-64 are decided; detailed guarantees remain to be written. |
 | Named character entities (`entity.dd`) | Undecided | Decide whether this documentation/compiler facility is retained unchanged. |
@@ -128,7 +128,9 @@ Each chapter should be split into individual features as it is investigated.
 | --- | --- | --- | --- |
 | Struct storage and layout | Supported | Structs are value types with D field ordering, alignment, size, and offset rules. Direct recursive storage is rejected because it has no finite size. | `aggregate_types_accepted.d`, `recursive_struct_rejected.d` |
 | Struct initialization and literals | Supported | Default initialization, field-value literals, and scalar-field initialization are supported. Initialization involving a separately restricted field type remains subject to that type's restriction. | `aggregate_types_accepted.d` |
-| Struct methods and lifecycle | Supported | Runtime-free methods, constructors, destructors, and postblits are supported and generated helper functions inherit Laser-D's implicit function attributes. | `aggregate_types_accepted.d`; upstream `struct_allMembers.d` used as differential evidence |
+| Struct methods and constructors | Supported | Runtime-free methods and ordinary constructors are supported and generated helper functions inherit Laser-D's implicit function attributes. | `aggregate_types_accepted.d`; upstream `struct_allMembers.d` used as differential evidence |
+| Struct destructors | Rejected | Source-level struct destructors are rejected; Laser-D does not schedule user-defined implicit work at struct scope exit. | `struct_destructor_rejected.d` |
+| Struct postblits | Rejected | Source-level `this(this)` postblit constructors are rejected; ordinary struct copying does not invoke a user-defined post-copy hook. | `struct_postblit_rejected.d` |
 | Aggregate invariants | Rejected | `invariant` declarations are not part of Laser-D. Programs must use explicitly called validation functions when they require consistency checks. | `invariant_rejected.d` |
 | Alias this | Rejected | Both `alias member this` and `alias this = member` declarations are rejected. Laser-D does not perform implicit member forwarding or conversion through `alias this`. | `alias_this_rejected.d` |
 | Bit fields | Supported | Integral signed and unsigned bit fields, default initializers, anonymous and zero-width alignment fields, struct and union storage, access, assignment, and bit-field traits are supported without a preview switch. Layout remains implementation-defined and must not be assumed portable without target-specific verification. | `bitfields_accepted.d`; upstream `dbitfields.d` used as differential evidence |
@@ -151,7 +153,7 @@ Each chapter should be split into individual features as it is investigated.
 | Objective-C object model and linkage | Rejected | `extern(Objective-C)` is rejected for all declarations, excluding Objective-C classes, protocols, methods, and standalone functions. `D_ObjectiveC` is never predefined. | `objective_c_linkage_rejected.d`, `objective_c_version_absent.d` |
 | C++ classes and interfaces | Rejected | Class and interface declarations under C++ linkage are rejected, including forward declarations, definitions, templates, and explicit class/struct mangling forms. | `cpp_class_rejected.d`, `cpp_interface_rejected.d` |
 | C++ free functions | Supported | `extern(C++)` free-function declarations, function types, mangling, and overload sets remain available without enabling the C++ object model. | `cpp_free_functions_accepted.d` |
-| C++ structs | Undecided | C++ struct declarations and their ABI behavior will be reviewed separately. | None |
+| C++ structs | Rejected | Struct declarations under C++ linkage are rejected, including forward declarations, definitions, templates, and explicit class-mangling forms. | `cpp_struct_rejected.d` |
 
 ## Evidence required for a decision
 

@@ -276,8 +276,10 @@ static assert(foo() == 1 && bar() == 2);
 $(H2 $(LNAME2 classes, Classes))
 
     $(P_LASER_D C++ classes and interfaces are not part of Laser-D and their
-    declarations are rejected. C++ linkage for free functions remains
-    supported. C++ structs remain undecided pending a separate ABI review.)
+    declarations are rejected. C++ structs are also rejected because their
+    value-type ABI still depends on C++ layout, mangling, construction,
+    destruction, and copying rules. C++ linkage for free functions remains
+    supported.)
 
     $(P C++ classes can be declared in D by using the $(CODE extern (C++))
     attribute on $(CODE class), $(CODE struct) and $(CODE interface)
