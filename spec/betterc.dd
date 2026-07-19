@@ -39,10 +39,17 @@ $(H2 $(LNAME2 better-c, Better C))
     command line flag for the implementation.
     )
 
+    $(P In Laser-D, $(B BetterC) is always enabled. The command-line flag
+    $(TT -betterC) remains accepted for compatibility with D build tools, but
+    is redundant. Configuration files and command-line options cannot disable
+    or weaken BetterC mode.)
+
     $(P When $(B BetterC) is enabled, the predefined
     $(DDLINK spec/version, Conditional Compilation, version) `D_BetterC`
     can be used for conditional compilation.
     )
+
+    $(P Consequently, Laser-D always defines `D_BetterC`.)
 
 
     $(P An entire program can be written in $(B BetterC) by supplying a C `main()` function:)

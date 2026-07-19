@@ -24,11 +24,11 @@ review, but does not by itself decide the status.
 | Feature | Status | Decision | Specification | Laser-D tests |
 | --- | --- | --- | --- | --- |
 | D source compatibility | Supported | Laser-D introduces no new syntax; every Laser-D program is also a D program. | `DESIGN.md` | Needed |
-| BetterC mode | Restricted | BetterC is always enabled and cannot be disabled or weakened by configuration or command-line options. | `DESIGN.md`, `spec/betterc.dd` needs Laser-D wording | `betterc_default.d`, `betterc_mandatory.d` |
+| BetterC mode | Restricted | BetterC is always enabled and cannot be disabled or weakened by configuration or command-line options; required template instances are emitted without relying on the D runtime. | `DESIGN.md`, `spec/betterc.dd` | `betterc_default.d`, `betterc_mandatory.d`, `betterc_template_emission.d` |
 | D runtime | Rejected | Programs may not depend on the D runtime. Only the C runtime is available. | `DESIGN.md`; applicable `spec/` chapters need review | Coverage incomplete |
 | Garbage collector | Rejected | GC-dependent language behavior is unavailable. | `DESIGN.md`; `spec/garbage.dd` needs Laser-D wording | Coverage incomplete |
-| Function `nothrow` attribute | Restricted | Every function type is implicitly `nothrow`; spelling `nothrow` explicitly is rejected. | `DESIGN.md`; `spec/function.dd` and `spec/attribute.dd` need Laser-D wording | `implicit_function_attributes.d`, `explicit_function_attributes.d` |
-| Function `@nogc` attribute | Restricted | Every function type is implicitly `@nogc`; spelling `@nogc` explicitly is rejected. | `DESIGN.md`; `spec/function.dd` and `spec/attribute.dd` need Laser-D wording | `implicit_function_attributes.d`, `explicit_function_attributes.d` |
+| Function `nothrow` attribute | Restricted | Every function type is implicitly `nothrow`; spelling `nothrow` explicitly is rejected. | `DESIGN.md`, `spec/function.dd`, `spec/attribute.dd` | `implicit_function_attributes.d`, `explicit_function_attributes.d`, `explicit_function_type_attributes.d` |
+| Function `@nogc` attribute | Restricted | Every function type is implicitly `@nogc`; spelling `@nogc` explicitly is rejected. | `DESIGN.md`, `spec/function.dd`, `spec/attribute.dd` | `implicit_function_attributes.d`, `explicit_function_attributes.d`, `explicit_function_type_attributes.d` |
 | Backend and frontend/backend interface | Supported | Laser-D retains these implementation components unchanged. This does not by itself settle individual source-language features. | `AGENTS.md` project constraint | Not a language conformance test |
 | Target operating systems | Supported | Windows, Linux, and macOS are required targets. | `AGENTS.md`; `spec/portability.dd` needs review | Cross-platform CI needed |
 | x86-64 | Supported | x86-64 is the initial supported architecture. | `AGENTS.md`; `spec/portability.dd` needs review | Cross-platform CI needed |

@@ -752,6 +752,12 @@ $(H3 $(LNAME2 pure-optimization, Optimization))
 
 $(H2 $(LNAME2 nothrow-functions, Nothrow Functions))
 
+        $(P In Laser-D, every function type is implicitly `nothrow`. This
+        includes declarations, function pointers, delegates, function
+        literals, inferred functions, nested functions, member functions, and
+        functions synthesized by the implementation. The `nothrow` attribute
+        cannot be written explicitly in Laser-D source.)
+
         $(P Nothrow functions can only throw exceptions derived
         from $(LINK2 https://dlang.org/phobos/object.html#.Error, $(D class Error)).
         )
@@ -3907,6 +3913,12 @@ const int x = foo("1");
 
 
 $(H2 $(LNAME2 nogc-functions, No-GC Functions))
+
+        $(P In Laser-D, every function type is implicitly `@nogc`. This
+        includes declarations, function pointers, delegates, function
+        literals, inferred functions, nested functions, member functions, and
+        functions synthesized by the implementation. The `@nogc` attribute
+        cannot be written explicitly in Laser-D source.)
 
         $(P No-GC functions are functions marked with the $(D @nogc) attribute.
             Those functions do not allocate memory on the GC heap.

@@ -24,6 +24,11 @@ that have only the C runtime available. `allInst` does not impose the BetterC
 language restrictions itself; it is a complementary template code-generation
 setting used by upstream DMD whenever `-betterC` is selected.
 
+`compiler/test/laser-d/betterc_default.d` and `betterc_mandatory.d` verify the
+mandatory language mode. `betterc_template_emission.d` separately compiles,
+links, and runs a template instance that must be emitted without relying on
+the D runtime.
+
 Regression tests for this behavior live in `compiler/test/laser-d` rather than
 the upstream D test categories, because the upstream suite assumes full D
 language and runtime support. Run the dedicated suite from `compiler/test`
@@ -40,3 +45,8 @@ functions synthesized by the frontend.
 Writing either `nothrow` or `@nogc` explicitly is an error because source code
 cannot opt into or out of these invariants. Calls and function-type conversions
 therefore always expose both guarantees to the type system.
+
+`compiler/test/laser-d/implicit_function_attributes.d` covers declarations,
+external functions, pointers, delegates, inferred return types, member
+functions, nested functions, and lambdas. The explicit-attribute tests verify
+rejection on declarations, function pointers, and delegate types.

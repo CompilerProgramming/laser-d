@@ -718,6 +718,9 @@ $(H3 $(LNAME2 nogc, $(D @nogc) Attribute))
 
     $(P See $(DDSUBLINK spec/function, nogc-functions, No-GC Functions).)
 
+    $(P In Laser-D, `@nogc` is implicit on every function type and an explicit
+    `@nogc` attribute is rejected.)
+
 $(H3 $(LNAME2 property, $(D @property) Attribute))
 
     $(P See $(DDSUBLINK spec/function, property-functions, Property Functions).)
@@ -725,6 +728,9 @@ $(H3 $(LNAME2 property, $(D @property) Attribute))
 $(H3 $(LNAME2 nothrow, $(D nothrow) Attribute))
 
     $(P See $(DDSUBLINK spec/function, nothrow-functions, Nothrow Functions).)
+
+    $(P In Laser-D, `nothrow` is implicit on every function type and an
+    explicit `nothrow` attribute is rejected.)
 
 $(H3 $(LNAME2 pure, $(D pure) Attribute))
 
