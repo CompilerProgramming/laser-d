@@ -1,5 +1,10 @@
 # Laser-D design
 
+The working inventory and review status of individual language features is in
+[`FEATURE_STATUS.md`](FEATURE_STATUS.md). Language decisions recorded there
+must remain consistent with this design, the specification under `spec/`, and
+the tests under `compiler/test/laser-d`.
+
 ## Mandatory BetterC mode
 
 Laser-D always compiles D source in BetterC mode. The compiler parameter
