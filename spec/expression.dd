@@ -2068,6 +2068,13 @@ $(H4 $(LNAME2 slice_to_static_array, Slice Conversion to Static Array))
 
 $(H2 $(LNAME2 primary_expressions, Primary Expressions))
 
+$(P_LASER_D Laser-D supports identifiers, parenthesized expressions,
+$(D null), Boolean literals, literals of supported integer, floating-point,
+and character types, and construction or conversion using a supported scalar
+type. Literals and constructions that introduce rejected $(D real), imaginary,
+or complex types remain invalid. Other primary-expression forms are specified
+by their separately reviewed feature categories.)
+
 $(GRAMMAR
 $(GNAME PrimaryExpression):
     $(IDENTIFIER)

@@ -52,7 +52,7 @@ Each chapter should be split into individual features as it is investigated.
 | Properties (`property.dd`) | Undecided | Identify properties that require runtime support or hidden allocation. |
 | Attributes (`attribute.dd`) | Restricted | `nothrow` and `@nogc` are decided; all other attributes remain to be classified. |
 | Pragmas (`pragma.dd`) | Undecided | Review each predefined pragma and implementation dependency. |
-| Expressions (`expression.dd`) | Undecided | Review allocation, casts, literals, array operations, delegates, assertions, and hidden runtime calls. |
+| Expressions (`expression.dd`) | Restricted | Basic primary scalar expressions are supported. Remaining primary forms, operators, allocation, casts, calls, arrays, delegates, assertions, and hidden runtime behavior remain to be reviewed by category. |
 | Statements (`statement.dd`) | Undecided | Review exception statements, synchronization, scope guards, and ordinary control flow. |
 | Arrays (`arrays.dd`) | Undecided | Separate static arrays, slices, dynamic arrays, literals, concatenation, resizing, and array operations. |
 | Associative arrays (`hash-map.dd`) | Undecided | Determine whether any useful implementation is possible without the D runtime or GC. |
@@ -164,6 +164,14 @@ Each chapter should be split into individual features as it is investigated.
 | ImportC scalar representation | Supported | C source retains the C types needed by ImportC. In particular, C `long double` remains available through the frontend's internal extended representation even though Laser-D source cannot name D `real`. | `importc_module_accepted.d` |
 | Upstream preprocessed ImportC compatibility | Restricted | The 41 upstream `.i` tests that currently pass under Laser-D are copied into the Laser-D suite. Two upstream tests requiring `__importc_builtins.di` remain blocked by its use of rejected D `real`; the generated-interface golden test requires a Laser-D-specific expected output. | `importc_upstream_*.i` |
 | ImportC preprocessing and extended surface | Undecided | Automatic preprocessing, headers, macros, conditional compilation, atomics, vector extensions, inline assembly, and implementation-specific extensions require separate review. | None |
+
+## Expression decisions
+
+| Feature | Status | Decision | Tests |
+| --- | --- | --- | --- |
+| Primary scalar expressions | Supported | Identifiers, parentheses, `null`, Boolean literals, supported integer, floating-point, and character literals, and construction or conversion with supported scalar types are retained. | `primary_scalar_expressions_accepted.d` |
+| Rejected scalar expressions | Rejected | Literal or construction forms that introduce `real`, imaginary, or complex types remain rejected by their corresponding type decisions. | `real_rejected.d`, `imaginary_rejected.d`, `complex_rejected.d` |
+| Remaining primary expressions | Undecided | Strings, array and associative-array literals, function literals, interpolation, `this`, `super`, `new`, `$`, import and mixin expressions, `typeid`, `is`, traits, type properties, and template instances require separate review. | None |
 
 ## Evidence required for a decision
 

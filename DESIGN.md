@@ -164,3 +164,17 @@ initializers, and static assertions. The external preprocessing pipeline,
 headers, macros, conditional compilation, atomics, vector extensions, inline
 assembly, and implementation-specific C extensions remain to be audited in
 separate reviewable categories.
+
+## Expressions
+
+Laser-D supports basic primary scalar expressions: identifiers, parentheses,
+`null`, Boolean literals, literals of the supported integer, floating-point,
+and character types, and construction or conversion using a supported scalar
+type. The existing type restrictions still apply when a literal or scalar
+construction would introduce `real`, an imaginary type, or a complex type.
+
+This initial expression decision does not classify strings, array or
+associative-array literals, function literals, interpolated expressions,
+`this`, `super`, `new`, `$`, imports, mixins, `typeid`, `is`, traits, type
+properties, operators, assignment, calls, casts, or other postfix expressions.
+Those forms will be reviewed in smaller dependent categories.
