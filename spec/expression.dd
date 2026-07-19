@@ -3314,6 +3314,10 @@ $(GNAME TypeidExpression):
 
 $(H3 $(LNAME2 is_expression, Is Expressions))
 
+$(P_LASER_D $(D is) expressions are supported for type validity,
+equivalence, conversion, category, and pattern-deduction queries. Queries are
+limited to the supported Laser-D type system.)
+
 $(GRAMMAR
 $(GNAME IsExpression):
     $(D is $(LPAREN)) $(GLINK2 type, Type) $(D $(RPAREN))

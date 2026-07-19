@@ -926,6 +926,10 @@ mfp(c, 1);  // and call c.foo(1)
 
 $(H2 $(LNAME2 typeof, $(D typeof)))
 
+$(P_LASER_D $(D typeof) is supported for expressions and $(D return). It does
+not evaluate its operand and cannot introduce a type otherwise rejected by
+Laser-D.)
+
 $(GRAMMAR
 $(GNAME Typeof):
     $(D typeof $(LPAREN)) $(GLINK2 expression, Expression) $(D $(RPAREN))

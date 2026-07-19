@@ -252,3 +252,9 @@ Compile-time introspection mechanisms such as individual `__traits` operations,
 `is` expressions, `typeof`, and import expressions are documented and tested in
 their own feature reviews, even though templates and CTFE may consume their
 results.
+
+`typeof` and `is` expressions are supported. `typeof` determines an expression
+or function return type without evaluating the expression. `is` supports type
+validity, equivalence, implicit-conversion tests, type-category tests, and type
+pattern deduction. Both mechanisms inspect only the supported Laser-D type
+system; they do not make a rejected type or construct available.

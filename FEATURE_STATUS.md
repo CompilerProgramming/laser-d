@@ -48,7 +48,7 @@ Each chapter should be split into individual features as it is investigated.
 | Grammar (`grammar.dd`) | Undecided | Record grammar retained through the no-new-syntax compatibility rule and identify semantically rejected productions. |
 | Modules (`module.dd`) | Undecided | Review imports, module constructors/destructors, `ModuleInfo`, and separate compilation. |
 | Declarations (`declaration.dd`) | Restricted | Basic variables, manifest constants, inference, aliases, multiple declarations, and scalar initialization are supported. Linkage, most storage classes, static initialization, and declarations involving derived types remain to be reviewed. |
-| Types (`type.dd`) | Restricted | Current non-deprecated primitive scalar types are supported. Deprecated scalar types and all derived or user-defined types are classified separately or remain to be reviewed. |
+| Types (`type.dd`) | Restricted | Current non-deprecated primitive scalar types and compile-time inspection with `typeof` and `is` are supported. Deprecated scalar types and derived or user-defined types follow their individual classifications. |
 | Properties (`property.dd`) | Undecided | Identify properties that require runtime support or hidden allocation. |
 | Attributes (`attribute.dd`) | Restricted | `nothrow` and `@nogc` are decided; all other attributes remain to be classified. |
 | Pragmas (`pragma.dd`) | Undecided | Review each predefined pragma and implementation dependency. |
@@ -171,7 +171,7 @@ Each chapter should be split into individual features as it is investigated.
 | --- | --- | --- | --- |
 | Primary scalar expressions | Supported | Identifiers, parentheses, `null`, Boolean literals, supported integer, floating-point, and character literals, and construction or conversion with supported scalar types are retained. | `primary_scalar_expressions_accepted.d` |
 | Rejected scalar expressions | Rejected | Literal or construction forms that introduce `real`, imaginary, or complex types remain rejected by their corresponding type decisions. | `real_rejected.d`, `imaginary_rejected.d`, `complex_rejected.d` |
-| Remaining primary expressions | Undecided | Interpolation, `this`, `super`, non-array `new`, import expressions, `typeid`, `is`, traits, and non-array type properties require separate review. Function literals and ordinary template instances are classified separately; array literals and string mixins retain their existing restrictions. | `dynamic_array_literal_rejected.d`, `associative_array_literal_rejected.d` |
+| Remaining primary expressions | Undecided | Interpolation, `this`, `super`, non-array `new`, import expressions, `typeid`, traits, and non-array type properties require separate review. Function literals, ordinary template instances, and `is` expressions are classified separately; array literals and string mixins retain their existing restrictions. | `dynamic_array_literal_rejected.d`, `associative_array_literal_rejected.d` |
 
 ## Mixin decisions
 
@@ -210,6 +210,7 @@ Each chapter should be split into individual features as it is investigated.
 | Template emission | Supported | Instances needed across separately compiled modules are emitted without requiring the D runtime. | `betterc_template_emission.d` |
 | CTFE | Supported | Functions may execute at compile time for manifest constants, assertions, template arguments, initializers, and fixed-array dimensions; `__ctfe` is supported. | `ctfe_accepted.d` |
 | Compile-time control flow | Supported | `static if`, `static foreach`, and `static assert` are supported. | `ctfe_accepted.d` |
+| Type inspection | Supported | `typeof` is non-evaluating and supports expression and return-type queries. `is` supports validity, equivalence, conversion, category, and pattern-deduction queries over supported Laser-D types. | `type_inspection_accepted.d` |
 | Existing language restrictions | Restricted | Templates and CTFE do not bypass rejected Laser-D features; string mixins remain rejected inside templates. | `template_string_mixin_rejected.d` |
 
 ## Evidence required for a decision
