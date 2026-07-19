@@ -686,6 +686,10 @@ void main()
 
 $(H2 $(LNAME2 safe, $(D @safe), $(D @trusted), and $(D @system) Attributes))
 
+    $(P_LASER_D Every function and function type is implicitly `@system`.
+    `@safe`, `@trusted`, and explicit `@system` attributes are not supported,
+    and function-safety inference is disabled.)
+
     $(P See $(DDSUBLINK spec/function, function-safety, Function Safety).)
 
 $(H3 $(LNAME2 system-variables, System Variables))

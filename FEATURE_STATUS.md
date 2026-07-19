@@ -29,6 +29,7 @@ review, but does not by itself decide the status.
 | Garbage collector | Rejected | GC-dependent language behavior is unavailable. | `DESIGN.md`; `spec/garbage.dd` needs Laser-D wording | Coverage incomplete |
 | Function `nothrow` attribute | Restricted | Every function type is implicitly `nothrow`; spelling `nothrow` explicitly is rejected. | `DESIGN.md`, `spec/function.dd`, `spec/attribute.dd` | `implicit_function_attributes.d`, `explicit_function_attributes.d`, `explicit_function_type_attributes.d` |
 | Function `@nogc` attribute | Restricted | Every function type is implicitly `@nogc`; spelling `@nogc` explicitly is rejected. | `DESIGN.md`, `spec/function.dd`, `spec/attribute.dd` | `implicit_function_attributes.d`, `explicit_function_attributes.d`, `explicit_function_type_attributes.d` |
+| Function safety attributes | Restricted | Every function and function type is implicitly `@system`; `@safe`, `@trusted`, and explicit `@system` are rejected, and safety inference is disabled. | `DESIGN.md`, `spec/function.dd`, `spec/attribute.dd`, `spec/memory-safe-d.dd` | `implicit_function_attributes.d`, `explicit_safety_attributes_rejected.d` |
 | Backend and frontend/backend interface | Supported | Laser-D retains these implementation components unchanged. This does not by itself settle individual source-language features. | `AGENTS.md` project constraint | Not a language conformance test |
 | Target operating systems | Supported | Windows, Linux, and macOS are required targets. | `AGENTS.md`; `spec/portability.dd` needs review | Cross-platform CI needed |
 | x86-64 | Supported | x86-64 is the initial supported architecture. | `AGENTS.md`; `spec/portability.dd` needs review | Cross-platform CI needed |
@@ -79,7 +80,7 @@ Each chapter should be split into individual features as it is investigated.
 | Objective-C interoperability (`objc_interface.dd`) | Rejected | Objective-C linkage and its classes, protocols, methods, and functions cannot be declared in Laser-D source. |
 | Portability (`portability.dd`) | Restricted | Windows, Linux, macOS, and initially x86-64 are decided; detailed guarantees remain to be written. |
 | Named character entities (`entity.dd`) | Undecided | Decide whether this documentation/compiler facility is retained unchanged. |
-| Memory safety (`memory-safe-d.dd`) | Undecided | Review `@safe`, `@trusted`, `@system`, inference, and interaction with implicit attributes. |
+| Memory safety (`memory-safe-d.dd`) | Rejected | The checked `@safe` subset and `@trusted` boundary are not part of Laser-D. Every function is implicitly `@system`, with no safety inference or explicit safety annotations. |
 | ABI (`abi.dd`) | Undecided | The backend and frontend/backend interface are unchanged; determine which source-level ABI guarantees remain part of Laser-D. |
 | Vector extensions (`simd.dd`) | Undecided | Review portability and backend support across required targets. |
 | BetterC (`betterc.dd`) | Restricted | BetterC is mandatory, but its upstream documentation is not treated as a complete Laser-D specification. |
@@ -109,7 +110,8 @@ Each chapter should be split into individual features as it is investigated.
 | Feature | Status | Decision | Tests |
 | --- | --- | --- | --- |
 | User-defined attributes | Rejected | `@(ArgumentList)`, `@identifier`, UDA template instances, and UDA call expressions are rejected in every D source location, including modules, declarations, functions, parameters, aggregate members, and enum members. | `user_defined_attributes_rejected.d`, `module_user_defined_attribute_rejected.d` |
-| Built-in attributes | Undecided | Built-in language attributes are not changed by the UDA decision and retain their individual classifications. | Existing attribute-specific tests |
+| Function safety attributes | Restricted | `@safe` and `@trusted` are rejected. `@system` is mandatory and implicit, so spelling it explicitly is also rejected. | `implicit_function_attributes.d`, `explicit_safety_attributes_rejected.d` |
+| Remaining built-in attributes | Undecided | Built-in attributes other than the decided function-safety, `nothrow`, and `@nogc` groups retain their individual classifications. | Existing attribute-specific tests |
 | ImportC implementation attributes | Restricted | C and GNU attributes parsed from ImportC input are not D UDAs and remain part of the ImportC audit. | `importc_upstream_compilable_cattributes.i` |
 
 ## Basic declaration and primitive-type decisions

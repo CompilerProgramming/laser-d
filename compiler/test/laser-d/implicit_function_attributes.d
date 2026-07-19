@@ -31,8 +31,10 @@ void functionForms()
 
     static assert(hasAttribute!(nestedFunction, "nothrow"));
     static assert(hasAttribute!(nestedFunction, "@nogc"));
+    static assert(hasAttribute!(nestedFunction, "@system"));
     static assert(hasAttribute!(lambda, "nothrow"));
     static assert(hasAttribute!(lambda, "@nogc"));
+    static assert(hasAttribute!(lambda, "@system"));
 }
 
 enum bool hasAttribute(alias functionSymbol, immutable(char)[] expected) = ()
@@ -46,16 +48,22 @@ enum bool hasAttribute(alias functionSymbol, immutable(char)[] expected) = ()
 static assert(__traits(getFunctionAttributes, ordinary).length >= 2);
 static assert(hasAttribute!(ordinary, "nothrow"));
 static assert(hasAttribute!(ordinary, "@nogc"));
+static assert(hasAttribute!(ordinary, "@system"));
 static assert(hasAttribute!(externalFunction, "nothrow"));
 static assert(hasAttribute!(externalFunction, "@nogc"));
+static assert(hasAttribute!(externalFunction, "@system"));
 static assert(hasAttribute!(functionPointer, "nothrow"));
 static assert(hasAttribute!(functionPointer, "@nogc"));
+static assert(hasAttribute!(functionPointer, "@system"));
 static assert(hasAttribute!(delegateValue, "nothrow"));
 static assert(hasAttribute!(delegateValue, "@nogc"));
+static assert(hasAttribute!(delegateValue, "@system"));
 static assert(hasAttribute!(inferredReturnType, "nothrow"));
 static assert(hasAttribute!(inferredReturnType, "@nogc"));
+static assert(hasAttribute!(inferredReturnType, "@system"));
 static assert(hasAttribute!(Aggregate.memberFunction, "nothrow"));
 static assert(hasAttribute!(Aggregate.memberFunction, "@nogc"));
+static assert(hasAttribute!(Aggregate.memberFunction, "@system"));
 
 extern(C) int main()
 {

@@ -1388,13 +1388,7 @@ extern (C++) final class TypeFunction : TypeNext
         if (stc & STC.rvalue)
             this.isRvalue = true;
 
-        this.trust = TRUST.default_;
-        if (stc & STC.safe)
-            this.trust = TRUST.safe;
-        else if (stc & STC.system)
-            this.trust = TRUST.system;
-        else if (stc & STC.trusted)
-            this.trust = TRUST.trusted;
+        this.trust = TRUST.system;
     }
 
     static TypeFunction create(Parameters* parameters, Type treturn, ubyte varargs, LINK linkage, StorageClass stc = STC.none) @safe

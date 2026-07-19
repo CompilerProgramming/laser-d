@@ -1377,7 +1377,11 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
         {
             // If we find a builtin attribute, we're done, return immediately.
             if (STC stc = isBuiltinAtAttribute(token.ident))
+            {
+                if (stc & STC.safeGroup)
+                    error(attributeLoc, "attribute `@%s` is not supported in Laser-D; all functions are implicitly `@system`", token.ident.toChars());
                 return stc;
+            }
 
             error(attributeLoc, "user-defined attributes are not supported in Laser-D");
 

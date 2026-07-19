@@ -4019,6 +4019,10 @@ $(H2 $(LNAME2 nogc-functions, No-GC Functions))
 
 $(H2 $(LNAME2 function-safety, Function Safety))
 
+$(P_LASER_D Every function and function type is implicitly `@system`.
+`@safe`, `@trusted`, and explicit `@system` are not supported. Laser-D does not
+infer function safety or provide D's compiler-checked safe/trusted boundary.)
+
 $(H3 $(LNAME2 safe-functions, Safe Functions))
 
         $(P Safe functions are marked with the $(CODE @safe) attribute.

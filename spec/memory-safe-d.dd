@@ -4,6 +4,11 @@ $(SPEC_S Memory Safety,
 
 $(HEADERNAV_TOC)
 
+$(P_LASER_D D's compiler-checked memory-safe subset is not supported. All
+functions and function types are implicitly `@system`; `@safe`, `@trusted`,
+and explicit `@system` annotations are rejected, and safety inference is
+disabled.)
+
     $(HTMLTAG3 img, src="$(ROOT_DIR)images/dman-rain.jpg" align="right" alt="D-Man in rain" height="200")
 
         $(P $(I Memory Safety) for a program is defined as it being
