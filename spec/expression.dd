@@ -845,6 +845,10 @@ $(GNAME RelExpression):
 
 $(H3 $(LNAME2 array_comparisons, Array Comparisons))
 
+$(P_LASER_D Equality and identity comparison of compatible character slices is
+supported. Ordered array and slice comparisons using $(D <), $(D <=), $(D >),
+or $(D >=) are not supported because they require a D runtime hook.)
+
     $(P For static and dynamic arrays, the result of a *CmpExpression*
         is the result of the operator applied to the first non-equal
         element of the array. If two arrays compare equal, but are of

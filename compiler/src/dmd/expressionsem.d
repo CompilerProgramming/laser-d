@@ -14669,6 +14669,9 @@ private extern (C++) final class ExpressionSemanticVisitor : Visitor
 
             if (t1.isStaticOrDynamicArray() && t2.isStaticOrDynamicArray())
             {
+                error(exp.loc, "ordered array and slice comparisons are not supported in Laser-D");
+                return setError();
+
                 if (!verifyHookExist(exp.loc, *sc, Id.__cmp, "comparing arrays"))
                     return setError();
 

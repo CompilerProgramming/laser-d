@@ -291,6 +291,9 @@ $(IMPLEMENTATION_DEFINED Identifiers starting with $(D __) (two underscores) are
 
 $(H2 $(LNAME2 string_literals, String Literals))
 
+$(P_LASER_D String literals are supported as immutable character slices over
+compiler-owned static storage and do not allocate GC-owned memory.)
+
 $(GRAMMAR
 $(GNAME StringLiteral):
     $(GLINK WysiwygString)

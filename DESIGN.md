@@ -194,6 +194,19 @@ a pointer-and-length view and does not imply garbage-collected ownership. It
 may refer to fixed global or stack storage, static string-literal storage, or a
 pointer range supplied by manually managed or external code. Indexing,
 sub-slicing, `$`, `.ptr`, and read-only `.length` access are supported.
+Slice values may be passed, returned, reassigned, compared for identity or
+equality when their character element types match, filled in place, and copied
+into existing compatible storage. Ordered array and slice comparisons are
+rejected because upstream lowers them through the D runtime `object.__cmp`
+hook.
+
+String values are not a separate owning type: they are non-owning slices of
+immutable `char`, `wchar`, or `dchar` data. UTF-8, UTF-16, and UTF-32 string
+literals provide compiler-owned static storage and may be indexed or sliced
+without allocation. Their elements cannot be mutated, and a literal cannot be
+implicitly converted to a mutable character slice. The conventional `string`,
+`wstring`, and `dstring` names are aliases normally supplied by `object.d`, not
+intrinsic front-end types.
 
 Compile-time initializers for statically allocated fixed-size arrays remain
 supported. Dynamic array literal expressions, array allocation with `new`,

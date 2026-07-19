@@ -302,7 +302,8 @@ assert(*p == 2);
 $(H2 $(LNAME2 slicing, Slicing))
 
 $(P_LASER_D Slicing is supported and does not allocate. The resulting dynamic
-array is a non-owning view of the original storage.)
+array is a non-owning view of the original storage. Slice values may be passed,
+returned, reassigned, filled, and copied into compatible existing POD storage.)
 
         $(P $(I Slicing) an array means to specify a subarray of it.
         This is done by supplying two index expressions.
@@ -1258,6 +1259,15 @@ assert(s2[9] == '\0');
 $(H2 $(LNAME2 special-array, Special Array Types))
 
 $(H3 $(LNAME2 strings, Strings))
+
+$(P_LASER_D Strings are supported as non-owning slices of immutable $(D char),
+$(D wchar), or $(D dchar) data. String literals use compiler-owned static
+storage. Indexing, slicing, $(D .ptr), read-only $(D .length), identity, and
+same-element-type equality are supported. Elements cannot be mutated and
+literals do not implicitly convert to mutable character slices. Ordered
+comparison and GC-backed array operations are not supported. The conventional
+$(D string), $(D wstring), and $(D dstring) names are aliases supplied by
+$(D object.d), rather than intrinsic front-end types.)
 
         $(P A string is an array of $(DDSUBLINK spec/const3, immutable_type, immutable)
         (read-only) characters. String literals essentially are
