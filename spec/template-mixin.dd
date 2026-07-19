@@ -2,6 +2,9 @@ Ddoc
 
 $(SPEC_S Template Mixins,
 
+$(P_LASER_D Template mixin declarations and instantiations are supported.
+String mixins are not supported.)
+
 $(HEADERNAV_TOC)
 
         $(P A $(I TemplateMixin) takes an arbitrary set of declarations from

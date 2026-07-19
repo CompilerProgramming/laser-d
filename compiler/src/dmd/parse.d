@@ -405,6 +405,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
                             if (isDeclaration(&token, NeedDeclaratorId.mustIfDstyle, TOK.reserved, null))
                                 goto Ldeclaration;
                             // mixin(string)
+                            error(loc, "string mixin declarations are not supported in Laser-D");
                             nextToken();
                             auto exps = parseArguments();
                             check(TOK.semicolon);
@@ -3861,6 +3862,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
         case TOK.mixin_:
             // https://dlang.org/spec/expression.html#mixin_types
             loc = token.loc;
+            error(loc, "string mixin types are not supported in Laser-D");
             nextToken();
             if (token.value != TOK.leftParenthesis)
                 error(token.loc, "found `%s` when expecting `%s` following `mixin`", token.toChars(), Token.toChars(TOK.leftParenthesis));
@@ -6232,17 +6234,11 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
                 if (tv == TOK.leftParenthesis)
                 {
                     // mixin(string)
-                    AST.Expression e = parseAssignExp();
+                    error(loc, "string mixin statements are not supported in Laser-D");
+                    nextToken();
+                    auto exps = parseArguments();
                     check(TOK.semicolon, "mixin");
-                    if (e.op == EXP.mixin_)
-                    {
-                        AST.MixinExp cpe = cast(AST.MixinExp)e;
-                        s = new AST.MixinStatement(loc, cpe.exps);
-                    }
-                    else
-                    {
-                        s = new AST.ExpStatement(loc, e);
-                    }
+                    s = new AST.MixinStatement(loc, exps);
                     break;
                 }
                 else if (tv == TOK.template_)
@@ -8693,6 +8689,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
         case TOK.mixin_:
             {
                 // https://dlang.org/spec/expression.html#mixin_expressions
+                error(loc, "string mixin expressions are not supported in Laser-D");
                 nextToken();
                 if (token.value != TOK.leftParenthesis)
                     error(token.loc, "found `%s` when expecting `%s` following `mixin`", token.toChars(), Token.toChars(TOK.leftParenthesis));

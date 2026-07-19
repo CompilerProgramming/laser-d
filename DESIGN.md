@@ -175,9 +175,17 @@ construction would introduce `real`, an imaginary type, or a complex type.
 
 This initial expression decision does not classify strings, array or
 associative-array literals, function literals, interpolated expressions,
-`this`, `super`, `new`, `$`, imports, mixins, `typeid`, `is`, traits, type
+`this`, `super`, `new`, `$`, imports, `typeid`, `is`, traits, type
 properties, operators, assignment, calls, casts, or other postfix expressions.
 Those forms will be reviewed in smaller dependent categories.
+
+### Mixins
+
+String mixins are rejected in every syntactic position: declarations,
+statements, expressions, and types. Laser-D source cannot construct source text
+and ask the compiler to reparse it. Template mixin declarations and template
+mixin instantiations remain supported because they compose already parsed D
+declarations rather than reparsing strings.
 
 ### Static arrays and slices
 

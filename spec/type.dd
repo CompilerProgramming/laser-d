@@ -1043,6 +1043,8 @@ $(H3 $(LNAME2 typeof-special, Special Cases))
 
 $(H2 $(LNAME2 mixin_types, Mixin Types))
 
+$(P_LASER_D String mixin types are not supported.)
+
 $(GRAMMAR
 $(GNAME MixinType):
     $(D mixin $(LPAREN)) $(GLINK2 expression, ArgumentList) $(D $(RPAREN))

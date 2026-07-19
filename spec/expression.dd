@@ -2988,6 +2988,8 @@ $(H4 $(LNAME2 assert-message, Assert Message))
 
 $(H3 $(LNAME2 mixin_expressions, Mixin Expressions))
 
+$(P_LASER_D String mixin expressions are not supported.)
+
 $(GRAMMAR
 $(GNAME MixinExpression):
     $(D mixin $(LPAREN)) $(GLINK ArgumentList) $(D $(RPAREN))

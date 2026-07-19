@@ -625,6 +625,8 @@ module.)
 
 $(H2 $(LEGACY_LNAME2 MixinDeclaration, mixin-declaration, Mixin Declaration))
 
+$(P_LASER_D String mixin declarations are not supported.)
+
 $(GRAMMAR
 $(GNAME MixinDeclaration):
     $(D mixin) $(D $(LPAREN)) $(GLINK2 expression, ArgumentList) $(D $(RPAREN)) $(D ;)

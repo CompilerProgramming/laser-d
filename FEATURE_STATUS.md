@@ -64,7 +64,7 @@ Each chapter should be split into individual features as it is investigated.
 | Functions (`function.dd`) | Restricted | Implicit `nothrow` and `@nogc` are decided; review parameters, delegates, closures, nesting, variadics, and generated functions. |
 | Operator overloading (`operatoroverloading.dd`) | Undecided | Check lowering for hidden runtime or allocation dependencies. |
 | Templates (`template.dd`) | Undecided | Review instantiation, emission, constraints, specialization, and CTFE dependencies. |
-| Template mixins (`template-mixin.dd`) | Undecided | Review compile-time-only behavior and generated unsupported constructs. |
+| Template mixins (`template-mixin.dd`) | Supported | Mixin template declarations and template mixin instantiations are supported; string mixins are rejected separately. |
 | Contracts (`contracts.dd`) | Undecided | Determine assertion failure behavior and runtime dependencies. |
 | Conditional compilation (`version.dd`) | Restricted | `D_BetterC` is always defined; review remaining predefined versions and debug behavior. |
 | Traits (`traits.dd`) | Undecided | Review traits individually, especially runtime-information and function-attribute queries. |
@@ -171,7 +171,15 @@ Each chapter should be split into individual features as it is investigated.
 | --- | --- | --- | --- |
 | Primary scalar expressions | Supported | Identifiers, parentheses, `null`, Boolean literals, supported integer, floating-point, and character literals, and construction or conversion with supported scalar types are retained. | `primary_scalar_expressions_accepted.d` |
 | Rejected scalar expressions | Rejected | Literal or construction forms that introduce `real`, imaginary, or complex types remain rejected by their corresponding type decisions. | `real_rejected.d`, `imaginary_rejected.d`, `complex_rejected.d` |
-| Remaining primary expressions | Undecided | Function literals, interpolation, `this`, `super`, non-array `new`, import and mixin expressions, `typeid`, `is`, traits, non-array type properties, and template instances require separate review. Static-storage string literals and array `$` are classified with arrays; dynamic and associative-array literals are rejected. | `dynamic_array_literal_rejected.d`, `associative_array_literal_rejected.d` |
+| Remaining primary expressions | Undecided | Function literals, interpolation, `this`, `super`, non-array `new`, import expressions, `typeid`, `is`, traits, non-array type properties, and ordinary template instances require separate review. Static-storage string literals and array `$` are classified with arrays; array literals and string mixins are classified separately. | `dynamic_array_literal_rejected.d`, `associative_array_literal_rejected.d` |
+
+## Mixin decisions
+
+| Feature | Status | Decision | Tests |
+| --- | --- | --- | --- |
+| String mixin declarations and statements | Rejected | Compile-time source-text injection in declaration and statement positions is rejected. | `string_mixin_declaration_rejected.d`, `string_mixin_statement_rejected.d` |
+| String mixin expressions and types | Rejected | Source text cannot be reparsed as an expression or type. | `string_mixin_expression_rejected.d`, `string_mixin_type_rejected.d` |
+| Template mixins | Supported | Mixin template declarations and template mixin instantiations remain supported. | `template_mixins_accepted.d` |
 
 ## Array decisions
 

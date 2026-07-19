@@ -2436,6 +2436,8 @@ $(P See $(GLINK2 pragma, PragmaStatement)).
 
 $(H2 $(LEGACY_LNAME2 MixinStatement, mixin-statement, Mixin Statement))
 
+$(P_LASER_D String mixin statements are not supported.)
+
 $(GRAMMAR
 $(GNAME MixinStatement):
     $(D mixin) $(D $(LPAREN)) $(GLINK2 expression, ArgumentList) $(D $(RPAREN)) $(D ;)
