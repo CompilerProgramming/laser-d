@@ -101,9 +101,9 @@ base type is otherwise available in Laser-D. Opaque enums have no default
 initializer. An enum based on another enum requires explicit member values
 after its first member.
 
-Advanced aggregate behavior coupled to later categories—including bit fields,
-advanced copy and move constructors and overloaded operators—remains undecided
-until those dependent categories are reviewed.
+Advanced aggregate behavior coupled to later categories—including advanced
+copy and move constructors and overloaded operators—remains undecided until
+those dependent categories are reviewed.
 
 Aggregate `invariant` declarations are rejected. They introduce implicitly
 invoked checking functions and runtime behavior around constructors,
@@ -113,3 +113,9 @@ functions when such checks are required, making every invocation explicit.
 `alias this` declarations are rejected in both supported D syntaxes. Laser-D
 does not implicitly forward member lookup or conversions through an aggregate
 member; programs must name the member or conversion operation explicitly.
+
+Bit fields are supported without a preview switch. They are runtime-free and
+use the existing frontend/backend interface. Their layout is implementation-
+defined, so portable Laser-D code must not assume that bit-field layout is
+identical across targets. Code matching an external ABI must verify its layout
+on every supported target.

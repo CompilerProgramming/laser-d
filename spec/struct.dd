@@ -17,8 +17,9 @@ $(P Aggregate `invariant` declarations are not supported in Laser-D. Programs
 that require consistency checks shall use explicitly called validation
 functions. `alias this` declarations are also unsupported; Laser-D does not
 implicitly forward member lookup or conversions through an aggregate member.
-Bit fields, advanced copy and move constructors, and operator-specific behavior
-are specified separately with the features on which they depend.)
+Bit fields are supported without a preview switch. Advanced copy and move
+constructors and operator-specific behavior are specified separately with the
+features on which they depend.)
 
     $(P Whereas $(DDLINK spec/class, Classes, classes) are reference types,
     structs and unions are value types.
@@ -242,6 +243,11 @@ $(H2 $(LNAME2 struct_layout, Struct Layout))
     ))
 
 $(H2 $(LNAME2 bitfields, Bit Field Declarations))
+
+    $(P Laser-D supports bit fields without requiring a preview switch. Their
+    implementation-defined layout is not a portable interchange format;
+    programs requiring ABI compatibility shall verify size, alignment, and bit
+    offsets on every supported target.)
 
     $(P A bit field is declared with a $(GLINK2 declaration, BitfieldDeclarator).
     The bit field width is specified by the $(GLINK2 expression, AssignExpression) or
