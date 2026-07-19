@@ -63,3 +63,15 @@ The focused tests in `compiler/test/laser-d/lexical_*.d` cover accepted forms
 and representative malformed constructs. The upstream lexer diagnostic tests
 were also compared between upstream DMD in BetterC mode and Laser-D; the
 rejection results matched for the reviewed cases.
+
+## Basic declarations and primitive scalar types
+
+Laser-D retains D's current non-deprecated primitive scalar types, their
+default initialization, explicit and inferred local variables, multiple
+declarations, manifest constants, and basic type or variable aliases. A local
+scalar may use a `void` initializer, with the same uninitialized-value rules as
+D. Deprecated scalar types are not yet classified.
+
+This decision does not cover pointers, arrays, aggregates, type qualifiers,
+function types, storage-duration behavior, module initialization, or advanced
+alias/template behavior. Those features are reviewed in their own categories.

@@ -39,6 +39,13 @@ $(GNAME AggregateDeclaration):
 
 $(H3 $(LNAME2 variable-declarations, Variable Declarations))
 
+$(P Laser-D supports explicit and inferred declarations of the primitive
+scalar types listed in $(DDLINK spec/type, Basic Data Types, Basic Data Types),
+including multiple declarations, default initialization, scalar expression
+initializers, and local `void` initialization. Declarations involving derived
+types, storage-duration behavior, or runtime initialization are governed by
+their respective Laser-D feature sections.)
+
 $(GRAMMAR
 $(GNAME VarDeclarations):
     $(GLINK StorageClasses)$(OPT) $(GLINK2 type, BasicType) $(GLINK2 type, TypeSuffixes)$(OPT) $(GLINK IdentifierInitializers) $(D ;)
@@ -340,6 +347,10 @@ $(H3 $(LNAME2 global_static_init, Global and Static Initializers))
 
 
 $(H2 $(LNAME2 alias, Alias Declarations))
+
+    $(P Laser-D supports aliases of primitive types and variables. Aliases of
+    functions, aggregates, templates, overload sets, and other derived symbols
+    are available only when the aliased feature is itself supported.)
 
     $(EDITION 2024, Use the *AliasAssignments* form only -
     $(DDSUBLINK spec/legacy, alias-syntax, see legacy).)

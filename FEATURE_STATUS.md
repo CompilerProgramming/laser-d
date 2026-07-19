@@ -47,8 +47,8 @@ Each chapter should be split into individual features as it is investigated.
 | Interpolated expression sequences (`istring.dd`) | Undecided | Determine generated constructs and any runtime or allocation dependencies. |
 | Grammar (`grammar.dd`) | Undecided | Record grammar retained through the no-new-syntax compatibility rule and identify semantically rejected productions. |
 | Modules (`module.dd`) | Undecided | Review imports, module constructors/destructors, `ModuleInfo`, and separate compilation. |
-| Declarations (`declaration.dd`) | Undecided | Review variables, aliases, linkage, storage classes, and static initialization. |
-| Types (`type.dd`) | Undecided | Review basic, pointer, array, associative-array, delegate, class, and function types. |
+| Declarations (`declaration.dd`) | Restricted | Basic variables, manifest constants, inference, aliases, multiple declarations, and scalar initialization are supported. Linkage, most storage classes, static initialization, and declarations involving derived types remain to be reviewed. |
+| Types (`type.dd`) | Restricted | Current non-deprecated primitive scalar types are supported. Deprecated scalar types and all derived or user-defined types are classified separately or remain to be reviewed. |
 | Properties (`property.dd`) | Undecided | Identify properties that require runtime support or hidden allocation. |
 | Attributes (`attribute.dd`) | Restricted | `nothrow` and `@nogc` are decided; all other attributes remain to be classified. |
 | Pragmas (`pragma.dd`) | Undecided | Review each predefined pragma and implementation dependency. |
@@ -103,6 +103,22 @@ Each chapter should be split into individual features as it is investigated.
 | String literals | Supported | Quoted, WYSIWYG, delimited, token, hexadecimal, and postfix string literals are retained. | `lexical_accepted.d`; upstream `lexer1.d`, `lexer2.d`, and `lexer3.d` used as differential evidence |
 | Keywords and tokens | Supported | D keywords, operators, punctuation, and tokenization rules are retained unchanged. | Exercised throughout the Laser-D suite; upstream lexer diagnostics used as differential evidence |
 | Special tokens | Supported | D special tokens such as `__FILE__`, `__LINE__`, and `__MODULE__` are retained. | `lexical_accepted.d` |
+
+## Basic declaration and primitive-type decisions
+
+| Feature | Status | Decision | Tests |
+| --- | --- | --- | --- |
+| `void` | Supported | `void` is retained as the no-value function result type, but variables cannot have type `void`. | `basic_void_variable_rejected.d`; existing function tests |
+| Boolean type | Supported | `bool` and its `false` default initializer are retained. | `basic_declarations_accepted.d` |
+| Integer types | Supported | `byte`, `ubyte`, `short`, `ushort`, `int`, `uint`, `long`, and `ulong` and their D default initializers are retained. | `basic_declarations_accepted.d` |
+| Floating-point types | Supported | `float`, `double`, and `real` are retained with their target-defined D representations. | `basic_declarations_accepted.d` |
+| Character types | Supported | `char`, `wchar`, and `dchar` and their D default initializers are retained. | `basic_declarations_accepted.d` |
+| Null type | Supported | `typeof(null)` and the `null` initializer are retained. | `basic_declarations_accepted.d` |
+| Deprecated scalar types | Undecided | `cent`, `ucent`, and the deprecated imaginary and complex scalar types have not yet been accepted into or rejected from Laser-D. | None |
+| Explicit and inferred variables | Supported | Explicit scalar declarations, initialized `auto` declarations, multiple declarations, default initialization, and local `void` initialization are retained. An `auto` declaration without an initializer is rejected. | `basic_declarations_accepted.d`, `basic_auto_without_initializer_rejected.d` |
+| Manifest constants | Supported | Basic `enum` manifest constants are retained; enum types will be reviewed with aggregates and enums. | `basic_declarations_accepted.d` |
+| Basic aliases | Supported | Aliases of primitive types and variables are retained. More advanced alias behavior remains with templates and other feature categories. | `basic_declarations_accepted.d`; upstream `aliasassign.d` used as differential evidence |
+| Invalid and duplicate declarations | Rejected | Undeclared type names, `void` variables, missing inference initializers, and duplicate names are rejected. | `basic_unknown_type_rejected.d`, `basic_void_variable_rejected.d`, `basic_auto_without_initializer_rejected.d`, `basic_duplicate_declaration_rejected.d` |
 
 ## Evidence required for a decision
 
