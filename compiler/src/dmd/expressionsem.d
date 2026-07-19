@@ -6496,6 +6496,9 @@ private extern (C++) final class ExpressionSemanticVisitor : Visitor
             printf("\tnewtype: %s\n", exp.newtype.toChars());
         }
 
+        error(exp.loc, "`new` expressions are not supported in Laser-D because implicit allocation is disabled");
+        return setError();
+
         if (exp.placement)
         {
             exp.placement = exp.placement.expressionSemantic(sc);
@@ -6546,12 +6549,6 @@ private extern (C++) final class ExpressionSemanticVisitor : Visitor
                 edim = ts.dim;
                 exp.newtype = ts.next;
             }
-        }
-
-        if (edim)
-        {
-            error(exp.loc, "dynamic array allocation with `new` is not supported in Laser-D");
-            return setError();
         }
 
         ClassDeclaration cdthis = null;

@@ -3,7 +3,7 @@
 /*
 TEST_OUTPUT:
 ---
-laser-d/new_array_rejected.d(12): Error: dynamic array allocation with `new` is not supported in Laser-D
+laser-d/new_array_rejected.d(12): Error: `new` expressions are not supported in Laser-D because implicit allocation is disabled
 ---
 */
 

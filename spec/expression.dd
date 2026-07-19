@@ -3055,8 +3055,9 @@ $(GNAME ImportExpression):
 
 $(H3 $(LNAME2 new_expressions, New Expressions))
 
-$(P_LASER_D Dynamic array allocation with $(D new T[n]) is not supported.
-Other forms of $(D new) are classified with their allocated type.)
+$(P_LASER_D No form of $(D new) is supported. This includes scalar, struct,
+placement, class, anonymous-class, and array forms. Laser-D programs must use
+explicitly managed storage and supported initialization operations instead.)
 
 $(GRAMMAR
 $(GNAME NewExpression):
