@@ -85,7 +85,7 @@ Each chapter should be split into individual features as it is investigated.
 | Vector extensions (`simd.dd`) | Undecided | Review portability and backend support across required targets. |
 | BetterC (`betterc.dd`) | Restricted | BetterC is mandatory, but its upstream documentation is not treated as a complete Laser-D specification. |
 | ImportC (`importc.dd`) | Restricted | ImportC is retained. Standalone C11 compilation and mixed Laser-D/C modules are supported for the reviewed baseline; preprocessing, headers, macros, atomics, vector extensions, inline assembly, and implementation extensions remain to be audited. |
-| Live functions (`ob.dd`) | Undecided | Review compiler analysis and any runtime assumptions. |
+| Live functions (`ob.dd`) | Rejected | `@live` annotations and live ownership/borrowing analysis are not part of Laser-D. |
 | Windows programming (`windows.dd`) | Undecided | Separate portable language guarantees from Windows-specific interoperability. |
 | Legacy features (`legacy.dd`) | Undecided | Decide whether any deprecated or legacy constructs belong in the reduced language. |
 | Editions (`editions.dd`) | Undecided | Decide whether edition selection is supported or fixed. |
@@ -111,7 +111,8 @@ Each chapter should be split into individual features as it is investigated.
 | --- | --- | --- | --- |
 | User-defined attributes | Rejected | `@(ArgumentList)`, `@identifier`, UDA template instances, and UDA call expressions are rejected in every D source location, including modules, declarations, functions, parameters, aggregate members, and enum members. | `user_defined_attributes_rejected.d`, `module_user_defined_attribute_rejected.d` |
 | Function safety attributes | Restricted | `@safe` and `@trusted` are rejected. `@system` is mandatory and implicit, so spelling it explicitly is also rejected. | `implicit_function_attributes.d`, `explicit_safety_attributes_rejected.d` |
-| Remaining built-in attributes | Undecided | Built-in attributes other than the decided function-safety, `nothrow`, and `@nogc` groups retain their individual classifications. | Existing attribute-specific tests |
+| Live-function attribute | Rejected | `@live` is rejected on declarations and function types, and Laser-D never enables live ownership/borrowing analysis. | `live_attribute_rejected.d` |
+| Remaining built-in attributes | Undecided | Built-in attributes other than the decided function-safety, `nothrow`, `@nogc`, and `@live` groups retain their individual classifications. | Existing attribute-specific tests |
 | ImportC implementation attributes | Restricted | C and GNU attributes parsed from ImportC input are not D UDAs and remain part of the ImportC audit. | `importc_upstream_compilable_cattributes.i` |
 
 ## Basic declaration and primitive-type decisions

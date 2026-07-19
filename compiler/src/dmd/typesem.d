@@ -3794,8 +3794,6 @@ Type typeSemantic(Type type, Loc loc, Scope* sc)
 
         if (sc.stc & STC.property)
             tf.isProperty = true;
-        if (sc.stc & STC.live)
-            tf.isLive = true;
 
         tf.linkage = sc.linkage;
         if (tf.linkage == LINK.system)

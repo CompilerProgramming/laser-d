@@ -4,6 +4,10 @@ $(SPEC_S Live Functions,
 
 $(HEADERNAV_TOC)
 
+$(P_LASER_D Live functions are not supported. The `@live` attribute is
+rejected on declarations and function types, and the ownership/borrowing
+analysis described in this chapter is not part of Laser-D.)
+
 $(B Experimental, Subject to Change, use `-preview=dip1021` to activate)
 
 $(H2 $(LNAME2 ownership, Ownership))

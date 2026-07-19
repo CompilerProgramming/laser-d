@@ -53,6 +53,10 @@ fixed safety model, while spelling `@system` is redundant. Laser-D therefore
 provides no compiler-checked memory-safety boundary; memory correctness remains
 the program's responsibility.
 
+The experimental `@live` ownership and borrowing analysis is also rejected.
+`@live` cannot be attached to a declaration or function type, and no valid
+Laser-D function type carries the live-analysis attribute.
+
 `compiler/test/laser-d/implicit_function_attributes.d` covers declarations,
 external functions, pointers, delegates, inferred return types, member
 functions, nested functions, and lambdas. The explicit-attribute tests verify

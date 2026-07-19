@@ -1370,8 +1370,6 @@ extern (C++) final class TypeFunction : TypeNext
         this.isNogc = true;
         if (stc & STC.property)
             this.isProperty = true;
-        if (stc & STC.live)
-            this.isLive = true;
 
         if (stc & STC.ref_)
             this.isRef = true;
