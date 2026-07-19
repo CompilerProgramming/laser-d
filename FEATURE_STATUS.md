@@ -61,7 +61,7 @@ Each chapter should be split into individual features as it is investigated.
 | Interfaces (`interface.dd`) | Rejected | Native D, COM, Objective-C, and C++ interfaces are rejected. |
 | Enums (`enum.dd`) | Supported | Named, anonymous, manifest, based, and opaque enum declarations and ordinary enum properties are supported. Opaque enums have no default initializer, and automatic numbering is rejected when the base type is itself an enum. |
 | Type qualifiers (`const3.dd`) | Undecided | Review `const`, `immutable`, `inout`, `shared`, conversions, and initialization. |
-| Functions (`function.dd`) | Restricted | Implicit `nothrow` and `@nogc` are decided; review parameters, delegates, closures, nesting, variadics, and generated functions. |
+| Functions (`function.dd`) | Restricted | Ordinary functions, function pointers, non-capturing literals, non-capturing delegates, and method delegates are supported. All capturing delegates and closures are rejected. Parameters, nesting, variadics, contracts, and generated functions require further review. |
 | Operator overloading (`operatoroverloading.dd`) | Undecided | Check lowering for hidden runtime or allocation dependencies. |
 | Templates (`template.dd`) | Undecided | Review instantiation, emission, constraints, specialization, and CTFE dependencies. |
 | Template mixins (`template-mixin.dd`) | Supported | Mixin template declarations and template mixin instantiations are supported; string mixins are rejected separately. |
@@ -191,6 +191,15 @@ Each chapter should be split into individual features as it is investigated.
 | Ordered array and slice comparison | Rejected | `<`, `<=`, `>`, and `>=` on arrays or slices are rejected because they require the D runtime `object.__cmp` hook. | `ordered_slice_comparison_rejected.d` |
 | GC-backed array operations | Rejected | Dynamic array literals, `new T[n]`, concatenation, append, `.dup`, `.idup`, `.capacity`, and assignment to dynamic-array `.length` are rejected. | `dynamic_array_literal_rejected.d`, `new_array_rejected.d`, `array_concatenation_rejected.d`, `array_gc_properties_rejected.d` |
 | Associative arrays | Rejected | Associative-array types and literals are rejected. | `associative_arrays_rejected.d`, `associative_array_literal_rejected.d` |
+
+## Function, delegate, and closure decisions
+
+| Feature | Status | Decision | Tests |
+| --- | --- | --- | --- |
+| Ordinary functions and function pointers | Supported | Direct calls, taking function addresses, indirect calls, and non-capturing function literals converted to function pointers are supported. | `functions_and_function_pointers_accepted.d` |
+| Delegates | Supported | Non-capturing delegate literals and delegates to struct methods are supported as context-and-function-pointer values. | `delegates_accepted.d` |
+| Capturing delegates and closures | Rejected | Lexical capture is rejected regardless of whether the context is stack-scoped or would require heap allocation. Taking the address of a captured named nested function is also rejected. | `capturing_delegates_rejected.d` |
+| Remaining function features | Undecided | Complete parameter/storage-class behavior, named nested functions, variadics, contracts, and generated functions require later review. | None |
 
 ## Evidence required for a decision
 

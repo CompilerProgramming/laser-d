@@ -213,3 +213,22 @@ supported. Dynamic array literal expressions, array allocation with `new`,
 concatenation, append, `.dup`, `.idup`, `.capacity`, and assignment to dynamic
 array `.length` are rejected because they allocate, resize, or depend on GC
 allocation metadata. Associative-array types and literals are rejected.
+
+### Functions, delegates, and closures
+
+Ordinary functions, direct calls, function pointers, and non-capturing function
+literals are supported. Delegates are supported as two-word values containing a
+context pointer and function pointer; this includes non-capturing delegate
+literals and delegates to struct methods.
+
+Capturing delegates are rejected even when the compiler can prove that the
+captured context is `scope`. This avoids both hidden heap closures and the
+lifetime risks of delegates referring into active stack frames. The restriction
+also covers taking the address of a named nested function that captures an
+outer local. A struct-method delegate remains supported: its explicit object
+context is not a captured lexical frame and follows the same manual lifetime
+discipline as other non-owning pointers.
+
+This first function review does not yet classify the complete parameter model,
+variadic functions, nested named functions, function contracts, or generated
+special member functions.

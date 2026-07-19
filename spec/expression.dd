@@ -2491,6 +2491,10 @@ $(GNAME ValueExpression):
 
 $(H3 $(LNAME2 function_literals, Function Literals))
 
+$(P_LASER_D Non-capturing function and delegate literals are supported.
+Delegate literals that capture a local variable are not supported, even with a
+compiler-proven $(D scope) lifetime.)
+
 $(GRAMMAR
 $(GNAME FunctionLiteral):
     $(D function) $(GLINK RefOrAutoRef)$(OPT) $(GLINK BasicTypeWithSuffixes)$(OPT) $(GLINK ParameterWithAttributes)$(OPT) $(GLINK FunctionLiteralBody)

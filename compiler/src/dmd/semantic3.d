@@ -1326,7 +1326,7 @@ private extern(C++) final class Semantic3Visitor : Visitor
             sc2.pop();
         }
 
-        if (funcdecl.checkClosure())
+        if (funcdecl.checkCapturingDelegates() || funcdecl.checkClosure())
         {
             // We should be setting errors here instead of relying on the global error count.
             //errors = true;
@@ -1888,6 +1888,36 @@ void semanticRTInfo(AggregateDeclaration ad)
  *        $(LI `FuncDeclaration.printGCUsage`)
  *      )
  */
+/** Reject delegates whose context captures a local variable. */
+private bool checkCapturingDelegates(FuncDeclaration fd)
+{
+    if (fd.isCsymbol())
+        return false;
+
+    bool errors;
+    FuncDeclarations reported;
+
+    foreach (v; fd.closureVars)
+    {
+        foreach (f; v.nestedrefs)
+        {
+            auto literal = f.isFuncLiteralDeclaration();
+            if ((!literal || literal.tok != TOK.delegate_) && !f.tookAddressOf)
+                continue;
+
+            if (!reported.contains(f))
+            {
+                .error(f.loc, "capturing delegates are not supported in Laser-D");
+                reported.push(f);
+                errors = true;
+            }
+            if (v.ident != Id.This)
+                .errorSupplemental(v.loc, "captured variable `%s` declared here", v.toErrMsg());
+        }
+    }
+    return errors;
+}
+
 extern (D) bool checkClosure(FuncDeclaration fd)
 {
     //printf("checkClosure() %s\n", toPrettyChars());

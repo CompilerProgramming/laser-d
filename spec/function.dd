@@ -3363,6 +3363,10 @@ void test()
 
 $(H2 $(LNAME2 function-pointers-delegates, Function Pointers, Delegates and Closures))
 
+$(P_LASER_D Ordinary functions, function pointers, non-capturing function
+literals, delegates, and delegates to struct methods are supported. Delegate
+values do not by themselves allocate.)
+
 $(H3 $(LNAME2 function-pointers, Function Pointers))
 
         $(P A $(DDSUBLINK spec/type, function-pointers, function pointer)
@@ -3416,6 +3420,11 @@ uint function(uint) fp2 = &def;
 )
 
 $(H3 $(LNAME2 closures, Delegates & Closures))
+
+$(P_LASER_D Capturing delegates are not supported, including captures whose
+context is compiler-proven $(D scope) and taking the address of a named nested
+function that captures an outer local. Non-capturing delegates and delegates to
+struct methods remain supported.)
 
         $(P A $(DDSUBLINK spec/type, delegates, delegate) can be set to a
         non-static $(RELATIVE_LINK2 nested, nested function):)

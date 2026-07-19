@@ -836,6 +836,10 @@ $(P See $(DDSUBLINK spec/function, function-pointers, Function Pointers).)
 
 $(H3 $(LNAME2 delegates, Delegates))
 
+$(P_LASER_D Delegate types and allocation-free delegate values are supported.
+Non-capturing delegates and struct-method delegates are supported. Lexically
+capturing delegate contexts are not supported, whether stack- or heap-based.)
+
 $(GRAMMAR_INFORMATIVE
 $(GLINK Type) `delegate` $(GLINK2 function, Parameters) $(GLINK2 function, MemberFunctionAttributes)$(OPT)
 )
