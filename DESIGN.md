@@ -249,9 +249,8 @@ and CTFE cannot restore string mixins, GC-backed arrays, associative arrays,
 classes, capturing delegates, or any other rejected construct.
 
 Compile-time introspection mechanisms such as individual `__traits` operations,
-`is` expressions, `typeof`, and import expressions are documented and tested in
-their own feature reviews, even though templates and CTFE may consume their
-results.
+`is` expressions, and `typeof` are documented and tested in their own feature
+reviews, even though templates and CTFE may consume their results.
 
 `typeof` and `is` expressions are supported. `typeof` determines an expression
 or function return type without evaluating the expression. `is` supports type
@@ -271,3 +270,16 @@ string mixins. `__traits(getPointerBitmap)` is rejected because it exposes
 metadata for precise garbage-collector scanning, for which Laser-D has no
 runtime contract. `__traits(getUnitTests)` is deferred until language unit-test
 declarations and execution are reviewed.
+
+### Compile-time I/O
+
+Language-level compile-time I/O is rejected. Import expressions cannot read
+files selected by source code, even when the compiler is given an import-file
+path with `-J`. Both declaration and statement forms of `pragma(msg)` are
+rejected so compile-time evaluation cannot produce user-selected diagnostic
+output.
+
+This does not restrict pure CTFE over values already available to the compiler.
+It also does not include ordinary compiler diagnostics or compiler-generated
+object files and documentation, which are outputs of the compiler rather than
+I/O initiated by the compiled language program.

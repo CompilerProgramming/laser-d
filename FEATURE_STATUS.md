@@ -171,7 +171,7 @@ Each chapter should be split into individual features as it is investigated.
 | --- | --- | --- | --- |
 | Primary scalar expressions | Supported | Identifiers, parentheses, `null`, Boolean literals, supported integer, floating-point, and character literals, and construction or conversion with supported scalar types are retained. | `primary_scalar_expressions_accepted.d` |
 | Rejected scalar expressions | Rejected | Literal or construction forms that introduce `real`, imaginary, or complex types remain rejected by their corresponding type decisions. | `real_rejected.d`, `imaginary_rejected.d`, `complex_rejected.d` |
-| Remaining primary expressions | Undecided | Interpolation, `this`, `super`, non-array `new`, import expressions, `typeid`, and non-array type properties require separate review. Function literals, ordinary template instances, `is` expressions, and traits are classified separately; array literals and string mixins retain their existing restrictions. | `dynamic_array_literal_rejected.d`, `associative_array_literal_rejected.d` |
+| Remaining primary expressions | Undecided | Interpolation, `this`, `super`, non-array `new`, `typeid`, and non-array type properties require separate review. Function literals, ordinary template instances, `is` expressions, traits, and import expressions are classified separately; array literals and string mixins retain their existing restrictions. | `dynamic_array_literal_rejected.d`, `associative_array_literal_rejected.d` |
 
 ## Mixin decisions
 
@@ -225,6 +225,14 @@ Each chapter should be split into individual features as it is investigated.
 | String-to-type generation | Rejected | `__traits(toType)` is rejected because it creates a type from string/mangled text and would restore a form of compile-time text-to-language generation. | `traits_removed_operations_rejected.d` |
 | GC pointer metadata | Rejected | `__traits(getPointerBitmap)` is rejected because Laser-D has no garbage collector or GC scanning metadata contract. | `traits_removed_operations_rejected.d` |
 | Unit-test discovery | Undecided | `__traits(getUnitTests)` will be classified together with language unit-test declarations and execution. | None |
+
+## Compile-time I/O decisions
+
+| Feature | Status | Decision | Tests |
+| --- | --- | --- | --- |
+| Compile-time file input | Rejected | Import expressions such as `import("file")` are rejected. Compilation cannot read source-selected host files through the language, regardless of `-J` paths. | `compile_time_io_rejected.d` |
+| Compile-time message output | Rejected | Declaration and statement forms of `pragma(msg)` are rejected. CTFE cannot emit user-selected diagnostic output. | `compile_time_io_rejected.d`, `compile_time_statement_output_rejected.d` |
+| Pure compile-time execution | Supported | CTFE over compiler-known values remains supported when it does not perform host I/O. Normal compiler diagnostics and compiler-generated artifacts are not language-level compile-time I/O. | `ctfe_accepted.d` |
 
 ## Evidence required for a decision
 

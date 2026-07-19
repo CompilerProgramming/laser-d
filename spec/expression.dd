@@ -3019,6 +3019,10 @@ $(GNAME MixinExpression):
 
 $(H3 $(LNAME2 import_expressions, Import Expressions))
 
+$(P_LASER_D Import expressions are not supported. Laser-D source cannot read
+host files during compilation, including when import-file paths are supplied
+with the compiler's `-J` switch.)
+
 $(GRAMMAR
 $(GNAME ImportExpression):
     $(D import $(LPAREN)) $(GLINK AssignExpression) $(D $(RPAREN))

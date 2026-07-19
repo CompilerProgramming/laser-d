@@ -9412,6 +9412,9 @@ private extern (C++) final class ExpressionSemanticVisitor : Visitor
             printf("ImportExp::semantic('%s')\n", e.toChars());
         }
 
+        error(e.loc, "import expressions are not supported in Laser-D because compile-time file I/O is disabled");
+        return setError();
+
         auto se = semanticString(sc, e.e1, "file name argument");
         if (!se)
             return setError();

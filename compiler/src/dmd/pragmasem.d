@@ -103,6 +103,9 @@ void pragmaDeclSemantic(PragmaDeclaration pd, Scope* sc)
     }
     if (pd.ident == Id.msg)
     {
+        .error(pd.loc, "`pragma(msg)` is not supported in Laser-D because compile-time output is disabled");
+        return noDeclarations();
+
         if (!pd.args)
             return noDeclarations();
 
@@ -265,6 +268,9 @@ bool pragmaStmtSemantic(PragmaStatement ps, Scope* sc)
     //printf("body = %p\n", ps._body);
     if (ps.ident == Id.msg)
     {
+        error(ps.loc, "`pragma(msg)` is not supported in Laser-D because compile-time output is disabled");
+        return false;
+
         if (!pragmaMsgSemantic(ps.loc, sc, ps.args))
             return false;
     }

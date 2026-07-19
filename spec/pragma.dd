@@ -321,6 +321,10 @@ $(H3 $(LNAME2 mangle, $(D pragma mangle)))
 
 $(H3 $(LNAME2 msg, $(D pragma msg)))
 
+    $(P_LASER_D `pragma(msg)` is not supported in either declaration or
+    statement form because Laser-D does not permit language-level compile-time
+    output.)
+
     $(P Each $(ASSIGNEXPRESSION) is evaluated at compile time and then all are combined into a message.)
 
     ---
