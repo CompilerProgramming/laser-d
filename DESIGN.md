@@ -214,6 +214,12 @@ concatenation, append, `.dup`, `.idup`, `.capacity`, and assignment to dynamic
 array `.length` are rejected because they allocate, resize, or depend on GC
 allocation metadata. Associative-array types and literals are rejected.
 
+All `new` expressions are rejected, including scalar, struct, placement, class,
+and array forms. Laser-D has no source-level implicit allocation operation.
+Programs that need dynamic storage must obtain and release it explicitly, for
+example through C interoperability, and initialize supported value types in
+that explicitly managed storage.
+
 ### Functions, delegates, and closures
 
 Ordinary functions, direct calls, function pointers, and non-capturing function
