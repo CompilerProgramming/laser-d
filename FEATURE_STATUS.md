@@ -67,7 +67,7 @@ Each chapter should be split into individual features as it is investigated.
 | Template mixins (`template-mixin.dd`) | Supported | Mixin template declarations and template mixin instantiations are supported; string mixins are rejected separately. |
 | Contracts (`contracts.dd`) | Undecided | Determine assertion failure behavior and runtime dependencies. |
 | Conditional compilation (`version.dd`) | Restricted | `D_BetterC` is always defined; review remaining predefined versions and debug behavior. |
-| Traits (`traits.dd`) | Undecided | Review traits individually, especially runtime-information and function-attribute queries. |
+| Traits (`traits.dd`) | Restricted | Read-only type, function, parameter, and symbol reflection is supported. `__traits(toType)` and `__traits(getPointerBitmap)` are rejected; `getUnitTests` is deferred to the unit-test review. |
 | Error handling (`errors.dd`) | Undecided | Classify `throw`, `try`, `catch`, `finally`, throwable types, and error-reporting mechanisms. |
 | Unit tests (`unittest.dd`) | Undecided | Decide whether language `unittest` blocks are supported and how they run without druntime. |
 | Garbage collection (`garbage.dd`) | Rejected | Document the absence of the GC and enumerate rejected or alternative memory-management operations. |
@@ -171,7 +171,7 @@ Each chapter should be split into individual features as it is investigated.
 | --- | --- | --- | --- |
 | Primary scalar expressions | Supported | Identifiers, parentheses, `null`, Boolean literals, supported integer, floating-point, and character literals, and construction or conversion with supported scalar types are retained. | `primary_scalar_expressions_accepted.d` |
 | Rejected scalar expressions | Rejected | Literal or construction forms that introduce `real`, imaginary, or complex types remain rejected by their corresponding type decisions. | `real_rejected.d`, `imaginary_rejected.d`, `complex_rejected.d` |
-| Remaining primary expressions | Undecided | Interpolation, `this`, `super`, non-array `new`, import expressions, `typeid`, traits, and non-array type properties require separate review. Function literals, ordinary template instances, and `is` expressions are classified separately; array literals and string mixins retain their existing restrictions. | `dynamic_array_literal_rejected.d`, `associative_array_literal_rejected.d` |
+| Remaining primary expressions | Undecided | Interpolation, `this`, `super`, non-array `new`, import expressions, `typeid`, and non-array type properties require separate review. Function literals, ordinary template instances, `is` expressions, and traits are classified separately; array literals and string mixins retain their existing restrictions. | `dynamic_array_literal_rejected.d`, `associative_array_literal_rejected.d` |
 
 ## Mixin decisions
 
@@ -212,6 +212,19 @@ Each chapter should be split into individual features as it is investigated.
 | Compile-time control flow | Supported | `static if`, `static foreach`, and `static assert` are supported. | `ctfe_accepted.d` |
 | Type inspection | Supported | `typeof` is non-evaluating and supports expression and return-type queries. `is` supports validity, equivalence, conversion, category, and pattern-deduction queries over supported Laser-D types. | `type_inspection_accepted.d` |
 | Existing language restrictions | Restricted | Templates and CTFE do not bypass rejected Laser-D features; string mixins remain rejected inside templates. | `template_string_mixin_rejected.d` |
+
+## Trait decisions
+
+| Feature | Status | Decision | Tests |
+| --- | --- | --- | --- |
+| Type and value predicates | Supported | Arithmetic, integral, floating, scalar, unsigned, array-kind, overlap, copyability, POD, zero-initialization, construction, postblit, destruction, and alias-this queries are supported. Predicates for rejected type kinds remain usable by generic code, but cannot introduce those types. | `traits_type_and_function_accepted.d`, `bitfields_accepted.d` |
+| Function and parameter reflection | Supported | Function kind, virtual index, return ABI, attributes, variadic style, parameter storage classes, and the current function's parameter tuple may be inspected at compile time. Class-only results have no valid Laser-D class operands. | `traits_type_and_function_accepted.d` |
+| Symbol reflection | Supported | Names, membership, members, overloads, parents, protection, visibility, linkage, source location, C++ namespaces, target information, attributes, and symbol identity may be inspected. | `traits_symbol_accepted.d`, `bitfields_accepted.d` |
+| Semantic probes | Supported | `__traits(compiles)` and `__traits(isSame)` are supported for compile-time feature detection and identity tests. | `traits_symbol_accepted.d` |
+| Initialization symbol | Supported | `__traits(initSymbol)` is retained for supported aggregate types. | `traits_type_and_function_accepted.d` |
+| String-to-type generation | Rejected | `__traits(toType)` is rejected because it creates a type from string/mangled text and would restore a form of compile-time text-to-language generation. | `traits_removed_operations_rejected.d` |
+| GC pointer metadata | Rejected | `__traits(getPointerBitmap)` is rejected because Laser-D has no garbage collector or GC scanning metadata contract. | `traits_removed_operations_rejected.d` |
+| Unit-test discovery | Undecided | `__traits(getUnitTests)` will be classified together with language unit-test declarations and execution. | None |
 
 ## Evidence required for a decision
 

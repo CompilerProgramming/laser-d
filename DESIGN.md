@@ -258,3 +258,16 @@ or function return type without evaluating the expression. `is` supports type
 validity, equivalence, implicit-conversion tests, type-category tests, and type
 pattern deduction. Both mechanisms inspect only the supported Laser-D type
 system; they do not make a rejected type or construct available.
+
+Read-only `__traits` reflection is supported for types, values, functions,
+parameters, and symbols. This includes semantic probes such as `compiles` and
+`isSame`. Predicates that ask about a rejected language kind remain useful to
+generic templates, but cannot introduce an instance of that kind. Class and
+virtual-method traits consequently have no valid class operands in Laser-D.
+
+`__traits(toType)` is rejected because it creates a type from string or mangled
+text and crosses the same compile-time text-to-language boundary as rejected
+string mixins. `__traits(getPointerBitmap)` is rejected because it exposes
+metadata for precise garbage-collector scanning, for which Laser-D has no
+runtime contract. `__traits(getUnitTests)` is deferred until language unit-test
+declarations and execution are reviewed.

@@ -4,6 +4,12 @@ $(SPEC_S Traits,
 
 $(HEADERNAV_TOC)
 
+$(P_LASER_D Read-only traits that inspect supported Laser-D declarations are
+supported. Predicates may ask whether a declaration has a rejected language
+kind, but traits cannot make that kind available. `__traits(toType)` and
+`__traits(getPointerBitmap)` are not supported. `__traits(getUnitTests)` is
+deferred to the unit-test feature review.)
+
 $(H2 $(LNAME2 grammar, Grammar))
 
         $(P Traits are extensions to the language to enable
@@ -395,6 +401,9 @@ $(H3 $(GNAME isPOD))
 
 $(H3 $(GNAME toType))
 
+        $(P_LASER_D `__traits(toType)` is not supported because Laser-D does not
+        permit compile-time string or mangled-text generation of language types.)
+
         $(P Takes a single argument, which must evaluate to an expression of type `string`.
         The contents of the string must correspond to the $(DDSUBLINK spec/abi, name_mangling, mangled contents of a type)
         that has been seen by the implementation.)
@@ -612,6 +621,9 @@ AliasSeq!()
 )
 
 $(H3 $(GNAME getPointerBitmap))
+
+    $(P_LASER_D `__traits(getPointerBitmap)` is not supported because Laser-D has
+    no garbage collector or GC pointer-scanning metadata contract.)
 
     $(P The argument is a type.
     The result is an array of $(D size_t) describing the memory used by an instance of the given type.
@@ -1777,6 +1789,9 @@ version (CppRuntime_Microsoft)
         )
 
 $(H3 $(GNAME getUnitTests))
+
+        $(P_LASER_D This trait is not yet classified. Its Laser-D status will be
+        decided with language unit-test declarations and execution.)
 
         $(P
                 Takes one argument, a symbol of an aggregate (e.g. struct/class/module).

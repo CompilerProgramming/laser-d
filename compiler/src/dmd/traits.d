@@ -326,6 +326,17 @@ Expression semanticTraits(TraitsExp e, Scope* sc)
         printf("TraitsExp::semantic() %s\n", e.toChars());
     }
 
+    if (e.ident == Id.toType)
+    {
+        error(e.loc, "`__traits(toType)` is not supported in Laser-D because string-based type generation is disabled");
+        return ErrorExp.get();
+    }
+    if (e.ident == Id.getPointerBitmap)
+    {
+        error(e.loc, "`__traits(getPointerBitmap)` is not supported in Laser-D because GC metadata is disabled");
+        return ErrorExp.get();
+    }
+
     if (e.ident != Id.compiles &&
         e.ident != Id.isSame &&
         e.ident != Id.identifier &&
