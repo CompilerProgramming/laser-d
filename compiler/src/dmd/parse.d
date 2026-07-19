@@ -2294,6 +2294,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
                 return invalidLinkage();
 
             nextToken();
+            error("Objective-C linkage is not supported in Laser-D");
             return returnLinkage(LINK.objc);
         }
         else if (id != Id.C)
@@ -3353,14 +3354,6 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
         const loc = token.loc;
         TOK tok = token.value;
 
-        if (linkage == LINK.d)
-        {
-            if (tok == TOK.class_)
-                error(loc, "native D class declarations are not supported in Laser-D");
-            else if (tok == TOK.interface_)
-                error(loc, "native D interface declarations are not supported in Laser-D");
-        }
-
         //printf("Parser::parseAggregate()\n");
         nextToken();
         Identifier id;
@@ -3379,6 +3372,16 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
                 tpl = parseTemplateParameterList();
                 constraint = parseConstraint();
             }
+        }
+
+        if (tok == TOK.interface_ && id == Id.IUnknown)
+            error(loc, "COM interfaces are not supported in Laser-D");
+        else if (linkage == LINK.d)
+        {
+            if (tok == TOK.class_)
+                error(loc, "native D class declarations are not supported in Laser-D");
+            else if (tok == TOK.interface_)
+                error(loc, "native D interface declarations are not supported in Laser-D");
         }
 
         // Collect base class(es)

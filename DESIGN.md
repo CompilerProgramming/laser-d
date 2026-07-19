@@ -128,8 +128,14 @@ declarations, definitions, templates, nested declarations, explicit
 model depends on facilities outside Laser-D's reduced runtime model, including
 the D class hierarchy and associated runtime metadata.
 
-This rejection is deliberately limited to the native D object model.
-Declarations using foreign linkage, including C++, COM, and Objective-C forms,
-remain undecided and will be reviewed separately with their interoperability
-categories. Their exclusion from this rejection is not a guarantee that those
-features are supported.
+COM and Objective-C object models are also rejected. The frontend does not
+permit declaration of the special `IUnknown` interface from which it derives
+COM interface and class behavior, and it rejects `extern(Objective-C)` linkage
+for every declaration. Objective-C classes, protocols, methods, and standalone
+functions therefore cannot be introduced by Laser-D source.
+The predefined `D_ObjectiveC` version is never defined, including on targets
+whose unchanged backend has Objective-C capabilities.
+
+C++ classes and interfaces remain undecided and will be reviewed separately
+with C++ interoperability. Their exclusion from these rejections is not a
+guarantee that they are supported.

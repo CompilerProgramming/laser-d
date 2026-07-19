@@ -18,7 +18,6 @@ import dmd.arraytypes;
 import dmd.astenums;
 import dmd.attrib;
 import dmd.attribsem : foreachUda;
-import dmd.cond;
 import dmd.dclass;
 import dmd.declaration;
 import dmd.denum;
@@ -540,8 +539,6 @@ extern(C++) private final class Supported : Objc
 {
     extern(D) final this()
     {
-        VersionCondition.addPredefinedGlobalIdent("D_ObjectiveC");
-
         ObjcSelector._init();
     }
 

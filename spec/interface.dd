@@ -6,10 +6,10 @@ $(HEADERNAV_TOC)
 
 $(H2 $(LNAME2 declarations, Interface Declarations))
 
-$(P_LASER_D Native D interfaces are not part of Laser-D. Plain interface
-declarations and explicit $(D extern(D)) interface declarations are rejected.
-C++, COM, and Objective-C interfaces are not covered by this decision and
-remain subject to their interoperability specifications.)
+$(P_LASER_D Native D, COM, and Objective-C interfaces are not part of Laser-D.
+Plain interface declarations, explicit $(D extern(D)) interface declarations,
+the COM $(D IUnknown) root, and $(D extern(Objective-C)) linkage are rejected.
+C++ interfaces remain undecided pending review of C++ interoperability.)
 
     $(P An $(I Interface) describes a list of functions that a class which inherits
     from the interface must implement.)
@@ -249,6 +249,10 @@ $(SECTION3 $(LEGACY_LNAME2 ConstInterface, const-interface, Const and Immutable 
 
 
 $(SECTION2 $(LEGACY_LNAME2 COM-Interfaces, com-interfaces, COM Interfaces),
+
+    $(P_LASER_D COM interfaces and classes are not supported. Laser-D rejects
+    declaration of the special $(D IUnknown) interface that would otherwise
+    establish the COM object-model root.)
 
     $(P A variant on interfaces is the COM interface. A COM interface is
     designed to map directly onto a Windows COM object. Any COM object

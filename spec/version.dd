@@ -361,7 +361,8 @@ $(H3 $(LEGACY_LNAME2 PredefinedVersions, predefined-versions, Predefined Version
         $(TROW $(ARGS $(D D_Version2)) , $(ARGS This is a D version 2 compiler))
         $(TROW $(ARGS $(D D_NoBoundsChecks)) , $(ARGS Array bounds checks are disabled
                 (command line switch $(DDSUBLINK dmd, switch-boundscheck, $(TT -boundscheck=off)))))
-        $(TROW $(ARGS $(D D_ObjectiveC)) , $(ARGS The target supports interfacing with Objective-C))
+        $(TROW $(ARGS $(D D_ObjectiveC)) , $(ARGS The target supports interfacing with Objective-C.
+                $(P_LASER_D This identifier is never predefined because Objective-C interoperability is rejected.)))
         $(TROW $(ARGS $(D D_ProfileGC)) , $(ARGS GC allocations being profiled
                 (command line switch $(DDSUBLINK dmd, switch-profile, $(TT -profile=gc)))))
         $(TROW $(ARGS $(D D_Optimized)) , $(ARGS Compiling with enabled optimizations
