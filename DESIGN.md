@@ -220,11 +220,14 @@ and character types, and construction or conversion using a supported scalar
 type. The existing type restrictions still apply when a literal or scalar
 construction would introduce `real`, an imaginary type, or a complex type.
 
-This initial expression decision does not classify strings, array or
-associative-array literals, function literals, interpolated expressions,
-`this`, `super`, `new`, `$`, imports, `typeid`, `is`, traits, type
-properties, operators, assignment, calls, casts, or other postfix expressions.
-Those forms will be reviewed in smaller dependent categories.
+The `super` expression and its class-hierarchy use in `is` expressions are
+rejected. Laser-D structs do not support inheritance, and classes and
+interfaces are not part of the language, so there is no valid base object.
+ImportC may still use `super` as an ordinary C identifier.
+
+Interpolated expressions, `this`, non-array type properties, operators,
+assignment, calls, casts, and other postfix expressions retain their individual
+review status. Other primary forms are recorded in the feature inventory.
 
 ### Mixins
 

@@ -2182,6 +2182,10 @@ $(H3 $(LNAME2 this, this))
 
 $(H3 $(LNAME2 super, super))
 
+$(P_LASER_D `super` is not supported. Laser-D structs cannot inherit, and
+classes and interfaces are not part of the language. The class-hierarchy use
+of `super` in an `is` expression is rejected for the same reason.)
+
     $(P $(D super) is identical to $(D this), except that it is
         cast to $(D this)'s base class.
         It is an error if there is no base class.

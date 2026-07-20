@@ -330,6 +330,9 @@ class Lexer
             case TOK.vector:
                 error(token.loc, "vector types are not supported in Laser-D");
                 break;
+            case TOK.super_:
+                error(token.loc, "`super` is not supported in Laser-D because structs do not support inheritance");
+                break;
             case TOK.identifier:
                 if (token.ident == Id.__simd || token.ident == Id.__simd_sto || token.ident == Id.__simd_ib)
                     error(token.loc, "vector intrinsics are not supported in Laser-D");
