@@ -85,6 +85,15 @@ portable across its required operating systems and architectures and avoids a
 source-level dependency on backend-specific assembler dialects. ImportC inline
 assembly is separate C input and remains part of the ImportC audit.
 
+## Vector extensions
+
+Laser-D source does not support `__vector` types or the `__simd`, `__simd_sto`,
+and `__simd_ib` compiler intrinsics. The target-dependent `D_SIMD`, `D_AVX`,
+and `D_AVX2` version identifiers are not predefined. Portable fixed-size arrays
+remain supported, and architecture-specific vector implementations may be
+provided behind C interfaces. ImportC vector extensions remain a separate part
+of the ImportC audit.
+
 Laser-D source cannot declare mutable global, module, function-static, or
 aggregate-static storage. Manifest constants and deeply `immutable` static data
 remain available. Native D multithreading constructs (`shared`, `__gshared`,

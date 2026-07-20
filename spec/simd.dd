@@ -4,6 +4,12 @@ $(SPEC_S Vector Extensions,
 
 $(HEADERNAV_TOC)
 
+$(P_LASER_D Vector extensions are not supported in Laser-D source. The
+`__vector` type constructor, `__simd` intrinsic family, and the `D_SIMD`,
+`D_AVX`, and `D_AVX2` predefined versions are unavailable. Fixed-size arrays
+remain supported. Vector extensions in ImportC input are outside this
+restriction and remain part of the ImportC audit.)
+
         $(P CPUs often support specialized vector types and vector
         operations (a.k.a. $(I media instructions)).
         Vector types are a fixed array of floating or integer types, and

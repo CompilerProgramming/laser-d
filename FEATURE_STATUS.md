@@ -86,7 +86,7 @@ Each chapter should be split into individual features as it is investigated.
 | Named character entities (`entity.dd`) | Undecided | Decide whether this documentation/compiler facility is retained unchanged. |
 | Memory safety (`memory-safe-d.dd`) | Rejected | The checked `@safe` subset and `@trusted` boundary are not part of Laser-D. Every function is implicitly `@system`, with no safety inference or explicit safety annotations. |
 | ABI (`abi.dd`) | Undecided | The backend and frontend/backend interface are unchanged; determine which source-level ABI guarantees remain part of Laser-D. |
-| Vector extensions (`simd.dd`) | Undecided | Review portability and backend support across required targets. |
+| Vector extensions (`simd.dd`) | Rejected | `__vector` types, compiler SIMD intrinsics, and SIMD/AVX predefined versions are rejected in Laser-D source. Fixed-size arrays remain supported; ImportC vectors are audited separately. |
 | BetterC (`betterc.dd`) | Restricted | BetterC is mandatory, but its upstream documentation is not treated as a complete Laser-D specification. |
 | ImportC (`importc.dd`) | Restricted | ImportC is retained. Standalone C11 compilation and mixed Laser-D/C modules are supported for the reviewed baseline; preprocessing, headers, macros, atomics, vector extensions, inline assembly, and implementation extensions remain to be audited. |
 | Live functions (`ob.dd`) | Rejected | `@live` annotations and live ownership/borrowing analysis are not part of Laser-D. |

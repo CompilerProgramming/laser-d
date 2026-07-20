@@ -171,15 +171,6 @@ void addPredefinedGlobalIdentifiers(const ref Target tgt)
     import dmd.cond : VersionCondition;
 
     alias predef = VersionCondition.addPredefinedGlobalIdent;
-    if ((tgt.isX86_64 || tgt.isX86) && tgt.cpu >= CPU.sse2)
-    {
-        predef("D_SIMD");
-        if (tgt.cpu >= CPU.avx)
-            predef("D_AVX");
-        if (tgt.cpu >= CPU.avx2)
-            predef("D_AVX2");
-    }
-
     with (Target)
     {
         if (tgt.os & OS.Posix)

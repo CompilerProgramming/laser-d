@@ -327,6 +327,13 @@ class Lexer
             case TOK.asm_:
                 error(token.loc, "inline assembly is not supported in Laser-D");
                 break;
+            case TOK.vector:
+                error(token.loc, "vector types are not supported in Laser-D");
+                break;
+            case TOK.identifier:
+                if (token.ident == Id.__simd || token.ident == Id.__simd_sto || token.ident == Id.__simd_ib)
+                    error(token.loc, "vector intrinsics are not supported in Laser-D");
+                break;
             default:
                 break;
             }
