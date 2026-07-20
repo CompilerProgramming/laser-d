@@ -3819,6 +3819,10 @@ $(SPEC_RUNNABLE_EXAMPLE_COMPILE
 
 $(H3 $(LNAME2 RvalueExpression, Rvalue Expression))
 
+$(P_LASER_D `__rvalue(expression)` is not supported. Laser-D does not expose
+this unchecked explicit-move and ownership hint. The `__rvalue` function
+attribute is rejected as well.)
+
 $(GRAMMAR
 $(GNAME RvalueExpression):
     $(D __rvalue $(LPAREN)) $(GLINK AssignExpression) $(D $(RPAREN))

@@ -225,6 +225,11 @@ rejected. Laser-D structs do not support inheritance, and classes and
 interfaces are not part of the language, so there is no valid base object.
 ImportC may still use `super` as an ordinary C identifier.
 
+The `__rvalue(expression)` ownership hint and `__rvalue` function attribute are
+also rejected. Their explicit move semantics depend on advanced struct
+copy/move and destruction behavior that Laser-D does not retain, and they can
+leave an original lvalue in an unsafe-to-reuse state without ownership checks.
+
 Interpolated expressions, `this`, non-array type properties, operators,
 assignment, calls, casts, and other postfix expressions retain their individual
 review status. Other primary forms are recorded in the feature inventory.

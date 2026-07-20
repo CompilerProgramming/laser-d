@@ -757,6 +757,9 @@ $(H2 $(LNAME2 return, $(D return) Attribute))
 
 $(H2 $(LNAME2 __rvalue, $(D __rvalue) Attribute))
 
+$(P_LASER_D The `__rvalue` function attribute is not supported. The related
+`__rvalue(expression)` form is also rejected.)
+
     * $(DDSUBLINK spec/expression, __rvalue-function-attribute, $(I RvalueExpression)).
 
 $(H2 $(LNAME2 static, $(D static) Attribute))

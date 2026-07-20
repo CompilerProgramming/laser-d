@@ -202,6 +202,7 @@ Each chapter should be split into individual features as it is investigated.
 | Rejected scalar expressions | Rejected | Literal or construction forms that introduce `real`, imaginary, or complex types remain rejected by their corresponding type decisions. | `real_rejected.d`, `imaginary_rejected.d`, `complex_rejected.d` |
 | `new` expressions | Rejected | Every `new` expression is rejected, including scalar, struct, placement, class, and array forms. Laser-D requires allocation and initialization to be explicit through supported storage or C interoperability. | `new_expressions_rejected.d`, `new_array_rejected.d` |
 | `super` | Rejected | Structs do not support inheritance, while classes and interfaces are rejected, so neither the expression nor its class-hierarchy use in `is` expressions has a valid meaning. | `super_rejected.d` |
+| `__rvalue` | Rejected | Both `__rvalue(expression)` and the `__rvalue` function attribute are rejected. Laser-D does not expose this unchecked explicit-move and ownership hint. | `rvalue_rejected.d` |
 | Remaining primary expressions | Undecided | Interpolation, `this`, and non-array type properties require separate review. Function literals, ordinary template instances, `is` expressions, traits, import expressions, `typeid`, and `new` are classified separately; array literals and string mixins retain their existing restrictions. | `dynamic_array_literal_rejected.d`, `associative_array_literal_rejected.d` |
 
 ## Mixin decisions
