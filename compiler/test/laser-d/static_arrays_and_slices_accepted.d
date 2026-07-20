@@ -28,7 +28,7 @@ extern(C) int main()
     if (storage[1] != 22)
         return 5;
 
-    const(char)[] text = "Laser-D";
+    immutable(char)[] text = "Laser-D";
     if (text.length != 7 || text.ptr is null || text[0] != 'L' || text[$ - 1] != 'D')
         return 6;
 

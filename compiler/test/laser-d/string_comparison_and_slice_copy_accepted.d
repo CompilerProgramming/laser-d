@@ -5,12 +5,12 @@ bool equal(immutable(char)[] left, immutable(char)[] right)
     return left == right;
 }
 
-void copy(char[] destination, const(char)[] source)
+void copy(char[] destination, char[] source)
 {
     destination[] = source[];
 }
 
-bool sameView(const(char)[] left, const(char)[] right)
+bool sameView(immutable(char)[] left, immutable(char)[] right)
 {
     return left is right;
 }

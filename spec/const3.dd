@@ -4,6 +4,11 @@ $(D_S Type Qualifiers,
 
 $(HEADERNAV_TOC)
 
+$(P_LASER_D Laser-D supports `immutable` with its normal transitive D
+semantics. A local immutable value may be initialized at runtime; use a
+manifest `enum` when compile-time knowledge is required. The `const` qualifier
+is not supported in Laser-D source. C `const` in ImportC input is unaffected.)
+
         $(P Type qualifiers modify a type by applying a $(GLINK2 type, TypeCtor).
         $(I TypeCtor)s are: $(D const), $(D immutable), $(D shared), and $(D inout).
         Each applies transitively to:)

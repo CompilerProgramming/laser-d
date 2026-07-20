@@ -2,6 +2,11 @@ Ddoc
 
 $(SPEC_S Types,
 
+$(P_LASER_D The `const` type qualifier is not supported in Laser-D source.
+`immutable` remains supported for permanently unmodifiable data, while
+manifest `enum` values represent compile-time constants. ImportC `const` is
+unaffected.)
+
 $(HEADERNAV_TOC)
 
 $(H2 $(LNAME2 grammar, Grammar))
