@@ -2667,6 +2667,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
     {
         //Expressions *udas = NULL;
         const loc = token.loc;
+        error(loc, "module lifecycle constructors are not supported in Laser-D");
         STC stc = getStorageClass!AST(pAttrs);
 
         nextToken();
@@ -2701,6 +2702,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
     {
         AST.Expressions* udas = null;
         const loc = token.loc;
+        error(loc, "module lifecycle destructors are not supported in Laser-D");
         STC stc = getStorageClass!AST(pAttrs);
 
         nextToken();

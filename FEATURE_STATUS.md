@@ -51,7 +51,7 @@ Each chapter should be split into individual features as it is investigated.
 | Lexical analysis (`lex.dd`) | Supported | Laser-D retains D source text, whitespace, comments, identifiers, tokens, literals, escape sequences, keywords, and special tokens unchanged. Malformed lexical constructs are rejected according to the D lexical grammar. See the detailed lexical decisions below. |
 | Interpolated expression sequences (`istring.dd`) | Undecided | Determine generated constructs and any runtime or allocation dependencies. |
 | Grammar (`grammar.dd`) | Undecided | Record grammar retained through the no-new-syntax compatibility rule and identify semantically rejected productions. |
-| Modules (`module.dd`) | Restricted | Core module declarations, namespaces, imports, re-exports, cycles, and separate compilation are supported. `ModuleInfo` is rejected; module constructors/destructors and package-specific facilities require separate review. |
+| Modules (`module.dd`) | Restricted | Core module declarations, namespaces, imports, re-exports, cycles, and separate compilation are supported. `ModuleInfo` and all module lifecycle constructors and destructors are rejected; package-specific facilities require separate review. |
 | Declarations (`declaration.dd`) | Restricted | Basic variables, manifest constants, inference, aliases, multiple declarations, and scalar initialization are supported. Linkage, most storage classes, static initialization, and declarations involving derived types remain to be reviewed. |
 | Types (`type.dd`) | Restricted | Current non-deprecated primitive scalar types and compile-time inspection with `typeof` and `is` are supported. Deprecated scalar types and derived or user-defined types follow their individual classifications. |
 | Properties (`property.dd`) | Undecided | Identify properties that require runtime support or hidden allocation. |
@@ -181,7 +181,7 @@ Each chapter should be split into individual features as it is investigated.
 | Separate compilation | Supported | Modules may be compiled into separate object files while resolving declarations through their imported source interfaces. | `modules_accepted.d` |
 | Missing modules | Rejected | Importing a module that cannot be resolved on the configured import paths is diagnosed. | `module_missing_import_rejected.d` |
 | Module runtime metadata | Rejected | Laser-D never generates `ModuleInfo` instances and does not expose the Druntime `ModuleInfo` type. Ordinary module namespaces and separate compilation do not require this metadata. | `runtime_metadata_absent.d`, `modules_accepted.d` |
-| Module lifecycle | Undecided | Module constructors, module destructors, and shared module lifecycle hooks require a separate runtime-dependency review. | None |
+| Module lifecycle | Rejected | `static this()`, `static ~this()`, and their shared forms are rejected, including lifecycle declarations nested in aggregates or templates. | `module_lifecycle_rejected.d`; shared forms also covered by threading rejection tests |
 | Packages and advanced module facilities | Undecided | Package modules, package visibility, module deprecation, and edition-qualified modules require separate review. Module UDAs are rejected by the cross-cutting UDA decision. | `module_user_defined_attribute_rejected.d` |
 
 ## ImportC decisions

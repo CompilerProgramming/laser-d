@@ -8,8 +8,9 @@ $(P_LASER_D Core modules and imports are supported. This includes explicit and
 file-name-derived module names; ordinary, aliased, selective, renamed, static,
 private, and public imports; cyclic imports; and separate compilation.
 `ModuleInfo` runtime descriptors are not generated or exposed. Module lifecycle
-hooks, package-specific facilities, module attributes, and edition-qualified
-modules are not yet classified.)
+constructors and destructors are rejected. Package-specific facilities and
+edition-qualified modules are not yet classified; user-defined module
+attributes are rejected separately.)
 
 $(GRAMMAR
 $(GNAME Module):
@@ -534,6 +535,10 @@ $(H2 $(LNAME2 staticorder, Static Construction and Destruction))
 
 $(P_LASER_D Laser-D rejects mutable module storage, `shared`, `__gshared`, and
 shared module lifecycle declarations. ImportC globals remain available.)
+$(P_LASER_D Laser-D also rejects non-shared `static this()` and
+`static ~this()` declarations. This applies when nested in an aggregate or
+template because those declarations still participate in module startup and
+shutdown. Ordinary instance struct constructors remain supported.)
 
     $(P Static constructors are executed to initialize a module's state.
     Static destructors terminate a module's state.

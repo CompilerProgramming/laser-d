@@ -351,12 +351,12 @@ object file while imported source files provide the declarations needed for
 semantic analysis. This does not add a Laser-D runtime dependency.
 
 Laser-D does not generate or expose `ModuleInfo` runtime descriptors. Core
-module namespace and import behavior does not require them. This review does
-not yet classify module constructors or destructors, shared module lifecycle
-hooks, package modules and package visibility, deprecated or user-annotated
-module declarations, or edition-qualified modules. Those facilities retain
-undecided status until their dependent runtime, package, attribute, or edition
-categories are reviewed.
+module namespace and import behavior does not require them. Module lifecycle
+constructors and destructors (`static this()` and `static ~this()`) are also
+rejected, including declarations nested in aggregates or templates; these are
+still module startup and shutdown hooks. Shared lifecycle forms are rejected by
+both this rule and the cross-cutting rejection of `shared`. Package modules and
+visibility, module deprecation, and edition-qualified modules remain undecided.
 
 ### Runtime type information
 
