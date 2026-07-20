@@ -77,7 +77,7 @@ Each chapter should be split into individual features as it is investigated.
 | Unit tests (`unittest.dd`) | Undecided | Decide whether language `unittest` blocks are supported and how they run without druntime. |
 | Garbage collection (`garbage.dd`) | Rejected | Document the absence of the GC and enumerate rejected or alternative memory-management operations. |
 | Floating point (`float.dd`) | Undecided | Review target portability, compile-time behavior, and C runtime dependencies. |
-| x86 inline assembler (`iasm.dd`) | Undecided | Decide whether this target-specific feature belongs in the portable subset. |
+| Inline assembler (`iasm.dd`) | Rejected | D-style and GCC-style inline assembly are rejected in Laser-D source. ImportC inline assembly remains a separate undecided ImportC feature. |
 | Embedded documentation (`ddoc.dd`) | Undecided | Decide whether documentation generation remains a supported compiler facility. |
 | C interoperability (`interfaceToC.dd`) | Undecided | Expected to be central; verify types, calling conventions, linking, and C runtime use. |
 | C++ interoperability (`cpp_interface.dd`) | Restricted | C++ classes, interfaces, and structs are rejected. C++ free-function linkage is supported; the remaining interoperability surface is undecided. |

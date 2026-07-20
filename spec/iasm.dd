@@ -4,6 +4,11 @@ $(SPEC_S D X86 and X86_64 Inline Assembler,
 
 $(HEADERNAV_TOC)
 
+$(P_LASER_D Inline assembly is not supported in Laser-D source. This includes
+both D-style instruction blocks and GCC-style extended assembly. Inline
+assembly appearing in ImportC input is outside this restriction and remains
+part of the ImportC feature audit.)
+
     $(HTMLTAG3 a,
       href="http://digitalmars.com/gift/index.html" title="Gift Shop" target="_top",
       $(HTMLTAG3V img, src="$(ROOT_DIR)images/SomeAssemblySmall.png" border="0" align="right" alt="Some Assembly Required" width="284" height="186")

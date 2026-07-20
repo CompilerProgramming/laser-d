@@ -2367,6 +2367,8 @@ $(H2 $(LNAME2 asm, Asm Statement))
 
 $(P Inline assembler is supported with the asm statement:)
 
+$(P_LASER_D The `asm` statement is not supported in Laser-D source.)
+
 $(GRAMMAR
 $(GNAME AsmStatement):
     $(D asm) $(GLINK2 function, FunctionAttributes)$(OPT) $(D {) $(GLINK AsmInstructionList)$(OPT) $(D })

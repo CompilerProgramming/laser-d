@@ -77,6 +77,14 @@ try/finally nodes when lowering `scope(exit)`; this is implementation machinery,
 not an additional source feature. Laser-D programs report and propagate errors
 explicitly, for example with return values or C APIs, rather than D exceptions.
 
+## Inline assembly
+
+Laser-D source does not support inline assembly. Both D-style instruction
+blocks and GCC-style extended assembly are rejected. This keeps the language
+portable across its required operating systems and architectures and avoids a
+source-level dependency on backend-specific assembler dialects. ImportC inline
+assembly is separate C input and remains part of the ImportC audit.
+
 Laser-D source cannot declare mutable global, module, function-static, or
 aggregate-static storage. Manifest constants and deeply `immutable` static data
 remain available. Native D multithreading constructs (`shared`, `__gshared`,

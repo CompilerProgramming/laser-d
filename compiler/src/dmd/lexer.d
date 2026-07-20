@@ -324,6 +324,9 @@ class Lexer
             case TOK.throw_:
                 error(token.loc, "`throw` is not supported in Laser-D because D exception handling is disabled");
                 break;
+            case TOK.asm_:
+                error(token.loc, "inline assembly is not supported in Laser-D");
+                break;
             default:
                 break;
             }
