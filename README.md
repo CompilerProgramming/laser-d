@@ -1,51 +1,112 @@
-<div align="center">
+# Laser-D
 
-![dlang logo](https://dlang.org/images/dlogo.png)
-# DMD
-[![GitHub tag](https://img.shields.io/github/tag-date/dlang/dmd.svg?maxAge=86400&style=flat)](https://github.com/dlang/dmd/releases)
-[![Code coverage](https://img.shields.io/codecov/c/github/dlang/dmd.svg?maxAge=86400&style=flat)](https://codecov.io/gh/dlang/dmd)
-[![license](https://img.shields.io/github/license/dlang/dmd.svg?style=flat)](https://github.com/dlang/dmd/blob/master/LICENSE.txt)
+Laser-D is **Lesser-D**: a deliberately smaller dialect of the D programming
+language, implemented as a fork of the DMD compiler frontend.
 
-[![Build status](https://img.shields.io/cirrus/github/dlang/dmd/master?label=Cirrus%20CI&logo=Cirrus%20CI)](https://cirrus-ci.com/github/dlang/dmd/master)
-[![CircleCI](https://img.shields.io/circleci/project/github/dlang/dmd/master.svg?style=flat&label=circleci&logo=circleci)](https://circleci.com/gh/dlang/dmd/tree/master)
-[![Build Status](https://dev.azure.com/dlanguage/dmd/_apis/build/status/Azure%20pipelines?branchName=master)](https://dev.azure.com/dlanguage/dmd/_build/latest?definitionId=1&branchName=master)
-[![Buildkite](https://img.shields.io/buildkite/01239dde8424d69809d08769015bbdb9b90d05082e534d2f82/master.svg?style=flat&logo=dependabot&label=buildkite)](https://buildkite.com/dlang/dmd)
-</div>
+Laser-D is not intended to mean “D in BetterC mode.” BetterC does not define a
+complete language subset, and its precise boundary is difficult to infer from
+documentation alone. Laser-D instead defines its language through its own
+specification, implementation, and executable feature tests.
 
----
-**DMD** is the reference compiler for the D programming language.
+Every Laser-D program is also a D program. Laser-D introduces no new syntax; it
+selects a smaller, more explicit, and more robust part of D.
 
-Releases, language specification and other resources can be found on the [homepage](https://dlang.org).
-Please refer to the guidelines for [bug reports](CONTRIBUTING.md#reporting-bugs) to
-report a problem or browse the list of open bugs.
+## Direction
 
-### Overview
+Laser-D aims to combine D's pleasant syntax and compile-time facilities with a
+runtime model closer to C:
 
-This repository is structured into the following directories.
-Refer to their respective `README.md` for more in-depth information.
+- no garbage collector or D runtime dependency;
+- explicit storage, control flow, function calls, and cleanup;
+- predictable interoperability with C and supported C++ free functions;
+- portability across Windows, Linux, and macOS, initially on x86-64;
+- powerful compile-time abstraction without hidden runtime machinery; and
+- a language boundary specified by focused positive and negative tests.
 
-| Directory                            | Description                                       |
-|--------------------------------------|---------------------------------------------------|
-| [changelog](changelog)               | changelog entries for the upcoming release        |
-| [ci](ci)                             | CI related scripts / utilities                    |
-| [compiler](compiler)                 | root of all compiler (DMD/frontend) related code  |
-| [compiler/src](compiler/src)         | source code, build system and build instructions  |
-| [compiler/test](compiler/test)       | tests and testing infrastructure                  |
-| [compiler/docs](compiler/docs)       | man pages and internal documentation              |
-| [compiler/ini](compiler/ini)         | predefined `dmd.conf` files                       |
-| [druntime](druntime)                 | root of all runtime related code                  |
+Robustness is part of the language boundary. A feature should not be retained
+merely because it works for a useful special case. Features that have fragile
+semantics, depend on unreviewed compiler-generated behavior, or work only for
+some combinations of otherwise supported constructs should be restricted or
+rejected until they can be given a clear and dependable contract.
 
-With a D compiler and dub installed, dmd can be built with:
+## Language character
 
-```
-dub build dmd:compiler
-```
+The guiding principle is that source code should make consequential behavior
+visible. Syntax that can conceal allocation, control flow, lifetime,
+synchronization, runtime metadata, or an ordinary function call is generally
+rejected or replaced by a more explicit D spelling.
 
-For more information regarding compiling, installing, and
-hacking on DMD, check the [contribution guide](CONTRIBUTING.md) and
-visit the [D Wiki](https://wiki.dlang.org/DMD).
+Laser-D currently retains substantial parts of D, including:
 
-### Nightlies
+- modules and ImportC;
+- primitive scalar types, enums, structs, unions, and bit fields;
+- fixed arrays, non-owning slices, and string literals;
+- ordinary functions, function pointers, and controlled non-capturing
+  delegates;
+- templates, CTFE, traits, `typeof`, and `is`;
+- modern operator overloading, including fixed-storage multidimensional
+  indexing;
+- `immutable` data;
+- C interoperability and C++ free-function interoperability; and
+- deterministic cleanup through `scope(exit)`.
 
-Nightly builds based of the current DMD / Phobos `master` branch
-can be found [here](https://github.com/dlang/dmd/releases/tag/nightly).
+Laser-D rejects many of D's managed, implicit, legacy, or platform-specific
+facilities, including:
+
+- GC allocation, associative arrays, and GC-backed array operations;
+- classes, interfaces, virtual dispatch, and runtime type/module metadata;
+- exceptions, function contracts, module lifecycle functions, struct
+  destructors, and postblits;
+- capturing closures and delegates;
+- language-level threading features;
+- user-defined attributes, `@property`, and function calls without
+  parentheses;
+- string mixins and compile-time I/O;
+- reference returns and lifetime annotations;
+- legacy D1 operator hooks; and
+- inline assembly, vector types, COM, and Objective-C support.
+
+This is not a memory-safe language in the Rust sense. Pointers, manual storage,
+and implicitly `@system` code remain available. The objective is instead to
+make programs smaller in semantic surface area and easier to audit: calls,
+allocation, cleanup, aliasing, and external interaction should be apparent from
+the source wherever practical.
+
+Constructors and overloaded operators are deliberate exceptions because they
+can invoke user code through specialized syntax. Their supported behavior is
+therefore tested narrowly and remains subject to all other Laser-D restrictions.
+
+In short:
+
+> Laser-D is D's compile-time power with a smaller, more explicit, C-like
+> runtime language.
+
+## Specification and tests
+
+The current design rationale is recorded in [DESIGN.md](DESIGN.md), and the
+feature inventory is maintained in [FEATURE_STATUS.md](FEATURE_STATUS.md).
+Laser-D-specific language notes are incorporated into the relevant chapters
+under [`spec`](spec).
+
+The executable language specification lives under
+[`compiler/test/laser-d`](compiler/test/laser-d). Each accepted feature has a
+compilable or runnable test, while rejected forms have focused diagnostic
+tests. See the [Laser-D test README](compiler/test/laser-d/README.md) for
+instructions.
+
+## Repository layout
+
+This repository is based on DMD and retains its overall structure.
+
+| Directory | Description |
+| --- | --- |
+| [`compiler`](compiler) | Compiler frontend and build system |
+| [`compiler/src`](compiler/src) | Compiler sources and build instructions |
+| [`compiler/test`](compiler/test) | Test infrastructure and upstream tests |
+| [`compiler/test/laser-d`](compiler/test/laser-d) | Laser-D executable language specification |
+| [`spec`](spec) | Language specification with Laser-D decisions |
+| [`druntime`](druntime) | Upstream runtime sources; not part of the Laser-D runtime contract |
+
+The upstream DMD project and D language resources are available at
+[dlang.org](https://dlang.org) and in the
+[DMD repository](https://github.com/dlang/dmd).
