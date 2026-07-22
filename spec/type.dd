@@ -2,7 +2,7 @@ Ddoc
 
 $(SPEC_S Types,
 
-$(P_LASER_D The `const` type qualifier is not supported in Laser-D source.
+$(P_LASER_D The `const` and `inout` type qualifiers are not supported in Laser-D source.
 `immutable` remains supported for permanently unmodifiable data, while
 manifest `enum` values represent compile-time constants. ImportC `const` is
 unaffected.)

@@ -120,11 +120,13 @@ rejection results matched for the reviewed cases.
 
 ## Basic declarations and primitive scalar types
 
-Laser-D retains D's transitive `immutable` qualifier but rejects `const` in D
-source. `immutable` denotes data that can never change after initialization;
-local immutable values may still be initialized at runtime. Manifest `enum`
-values are used when a value must be compile-time known. ImportC retains C
-`const` declarations and their frontend qualifier representation.
+Laser-D retains D's transitive `immutable` qualifier but rejects `const` and
+`inout` in D source. `immutable` denotes data that can never change after
+initialization; local immutable values may still be initialized at runtime.
+Manifest `enum` values are used when a value must be compile-time known.
+ImportC retains C `const` declarations and any frontend-internal qualifier
+representation. `inout` wildcard matching is unnecessary without the full
+mutable/const/immutable qualifier family and is not part of Laser-D.
 
 Laser-D retains D's current non-deprecated primitive scalar types except for
 `real`, their default initialization, explicit and inferred local variables,

@@ -6,8 +6,9 @@ $(HEADERNAV_TOC)
 
 $(P_LASER_D Laser-D supports `immutable` with its normal transitive D
 semantics. A local immutable value may be initialized at runtime; use a
-manifest `enum` when compile-time knowledge is required. The `const` qualifier
-is not supported in Laser-D source. C `const` in ImportC input is unaffected.)
+manifest `enum` when compile-time knowledge is required. The `const` and
+`inout` qualifiers are not supported in Laser-D source. Qualifiers represented
+internally while compiling ImportC input are unaffected.)
 
         $(P Type qualifiers modify a type by applying a $(GLINK2 type, TypeCtor).
         $(I TypeCtor)s are: $(D const), $(D immutable), $(D shared), and $(D inout).
@@ -444,6 +445,9 @@ $(H2 $(LNAME2 const_member_functions, Const Member Functions))
 
 
 $(H2 $(LNAME2 inout, Inout))
+
+$(P_LASER_D The `inout` qualifier is not supported. Laser-D does not provide
+wildcard matching across mutable, `const`, and `immutable` qualifiers.)
 
     $(P Functions that differ only in whether the parameters are mutable, `const` or `immutable`,
         and have corresponding mutable, `const` or `immutable` return types, can be combined

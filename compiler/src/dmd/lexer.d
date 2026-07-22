@@ -339,6 +339,9 @@ class Lexer
             case TOK.const_:
                 error(token.loc, "`const` is not supported in Laser-D; use `immutable` for permanently unmodifiable data");
                 break;
+            case TOK.inout_:
+                error(token.loc, "`inout` is not supported in Laser-D because qualifier wildcard matching is disabled");
+                break;
             case TOK.identifier:
                 if (token.ident == Id.__simd || token.ident == Id.__simd_sto || token.ident == Id.__simd_ib)
                     error(token.loc, "vector intrinsics are not supported in Laser-D");
