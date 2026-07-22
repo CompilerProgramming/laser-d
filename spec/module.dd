@@ -4,10 +4,10 @@ $(SPEC_S Modules,
 
 $(HEADERNAV_TOC)
 
-$(P_LASER_D Core modules and imports are supported. This includes explicit and
+$(LASER_NORMATIVE Core modules and imports are supported. This includes explicit and
 file-name-derived module names; ordinary, aliased, selective, renamed, static,
 private, and public imports; cyclic imports; and separate compilation.
-`ModuleInfo` runtime descriptors are not generated or exposed. Module lifecycle
+$(D ModuleInfo) runtime descriptors are not generated or exposed. Module lifecycle
 constructors and destructors are rejected. Package-specific facilities and
 edition-qualified modules are not yet classified; user-defined module
 attributes are rejected separately.)
@@ -26,19 +26,6 @@ $(GNAME DeclDef):
     $(GLINK2 attribute, AttributeSpecifier)
     $(GLINK2 declaration, Declaration)
     $(GLINK2 class, Constructor)
-    $(GLINK2 class, Destructor)
-    $(GLINK2 struct, Postblit)
-    $(GLINK2 class, Invariant)
-    $(GLINK2 unittest, UnitTest)
-    $(GLINK2 class, AliasThis)
-    $(GLINK2 class, StaticConstructor)
-    $(GLINK2 class, StaticDestructor)
-    $(GLINK2 class, SharedStaticConstructor)
-    $(GLINK2 class, SharedStaticDestructor)
-    $(GLINK2 version, ConditionalDeclaration)
-    $(GLINK2 version, DebugSpecification)
-    $(GLINK2 version, VersionSpecification)
-    $(GLINK MixinDeclaration)
     $(GLINK EmptyDeclaration)
 
 $(GNAME EmptyDeclaration):
@@ -86,9 +73,10 @@ $(UL
 
 $(H2 $(LNAME2 module_declaration, Module Declaration))
 
-$(P_LASER_D Plain module declarations and module names derived from source file
-names are supported. Module attributes and edition qualifiers are deferred to
-their respective feature reviews.)
+$(LASER_NORMATIVE A module declaration consists of $(D module), its qualified
+name, and a semicolon. If it is omitted, the module name is derived from the
+source file name. Attributes and edition qualifiers are not part of the
+normative module-declaration grammar.)
 
 $(P The $(I ModuleDeclaration) sets the name of the module and what package it
 belongs to. If absent, the module name is taken to be the same name (stripped of
@@ -96,15 +84,7 @@ path and extension) of the source file name.)
 
 $(GRAMMAR
 $(GNAME ModuleDeclaration):
-    $(GLINK ModuleAttributes)$(OPT) $(D module) $(GLINK ModuleFullyQualifiedName) $(GLINK2 editions, Edition)$(OPT) $(D ;)
-
-$(GNAME ModuleAttributes):
-    $(GLINK ModuleAttribute)
-    $(GLINK ModuleAttribute) $(GSELF ModuleAttributes)
-
-$(GNAME ModuleAttribute):
-    $(GLINK2 attribute, DeprecatedAttribute)
-    $(GLINK2 attribute, UserDefinedAttribute)
+    $(D module) $(GLINK ModuleFullyQualifiedName) $(D ;)
 
 $(GNAME ModuleFullyQualifiedName):
     $(GLINK ModuleName)
@@ -114,9 +94,9 @@ $(GNAME ModuleName):
     $(GLINK_LEX Identifier)
 )
 
-$(P_LASER_D User-defined attributes on module declarations are not supported.
-The deprecated module attribute remains subject to its separate feature
-review.)
+$(LASER_EXCLUDED User-defined attributes on module declarations are not
+supported. Module deprecation and edition-qualified declarations remain under
+review and are therefore not included in the normative grammar.)
 
 $(GRAMMAR
 $(GNAME Packages):
@@ -167,44 +147,16 @@ module foo_bar;
     the ASCII lower case letters, digits, and `_`s, and should not be a $(GLINK_LEX Keyword).)
     ))
 
-$(H3 $(LNAME2 deprecated_modules, Deprecated modules))
+$(H3 $(LNAME2 advanced_module_declarations, Advanced Module Declarations))
 
-$(P A $(I ModuleDeclaration) can have an optional $(GLINK2 attribute,
-DeprecatedAttribute). The compiler will produce a message when the deprecated
-module is imported.)
-
----------
-deprecated module foo;
----------
-
----------
-module bar;
-import foo;  // Deprecated: module foo is deprecated
----------
-
-$(P A $(I DeprecatedAttribute) can have an optional $(ASSIGNEXPRESSION) argument to provide a
-more informative message. The $(I AssignExpression) must evaluate to a string at compile time.
-)
-
----------
-deprecated("Please use foo2 instead.")
-module foo;
----------
-
----------
-module bar;
-import foo;  // Deprecated: module foo is deprecated - Please use foo2 instead.
----------
-
-    $(IMPLEMENTATION_DEFINED
-    $(OL
-    $(LI How the deprecation messages are presented to the user.)
-    ))
+$(LASER_UNDER_REVIEW Module deprecation, edition-qualified module
+declarations, package modules, and package visibility have not yet been
+classified. They are not portability guarantees in Laser-D.)
 
 
 $(H2 $(LEGACY_LNAME2 ImportDeclaration, import-declaration, Import Declaration))
 
-$(P_LASER_D Import declarations are supported, including module aliases,
+$(LASER_NORMATIVE Import declarations are supported, including module aliases,
 selective and renamed bindings, static imports, visibility-controlled imports,
 public re-exports, duplicate imports, and cyclic module graphs. A private import
 does not re-export symbols.)
@@ -265,10 +217,10 @@ module myapp.main;
 
 import std.stdio; // import module stdio from package std
 
-class Foo : BaseClass
+void run()
 {
-    import myapp.foo;  // import module myapp.foo in this class' scope
-    void bar ()
+    import myapp.foo;  // visible in run and its nested scopes
+    void nested()
     {
         import myapp.bar;  // import module myapp.bar in this function' scope
         writeln("hello!");  // calls std.stdio.writeln
@@ -278,20 +230,18 @@ class Foo : BaseClass
 
 $(P When a symbol name is used unqualified, a two-phase lookup is used.
 First, the module scope is searched, starting from the innermost scope.
-For example, in the previous example, while looking for `writeln`,
+For example, in the previous example, while looking for $(D writeln),
 the order will be:)
 
 $(UL
-    $(LI Declarations inside `bar`.)
-    $(LI Declarations inside `Foo`.)
-    $(LI Declarations inside `BaseClass`.)
+    $(LI Declarations inside $(D nested).)
+    $(LI Declarations inside $(D run).)
     $(LI Declarations at module scope.)
 )
 
 $(P If the first lookup isn't successful, a second one is performed on imports.
-In the second lookup phase inherited scopes are ignored.  This includes the scope of
-base classes and interfaces (in this example, `BaseClass`'s imports
-would be ignored), as well as imports in mixed-in $(D template).)
+Imports in unrelated scopes are ignored, while imports introduced by a mixed-in
+$(D template) participate according to the template-mixin rules.)
 
 $(P Symbol lookup stops as soon as a matching symbol is found. If two symbols with the
 same name are found at the same lookup phase, this ambiguity will result in a
@@ -514,180 +464,52 @@ void main()
 
 $(H2 $(LNAME2 module_scope_operators, Module Scope Operator))
 
-    $(P A leading dot (`.`) causes the
+    $(P A leading dot ($(D .)) causes the
     identifier to be looked up in the module scope.)
 
 $(SPEC_RUNNABLE_EXAMPLE_RUN
 ---------
-const int x = 1;
+enum x = 1;
 
-void main()
+extern(C) int main()
 {
     int x = 5;
-    assert(x == 5); // main.x, not global x
-    assert(.x == 1); // global x
+    return x == 5 && .x == 1 ? 0 : 1;
 }
 ---------
 )
 
 
-$(H2 $(LNAME2 staticorder, Static Construction and Destruction))
+$(H2 $(LNAME2 staticorder, No Module Lifecycle))
 
-$(P_LASER_D Laser-D rejects mutable module storage, `shared`, `__gshared`, and
-shared module lifecycle declarations. ImportC globals remain available.)
-$(P_LASER_D Laser-D also rejects non-shared `static this()` and
-`static ~this()` declarations. This applies when nested in an aggregate or
-template because those declarations still participate in module startup and
-shutdown. Ordinary instance struct constructors remain supported.)
+$(LASER_EXCLUDED Laser-D has no module or thread lifecycle execution. It rejects
+$(D static this()), $(D static ~this()), their $(D shared) forms, and the same
+declarations nested in aggregates or templates. Import order therefore never
+establishes a runtime construction or destruction order. Ordinary instance
+struct constructors are unaffected.)
 
-    $(P Static constructors are executed to initialize a module's state.
-    Static destructors terminate a module's state.
-    )
-
-    $(P A module may have multiple static constructors and static destructors.
-    The static constructors are run in lexical order, the static destructors
-    are run in reverse lexical order.)
-
-    $(P Non-shared static constructors and destructors are
-    run whenever threads are created or destroyed, including the main thread.)
-
-    $(P Shared static constructors are run once before `main()` is called.
-    Shared static destructors are run after the `main()` function returns.
-    )
-
-    ---
-    import resource;
-
-    Resource x;
-    shared Resource y;
-    __gshared Resource z;
-
-    static this()  // non-shared static constructor
-    {
-        x = acquireResource();
-    }
-
-    shared static this()  // shared static constructor
-    {
-        y = acquireSharedResource();
-        z = acquireSharedResource();
-    }
-
-    static ~this()  // non-shared static destructor
-    {
-        releaseResource(x);
-    }
-
-    shared static ~this()   // shared static destructor
-    {
-        releaseSharedResource(y);
-        releaseSharedResource(z);
-    }
-    ---
-
-    $(BEST_PRACTICE
-    $(OL
-    $(LI Shared static constructors and destructors are used to initialize and terminate
-    shared global data.)
-    $(LI Non-shared static constructors and destructors are used to initialize and terminate
-    thread local data.)
-    ))
-
-$(H3 $(LNAME2 order_of_static_ctor, Order of Static Construction))
-
-$(P Shared static constructors on all modules are run before any non-shared static
-constructors.)
-
-$(P The order of static initialization is implicitly determined by the $(I
-import) declarations in each module. Each module is assumed to depend on any
-imported modules being statically constructed first.
-There is no other order imposed on the execution of module static constructors.)
-
-$(P Cycles (circular dependencies) in the import declarations are allowed so
-long as neither, or one, but not both, of the modules, contains static constructors or static
-destructors. Violation of this rule will result in a runtime exception.)
-
-    $(IMPLEMENTATION_DEFINED
-    $(OL
-    $(LI An implementation may provide a means of overriding the cycle detection abort.
-    A typical method uses the D Runtime switch
-    `--DRT-oncycle=...` where the following behaviors are supported:
-    $(OL
-    $(LI `abort` The default behavior. The normal behavior as described
-            in the previous section.)
-    $(LI `print` Print all cycles detected, but do not abort execution.
-            When cycles are present, the order of static construction is
-            implementation defined, and not guaranteed to be valid.)
-    $(LI `ignore` Do not abort execution or print any cycles. When
-            cycles are present, the order of static construction is implementation
-            defined, and not guaranteed to be valid.)
-    )
-    ))
-    )
-
-    $(BEST_PRACTICE
-    $(OL
-    $(LI Avoid cyclical imports where practical. They can be an indication of poor
-    decomposition of a program's structure into independent modules. Two modules
-    that import each other can often be reorganized into three modules without
-    cycles, where the third contains the declarations needed by the other two.)
-    )
-    )
-
-$(H3 $(LNAME2 order_of_static_ctors, Order of Static Construction within a Module))
-
-$(P Within a module, static construction occurs in the lexical order in
-which they appear.)
-
-$(H3 $(LNAME2 order_static_dtor, Order of Static Destruction))
-
-$(P This is defined to be in exactly the reverse order of static construction.
-Static destructors for individual modules will only be run if the
-corresponding static constructor successfully completed.)
-
-$(P Shared static destructors are executed after static destructors.)
+$(P Mutable module storage, $(D shared), and $(D __gshared) are also rejected.
+Manifest constants and deeply immutable static data require no lifecycle hook.
+ImportC globals remain available under the ImportC rules.)
 
 $(H2 $(LNAME2 order_of_unittests, Order of Unit tests))
 
-$(P Unit tests are run in the lexical order in which they appear within a
-module.)
+$(LASER_UNDER_REVIEW Language-level unit-test declarations have not yet been
+classified. Laser-D therefore does not currently specify module-level unit-test
+discovery or execution order.)
 
-$(H2 $(LEGACY_LNAME2 MixinDeclaration, mixin-declaration, Mixin Declaration))
+$(H2 $(LEGACY_LNAME2 MixinDeclaration, mixin-declaration, String Mixin Declarations (Excluded)))
 
-$(P_LASER_D String mixin declarations are not supported.)
+$(LASER_EXCLUDED String mixin declarations are not part of Laser-D and the
+$(I MixinDeclaration) production is omitted from $(GLINK DeclDef). Template
+mixin declarations and instantiations are separate constructs described in the
+template-mixin chapter.)
 
-$(GRAMMAR
-$(GNAME MixinDeclaration):
-    $(D mixin) $(D $(LPAREN)) $(GLINK2 expression, ArgumentList) $(D $(RPAREN)) $(D ;)
-)
+$(H2 $(LEGACY_LNAME2 PackageModule, package-module, Package Modules (Under Review)))
 
-$(P Each $(GLINK2 expression, AssignExpression) in the $(I ArgumentList) is
-    evaluated at compile time, and the result must be representable
-    as a string.
-    The resulting strings are concatenated to form a string.
-    The text contents of the string must be compilable as valid
-    $(GLINK DeclDefs), and is compiled as such.)
-
-$(P The content of a mixin cannot be forward referenced by other *DeclDefs* of
-    the same scope because it is not yet pulled into the AST.)
-
----------
-class B : A {}      // Error: undefined identifier `A`
-mixin ("class A {}");
----------
-
-$(P Forward references may only work in function bodies because they
-    are processed after the declarations:)
-
----------
-void v()
-{
-    class B : A {}
-}
-mixin ("class A {}");
----------
-
-$(H2 $(LEGACY_LNAME2 PackageModule, package-module, Package Module))
+$(LASER_UNDER_REVIEW Package modules and package-specific visibility have not
+yet been classified. The following material describes the upstream D facility
+for review and is not currently normative Laser-D text.)
 
 $(P A package module can be used to publicly import other modules, while
 providing a simpler import syntax. This enables the conversion of a module into a package
