@@ -3768,6 +3768,11 @@ Type typeSemantic(Type type, Loc loc, Scope* sc)
             tf.isNogc = true;
         if (sc.stc & STC.ref_)
             tf.isRef = true;
+        if (tf.isRef && loc.isValid() && sc._module.filetype != FileType.c)
+        {
+            .error(loc, "`ref` return values are not supported in Laser-D");
+            errors = true;
+        }
         if (sc.stc & STC.return_)
             tf.isReturn = true;
         if (sc.stc & STC.returnScope)

@@ -12,7 +12,7 @@ laser-d/capturing_delegates_rejected.d(33):        captured variable `captured` 
 ---
 */
 
-int invoke(scope int delegate(int) operation, int value)
+int invoke(int delegate(int) operation, int value)
 {
     return operation(value);
 }

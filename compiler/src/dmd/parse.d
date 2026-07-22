@@ -3019,25 +3019,32 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
                     goto L2;
 
                 case TOK.lazy_:
+                    error(token.loc, "`lazy` parameters are not supported in Laser-D; use `in`, `out`, or `ref`");
                     stc = STC.lazy_;
                     goto L2;
 
                 case TOK.scope_:
+                    error(token.loc, "`scope` parameters are not supported in Laser-D; use `in`, `out`, or `ref`");
                     stc = STC.scope_;
                     goto L2;
 
                 case TOK.final_:
+                    error(token.loc, "`final` parameters are not supported in Laser-D; use `in`, `out`, or `ref`");
                     stc = STC.final_;
                     goto L2;
 
                 case TOK.auto_:
                     stc = STC.auto_;
                     if (peekNext() == TOK.ref_)
+                    {
+                        error(token.loc, "`auto ref` parameters are not supported in Laser-D; use `ref`");
                         stc |= STC.autoref;
+                    }
                     goto L2;
 
                 case TOK.return_:
                 {
+                    error(token.loc, "`return` parameter annotations are not supported in Laser-D; use `in`, `out`, or `ref`");
                     stc = STC.return_;
                     TOK next = peekNext();
                     if (next == TOK.scope_)    // recognize the `return scope` pair
@@ -4706,6 +4713,13 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             Identifier ident;
             auto t = parseDeclarator(ts, alt, &ident, &tpl, storage_class, &disable, &udas);
             assert(t);
+            AST.TypeFunction declaredFunctionType;
+            if (t.ty == Tfunction)
+                declaredFunctionType = cast(AST.TypeFunction)t;
+            else if ((t.ty == Tpointer || t.ty == Tdelegate) && (cast(AST.TypeNext)t).next.ty == Tfunction)
+                declaredFunctionType = cast(AST.TypeFunction)(cast(AST.TypeNext)t).next;
+            if (declaredFunctionType && ((storage_class & STC.ref_) || declaredFunctionType.isRef))
+                error(loc, "`ref` return values are not supported in Laser-D");
             if (!tfirst)
                 tfirst = t;
             else if (t != tfirst)
@@ -5367,6 +5381,8 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
         }
 
         auto tf = new AST.TypeFunction(parameterList, tret, linkage, stc);
+        if (stc & STC.ref_)
+            error(loc, "`ref` return values are not supported in Laser-D");
         tf = cast(AST.TypeFunction)AST.addSTC(tf, stc);
         auto fd = new AST.FuncLiteralDeclaration(loc, Loc.initial, tf, save, null, null, stc & STC.auto_);
 

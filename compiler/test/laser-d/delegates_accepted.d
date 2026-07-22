@@ -1,6 +1,6 @@
 // TEST_MODE: runnable
 
-int invoke(scope int delegate(int) operation, int value)
+int invoke(int delegate(int) operation, int value)
 {
     return operation(value);
 }

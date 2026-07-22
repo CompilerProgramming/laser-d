@@ -37,6 +37,13 @@ fail-compilation, or runnable using its `TEST_MODE` directive.
 
 ## Implicit function attributes
 
+Function parameters may use only the `in`, `out`, and `ref` parameter storage
+annotations. Laser-D rejects `scope`, `lazy`, `return`, `auto ref`, and `final`
+parameter annotations. Functions and function literals cannot return by `ref`;
+return values are ordinary values. This removes lifetime annotations, lazy
+thunks, inferred reference passing, and reference-return aliasing from function
+boundaries.
+
 Every function type in Laser-D is implicitly `nothrow`, `@nogc`, and `@system`.
 These are language invariants rather than optional annotations: they apply to
 function declarations, function pointers, delegates, lambdas, inferred
