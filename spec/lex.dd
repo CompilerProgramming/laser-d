@@ -13,11 +13,17 @@ phase of translation.)
 
 $(H2 $(LNAME2 source_text, Source Text))
 
-$(P Laser-D retains D lexical analysis unchanged. Source text, whitespace,
+$(LASER_NORMATIVE Laser-D retains D lexical analysis unchanged. Source text, whitespace,
 comments, identifiers, tokens, literals, escape sequences, keywords, and
 special tokens described in this chapter are part of Laser-D. A construct may
 be lexically valid but still be rejected by a later Laser-D grammar or semantic
 restriction.)
+
+$(P Lexical recognition does not imply language support. In particular, the
+lexer continues to recognize every D keyword and the $(D L) and $(D i)
+floating-point suffixes so that the frontend can issue precise diagnostics.
+Laser-D source may not use a recognized token to construct a feature rejected
+by another normative chapter.)
 
 $(GRAMMAR
 $(GNAME SourceFile):
@@ -291,7 +297,7 @@ $(IMPLEMENTATION_DEFINED Identifiers starting with $(D __) (two underscores) are
 
 $(H2 $(LNAME2 string_literals, String Literals))
 
-$(P_LASER_D String literals are supported as immutable character slices over
+$(LASER_NORMATIVE String literals are supported as immutable character slices over
 compiler-owned static storage and do not allocate GC-owned memory.)
 
 $(GRAMMAR
@@ -883,6 +889,12 @@ $(GNAME HexLetter):
 
 $(H2 $(LNAME2 floatliteral, Floating Point Literals))
 
+$(LASER_NORMATIVE Laser-D floating-point literals have type $(D double) when
+unsuffixed and type $(D float) when followed by $(D f) or $(D F). The lexer
+recognizes the D suffixes $(D L) and $(D i), but a Laser-D source file using
+either suffix is rejected. The rejected suffixes remain recognized for clear
+diagnostics and for the ImportC frontend.)
+
 $(GRAMMAR_LEX
 $(GNAME FloatLiteral):
     $(GLINK Float) $(GLINK Suffix)$(OPT)
@@ -989,14 +1001,18 @@ $(GNAME LeadingDecimal):
         6_022_.140_857E+20_
         ---
 
-        * Floating literals with no suffix are of type `double`.
-        * Floating literals followed by $(B f) or $(B F) are of type `float`.
-        * Floating literals followed by $(B L) are of type `real`.
+        $(UL
+        $(LI Floating literals with no suffix are of type $(D double).)
+        $(LI Floating literals followed by $(B f) or $(B F) are of type
+            $(D float).)
+        $(LI Floating literals followed by $(B L), or by the imaginary suffix
+            $(B i), are not valid Laser-D expressions.)
+        )
 
 ---------
 0.0                    // double
 0F                     // float
-0.0L                   // real
+0.0L                   // lexed, then rejected by Laser-D
 ---------
 
         $(P The literal may not exceed the range of the type.
@@ -1012,13 +1028,21 @@ $(GNAME LeadingDecimal):
         1.;  // OK, double
         ---
 
-        $(NOTE Floating literals followed by $(B i) to denote imaginary
-        floating point values have been deprecated.)
+        $(LASER_EXCLUDED The $(B L) suffix denotes D's unsupported $(D real)
+        type, and the $(B i) suffix denotes an unsupported imaginary type.
+        Neither suffix is available to Laser-D programs.)
 
 
 $(H2 $(LNAME2 keywords, Keywords))
 
-        $(P Keywords are reserved identifiers.)
+        $(P All D keywords remain reserved identifiers. Reservation prevents a
+        token from being used as an identifier; it does not mean that the D
+        construct introduced by that keyword is part of Laser-D.)
+
+        $(LASER_NORMATIVE The keyword table below is a lexical table. Keywords
+        associated with excluded features remain reserved and are rejected by
+        the applicable grammar or semantic rule. ImportC applies the C lexical
+        and language rules described in the ImportC chapter.)
 
 
 $(GRAMMAR
