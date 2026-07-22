@@ -196,9 +196,13 @@ base type is otherwise available in Laser-D. Opaque enums have no default
 initializer. An enum based on another enum requires explicit member values
 after its first member.
 
-Advanced aggregate behavior coupled to later categories—including advanced
-copy and move constructors and overloaded operators—remains undecided until
-those dependent categories are reviewed.
+Modern operator overloading has been reviewed separately and is supported under
+the restrictions in the operator section. User-defined copy and move
+constructors are rejected; ordinary value-copyable structs retain field-wise
+copying without user-defined lifecycle hooks. Nested structs are supported only
+when they require no hidden enclosing context. Constructor delegation and
+attribute-driven construction disablement remain undecided until reviewed
+directly.
 
 Aggregate `invariant` declarations are rejected. They introduce implicitly
 invoked checking functions and runtime behavior around constructors,

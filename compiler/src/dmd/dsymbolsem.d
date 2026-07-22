@@ -341,6 +341,12 @@ void makeNested(AggregateDeclaration _this)
     }
     if (_this.enclosing)
     {
+        if (_this.isStructDeclaration() && _this.getModule().filetype != FileType.c)
+        {
+            .error(_this.loc, "nested structs requiring a hidden context are not supported in Laser-D");
+            _this.errors = true;
+        }
+
         import dmd.typesem : alignment;
         //printf("makeNested %s, enclosing = %s\n", toChars(), enclosing.toChars());
         assert(t);
@@ -4329,6 +4335,14 @@ private extern(C++) final class DsymbolSemanticVisitor : Visitor
                     else
                         ctd.isMoveCtor = true;          // move constructor
                     assert(!(ctd.isCpCtor && ctd.isMoveCtor));
+
+                    if (!sc.inCfile)
+                    {
+                        const(char)* constructorKind = ctd.isCpCtor ? "copy" : "move";
+                        error(ctd.loc, "user-defined struct %s constructors are not supported in Laser-D",
+                            constructorKind);
+                        ctd.errors = true;
+                    }
                 }
             }
         }
