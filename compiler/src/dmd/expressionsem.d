@@ -2526,6 +2526,12 @@ private Expression resolveUFCSProperties(Scope* sc, Expression e1, Expression e2
     if (e is null)
         return null;
 
+    if (sc && !sc.inCfile)
+    {
+        error(loc, "function calls require explicit `()` in Laser-D");
+        return ErrorExp.get();
+    }
+
     // Rewrite
     if (e2)
     {
@@ -3578,6 +3584,17 @@ private Expression resolvePropertiesX(Scope* sc, Expression e1, Expression e2 = 
     Dsymbol s;
     Objects* tiargs;
     Type tthis;
+
+    Expression rejectImplicitCall()
+    {
+        if (sc && !sc.inCfile)
+        {
+            error(loc, "function calls require explicit `()` in Laser-D");
+            return ErrorExp.get();
+        }
+        return null;
+    }
+
     if (auto de = e1.isDotExp())
     {
         if (auto oe = de.e2.isOverExp())
@@ -3617,6 +3634,8 @@ private Expression resolvePropertiesX(Scope* sc, Expression e1, Expression e2 = 
             }
             if (fd)
             {
+                if (Expression rejected = rejectImplicitCall())
+                    return rejected;
                 Expression e = new CallExp(loc, e1, e2);
                 return e.expressionSemantic(sc);
             }
@@ -3639,6 +3658,8 @@ private Expression resolvePropertiesX(Scope* sc, Expression e1, Expression e2 = 
         }
         if (fd)
         {
+            if (Expression rejected = rejectImplicitCall())
+                return rejected;
             Expression e = new CallExp(loc, e1);
             if (e2)
             {
@@ -3730,6 +3751,8 @@ private Expression resolvePropertiesX(Scope* sc, Expression e1, Expression e2 = 
                 if (fd.errors)
                     return ErrorExp.get();
                 assert(fd.type.ty == Tfunction);
+                if (Expression rejected = rejectImplicitCall())
+                    return rejected;
                 Expression e = new CallExp(loc, e1, e2);
                 return e.expressionSemantic(sc);
             }
@@ -3742,6 +3765,8 @@ private Expression resolvePropertiesX(Scope* sc, Expression e1, Expression e2 = 
             TypeFunction tf = fd.type.isTypeFunction();
             if (!e2 || tf.isRef)
             {
+                if (Expression rejected = rejectImplicitCall())
+                    return rejected;
                 Expression e = new CallExp(loc, e1);
                 if (e2)
                 {

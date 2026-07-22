@@ -326,9 +326,10 @@ User-defined `@property` functions are rejected. Although `@property` is a
 built-in function attribute rather than a UDA, it makes function calls look
 like field reads and writes. Laser-D requires source-defined behavior to use
 explicit function-call syntax so that potentially executable operations remain
-visible at the call site. D also permits parentheses to be omitted for some
-ordinary zero-argument function calls; that separate syntax remains to be
-reviewed before Laser-D can enforce this rule universally.
+visible at the call site. Parentheses are mandatory for ordinary function,
+method, template, and UFCS calls even when no explicit argument is passed or
+all parameters have defaults. Setter-like assignment to a function name is
+also rejected.
 
 The floating-point `.im` property requires a separate decision because it is
 legacy surface associated with the removed imaginary and complex type family.

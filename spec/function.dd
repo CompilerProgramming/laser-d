@@ -910,6 +910,11 @@ $(P_LASER_D `inout` functions and parameters are not supported.)
 
 $(H2 $(LNAME2 optional-parenthesis, Optional Parentheses))
 
+$(P_LASER_D Optional function-call parentheses are not supported. Every
+function, method, template, and UFCS call requires explicit `()`, including
+calls that pass no explicit arguments because parameters have defaults.
+Setter-like assignment to a function name is also rejected.)
+
     $(P If a function call passes no explicit argument, i.e. it would syntactically use $(D ()), then these parentheses
     may be omitted, similar to a getter invocation of a
         $(RELATIVE_LINK2 property-functions, property function).
@@ -1003,8 +1008,8 @@ $(H2 $(LNAME2 optional-parenthesis, Optional Parentheses))
 $(H2 $(LNAME2 property-functions, Property Functions))
 
 $(P_LASER_D Property functions are not supported. Laser-D rejects `@property`
-so annotated getters and setters cannot look like field access. Optional
-parentheses on ordinary zero-argument calls are reviewed separately.)
+so annotated getters and setters cannot look like field access. Ordinary calls
+also require explicit parentheses.)
 
     $(P WARNING: The definition and usefulness of property functions is being reviewed, and the implementation
     is currently incomplete.  Using property functions is not recommended until the definition is

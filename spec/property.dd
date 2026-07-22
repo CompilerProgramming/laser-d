@@ -12,8 +12,8 @@ of Laser-D.)
 
 $(P_LASER_D User-defined `@property` functions are not supported. Source-defined
 behavior must be invoked using explicit function-call syntax rather than
-field-like property reads or writes. D's separate optional-parentheses rule for
-ordinary zero-argument calls remains under review.)
+field-like property reads or writes. Ordinary functions, methods, templates,
+and UFCS calls also require explicit parentheses.)
 
 $(HEADERNAV_TOC)
 
