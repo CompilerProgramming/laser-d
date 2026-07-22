@@ -86,6 +86,25 @@ try/finally nodes when lowering `scope(exit)`; this is implementation machinery,
 not an additional source feature. Laser-D programs report and propagate errors
 explicitly, for example with return values or C APIs, rather than D exceptions.
 
+## Ordinary control flow
+
+Laser-D supports structured scalar control flow with `if`/`else`, `while`,
+`do`/`while`, and `for`. It supports `break`, `continue`, labels, `goto`,
+labeled transfers, and `goto case`/`goto default`. An active `scope(exit)`
+guard runs when any of these transfers leave its lexical scope.
+
+Direct `foreach` and `foreach_reverse` iteration over fixed arrays and
+non-owning slices is supported, including index/value and `ref` value forms.
+Numeric range foreach is also supported. Implicit iteration protocols such as
+`opApply`, user-defined ranges, delegate iteration, and runtime `foreach` over
+compile-time sequences require a separate advanced-iteration review.
+
+Integral and enum `switch`, `final switch`, case ranges, and explicit default
+handling are supported. String switches are rejected because D lowers them to
+the unavailable `object.__switch` runtime hook. Associative-array iteration is
+unavailable with associative arrays. `with` is supported for retained value
+types and namespaces; it cannot introduce a rejected object model.
+
 ## Inline assembly
 
 Laser-D source does not support inline assembly. Both D-style instruction

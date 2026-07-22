@@ -2075,6 +2075,13 @@ Statement statementSemanticVisit(Statement s, Scope* sc)
         }
 
 
+        if (!sc.inCfile && ss.condition.type.isString())
+        {
+            error(ss.loc, "string `switch` statements are not supported in Laser-D because they require the D runtime");
+            sc.pop();
+            return setError();
+        }
+
         if (!(ss.condition.type.isString() && sc.needsCodegen()))
         {
             sc.pop();

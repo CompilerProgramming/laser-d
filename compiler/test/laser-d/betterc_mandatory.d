@@ -3,7 +3,7 @@
 /*
 TEST_OUTPUT:
 ---
-laser-d/betterc_mandatory.d(13): Error: cannot use `throw` statements with `-betterC`
+laser-d/betterc_mandatory.d(13): Error: `throw` is not supported in Laser-D because D exception handling is disabled
 ---
 */
 

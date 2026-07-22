@@ -3,8 +3,9 @@
 /*
 TEST_OUTPUT:
 ---
-laser-d/rvalue_rejected.d(20): Error: `__rvalue` is not supported in Laser-D because explicit move and ownership hints are disabled
-laser-d/rvalue_rejected.d(23): Error: `__rvalue` is not supported in Laser-D because explicit move and ownership hints are disabled
+laser-d/rvalue_rejected.d(21): Error: `__rvalue` is not supported in Laser-D because explicit move and ownership hints are disabled
+laser-d/rvalue_rejected.d(24): Error: `__rvalue` is not supported in Laser-D because explicit move and ownership hints are disabled
+laser-d/rvalue_rejected.d(24): Error: `ref` return values are not supported in Laser-D
 ---
 */
 
