@@ -193,6 +193,10 @@ int foo();
 
 $(H2 $(LNAME2 contracts, Function Contracts))
 
+$(P_LASER_D Function contracts are not supported. `in`, `out`, and
+contract-style `do` clauses are rejected; ordinary function bodies use direct
+`{ ... }` syntax.)
+
 $(GRAMMAR
 $(GNAME FunctionContracts):
     $(GLINK FunctionContract)

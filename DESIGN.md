@@ -307,9 +307,14 @@ outer local. A struct-method delegate remains supported: its explicit object
 context is not a captured lexical frame and follows the same manual lifetime
 discipline as other non-owning pointers.
 
-This first function review does not yet classify the complete parameter model,
-variadic functions, nested named functions, function contracts, or generated
-special member functions.
+This first function review does not yet classify variadic functions, nested
+named functions, or generated special member functions.
+
+Function contracts are rejected. This includes expression and block forms of
+`in` preconditions and `out` postconditions, named postcondition results, and
+contract-style `do` function bodies. Ordinary functions use a direct `{ ... }`
+body and perform any required validation through explicit statements and return
+values. This decision does not classify the separate `assert` expression.
 
 ### Properties
 

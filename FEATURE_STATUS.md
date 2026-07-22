@@ -67,11 +67,11 @@ Each chapter should be split into individual features as it is investigated.
 | Interfaces (`interface.dd`) | Rejected | Native D, COM, Objective-C, and C++ interfaces are rejected. |
 | Enums (`enum.dd`) | Supported | Named, anonymous, manifest, based, and opaque enum declarations and ordinary enum properties are supported. Opaque enums have no default initializer, and automatic numbering is rejected when the base type is itself an enum. |
 | Type qualifiers (`const3.dd`) | Restricted | `immutable` is supported with normal D transitive semantics. `const`, `inout`, and `shared` are rejected. Remaining immutable conversions and initialization details require review. |
-| Functions (`function.dd`) | Restricted | Ordinary functions, function pointers, non-capturing literals, non-capturing delegates, and method delegates are supported. Parameters may use only `in`, `out`, or `ref`; source-level `ref` returns, including explicitly `ref`-annotated constructors, are rejected. Capturing delegates and closures are rejected. Variadics, contracts, and remaining generated-function behavior require further review. |
+| Functions (`function.dd`) | Restricted | Ordinary functions, function pointers, non-capturing literals, non-capturing delegates, and method delegates are supported. Parameters may use only `in`, `out`, or `ref`; source-level `ref` returns, including explicitly `ref`-annotated constructors, are rejected. Capturing delegates, closures, and function contracts are rejected. Variadics and remaining generated-function behavior require further review. |
 | Operator overloading (`operatoroverloading.dd`) | Restricted | Modern struct operator hooks, including multidimensional indexing and slicing, are supported and lower to ordinary calls without inherent runtime allocation. Hooks remain subject to Laser-D type and function restrictions. Legacy D1 hooks are rejected. |
 | Templates (`template.dd`) | Supported | Template declaration, selection, instantiation, inference, specialization, constraints, recursion, and emission are supported. Template contents remain subject to every Laser-D language restriction. |
 | Template mixins (`template-mixin.dd`) | Supported | Mixin template declarations and template mixin instantiations are supported; string mixins are rejected separately. |
-| Contracts (`contracts.dd`) | Undecided | Determine assertion failure behavior and runtime dependencies. |
+| Function contracts (`contracts.dd`) | Rejected | `in` preconditions, `out` postconditions, and contract-style `do` bodies are rejected. Assertion expressions remain a separate decision. |
 | Conditional compilation (`version.dd`) | Restricted | `D_BetterC` is always defined; review remaining predefined versions and debug behavior. |
 | Traits (`traits.dd`) | Restricted | Read-only type, function, parameter, and symbol reflection is supported. `__traits(toType)` and `__traits(getPointerBitmap)` are rejected; `getUnitTests` is deferred to the unit-test review. |
 | Error handling (`errors.dd`) | Restricted | D exceptions are rejected. Errors must be represented and propagated explicitly, such as through return values or C APIs. `scope(exit)` provides deterministic cleanup. |
@@ -232,7 +232,8 @@ Each chapter should be split into individual features as it is investigated.
 | Ordinary functions and function pointers | Supported | Direct calls, taking function addresses, indirect calls, and non-capturing function literals converted to function pointers are supported. | `functions_and_function_pointers_accepted.d` |
 | Delegates | Supported | Non-capturing delegate literals and delegates to struct methods are supported as context-and-function-pointer values. | `delegates_accepted.d` |
 | Capturing delegates and closures | Rejected | Lexical capture is rejected regardless of whether the context is stack-scoped or would require heap allocation. Taking the address of a captured named nested function is also rejected. | `capturing_delegates_rejected.d` |
-| Remaining function features | Undecided | Complete parameter/storage-class behavior, named nested functions, variadics, contracts, and generated functions require later review. | None |
+| Function contracts | Rejected | Expression and block `in`/`out` contracts, named postcondition results, and contract-style `do` bodies are rejected on ordinary, member, templated, constructor, and literal functions. | `function_contracts_rejected.d` |
+| Remaining function features | Undecided | Named nested functions, variadics, and generated functions require later review. | None |
 
 ## Property decisions
 

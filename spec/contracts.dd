@@ -2,6 +2,11 @@ Ddoc
 
 $(SPEC_S Contract Programming,
 
+$(P_LASER_D Function contracts are not supported. Laser-D rejects `in`
+preconditions, `out` postconditions, and contract-style `do` function bodies.
+Validation must use explicit function-body statements and return values. This
+does not decide the separate `assert` expression.)
+
 $(HEADERNAV_TOC)
 
         $(P Contracts enable specifying conditions that must hold true

@@ -5461,6 +5461,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             goto default;
 
         case TOK.do_:
+            error(token.loc, "contract-style `do` function bodies are not supported in Laser-D; use `{ ... }`");
             nextToken();
             f.fbody = parseStatement(ParseStatementFlags.curly);
             f.endloc = endloc;
@@ -5479,6 +5480,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             // in { statements... }
             // in (expression)
             auto loc = token.loc;
+            error(loc, "`in` function contracts are not supported in Laser-D");
             nextToken();
             if (!f.frequires)
             {
@@ -5518,6 +5520,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             // out (identifier) { statements... }
             // out (identifier; expression)
             auto loc = token.loc;
+            error(loc, "`out` function contracts are not supported in Laser-D");
             nextToken();
             if (!f.fensures)
             {
