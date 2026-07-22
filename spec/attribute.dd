@@ -224,7 +224,7 @@ Laser-D declarations.)
 $(H2 $(LNAME2 attributes_under_review, Built-in Attributes Under Review))
 
 $(LASER_UNDER_REVIEW The following built-in facilities are not yet Laser-D
-guarantees: $(D align), $(D deprecated), $(D @disable), $(D @__future),
+guarantees: $(D align), $(D deprecated), $(D @__future),
 general visibility, $(D export), $(D pragma), and compiler-recognized special
 attributes. They remain reserved syntax while their individual reviews are
 pending.)
@@ -245,8 +245,9 @@ review.)
 
 $(H3 $(LNAME2 disable, $(D @disable)))
 
-$(P Disabled declarations and disabled default construction remain under
-review.)
+$(LASER_REJECTED Explicit $(D @disable) is rejected. Laser-D does not use an
+attribute to create unavailable declarations, disabled overloads,
+nonconstructible structs, or noncopyable structs.)
 
 $(H3 $(LNAME2 future, $(D @__future)))
 

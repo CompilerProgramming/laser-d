@@ -201,8 +201,9 @@ the restrictions in the operator section. User-defined copy and move
 constructors are rejected; ordinary value-copyable structs retain field-wise
 copying without user-defined lifecycle hooks. Nested structs are supported only
 when they require no hidden enclosing context. Constructor delegation and
-attribute-driven construction disablement remain undecided until reviewed
-directly.
+explicit `@disable` are rejected. Constructors initialize fields directly, and
+Laser-D does not provide attribute-driven nonconstructible or noncopyable value
+types.
 
 Aggregate `invariant` declarations are rejected. They introduce implicitly
 invoked checking functions and runtime behavior around constructors,

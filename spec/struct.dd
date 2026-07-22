@@ -238,9 +238,8 @@ postblit are also rejected.)
 
 $(H3 $(LNAME2 delegating-constructor, Constructor Delegation))
 
-$(P Constructor delegation and other advanced constructor interactions have not
-yet been established as part of the Laser-D conformance boundary. Ordinary
-direct field-initializing constructors are the guaranteed form.)
+$(LASER_REJECTED A struct constructor cannot delegate to another constructor
+with $(D this(...)). Constructors initialize their fields directly.)
 
 $(H3 $(LNAME2 struct-instantiation, Struct Instantiation))
 
@@ -263,8 +262,9 @@ other function.)
 
 $(H3 $(LNAME2 disable_default_construction, Disabled Default Construction))
 
-$(P Attribute-driven disabling of construction is governed by the Laser-D
-attribute review and is not implied by support for ordinary constructors.)
+$(LASER_REJECTED $(D @disable this()) and every other explicit use of
+$(D @disable) are rejected. Laser-D structs cannot opt out of ordinary default
+initialization through an attribute.)
 
 $(H3 $(LNAME2 field-init, Constructor Field Initialization))
 
@@ -280,8 +280,8 @@ value-copyable and which require no postblit or destructor.)
 
 $(H3 $(LNAME2 disable-copy, Disabled Copying))
 
-$(P Attribute-driven disabled-copy declarations are not implied by ordinary
-value copying and remain governed by the attribute and advanced-copy reviews.)
+$(LASER_REJECTED Attribute-driven disabled copying is rejected together with
+$(D @disable) and user-defined copy constructors.)
 
 $(H3 $(LNAME2 copy-constructor-attributes, Copy Constructor Attributes))
 
@@ -299,7 +299,8 @@ provides no general ownership transfer or moved-from-state model.)
 
 $(H3 $(LNAME2 disable-move, Disabled Moving))
 
-$(P Attribute-driven disabled-moving declarations are not currently guaranteed.)
+$(LASER_REJECTED Attribute-driven disabled moving is rejected together with
+$(D @disable) and user-defined move constructors.)
 
 $(H3 $(LNAME2 move-constructor-attributes, Move Constructor Attributes))
 
@@ -375,9 +376,8 @@ $(P The guaranteed aggregate subset consists of ordinary value storage, layout,
 fields, default and explicit initialization, literals, methods, direct
 constructors, named and anonymous unions, and integral bit fields. Destructors,
 postblits, invariants, $(D alias this), and C++ structs are rejected. Advanced
-copy and move constructors and hidden-context nested structs are rejected.
-Constructor delegation and attribute-driven disabled construction/copying
-require separate review before they become Laser-D guarantees.)
+copy and move constructors, constructor delegation, $(D @disable), and
+hidden-context nested structs are rejected.)
 
 $(SPEC_FOOTER)
 )

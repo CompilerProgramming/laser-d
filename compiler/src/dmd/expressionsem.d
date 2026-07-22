@@ -8217,6 +8217,12 @@ private extern (C++) final class ExpressionSemanticVisitor : Visitor
                     return setError();
                 }
 
+                if (!sc.inCfile && ad.isStructDeclaration())
+                {
+                    error(exp.loc, "constructor delegation is not supported in Laser-D; initialize fields directly");
+                    return setError();
+                }
+
                 // https://issues.dlang.org/show_bug.cgi?id=18719
                 // If `exp` is a call expression to another constructor
                 // then it means that all struct/class fields will be
