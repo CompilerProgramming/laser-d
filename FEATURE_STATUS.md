@@ -67,7 +67,7 @@ Each chapter should be split into individual features as it is investigated.
 | Interfaces (`interface.dd`) | Rejected | Native D, COM, Objective-C, and C++ interfaces are rejected. |
 | Enums (`enum.dd`) | Supported | Named, anonymous, manifest, based, and opaque enum declarations and ordinary enum properties are supported. Opaque enums have no default initializer, and automatic numbering is rejected when the base type is itself an enum. |
 | Type qualifiers (`const3.dd`) | Restricted | `immutable` is supported with normal D transitive semantics. `const`, `inout`, and `shared` are rejected. Remaining immutable conversions and initialization details require review. |
-| Functions (`function.dd`) | Restricted | Ordinary functions, function pointers, non-capturing literals, non-capturing delegates, and method delegates are supported. Parameters may use only `in`, `out`, or `ref`; `ref` returns are rejected. Capturing delegates and closures are rejected. Variadics, contracts, and remaining generated-function behavior require further review. |
+| Functions (`function.dd`) | Restricted | Ordinary functions, function pointers, non-capturing literals, non-capturing delegates, and method delegates are supported. Parameters may use only `in`, `out`, or `ref`; source-level `ref` returns, including explicitly `ref`-annotated constructors, are rejected. Capturing delegates and closures are rejected. Variadics, contracts, and remaining generated-function behavior require further review. |
 | Operator overloading (`operatoroverloading.dd`) | Undecided | Check lowering for hidden runtime or allocation dependencies. |
 | Templates (`template.dd`) | Supported | Template declaration, selection, instantiation, inference, specialization, constraints, recursion, and emission are supported. Template contents remain subject to every Laser-D language restriction. |
 | Template mixins (`template-mixin.dd`) | Supported | Mixin template declarations and template mixin instantiations are supported; string mixins are rejected separately. |
@@ -245,7 +245,7 @@ Each chapter should be split into individual features as it is investigated.
 | Compile-time control flow | Supported | `static if`, `static foreach`, and `static assert` are supported. | `ctfe_accepted.d` |
 | Type inspection | Supported | `typeof` is non-evaluating and supports expression and return-type queries. `is` supports validity, equivalence, conversion, category, and pattern-deduction queries over supported Laser-D types. | `type_inspection_accepted.d` |
 | Existing language restrictions | Restricted | Templates and CTFE do not bypass rejected Laser-D features; string mixins remain rejected inside templates. | `template_string_mixin_rejected.d` |
-| Struct-template constructors | Known issue | Instantiating a struct template with an ordinary constructor currently misdiagnoses the constructor as a rejected `ref` return. Aggregate initialization remains available. | `template_struct_constructor_issue.d` |
+| Templated struct constructors | Supported | Ordinary constructors in struct templates and templated constructors in ordinary structs are supported. Their internal in-place construction mechanism does not expose source-level `ref` returns. | `template_struct_constructors_accepted.d`, `template_supported_features_accepted.d` |
 
 ## Trait decisions
 

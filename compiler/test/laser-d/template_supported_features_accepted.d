@@ -67,6 +67,11 @@ struct Box(T)
 {
     T value;
 
+    this(T initial)
+    {
+        value = initial;
+    }
+
     T get()
     {
         return value;

@@ -40,9 +40,11 @@ fail-compilation, or runnable using its `TEST_MODE` directive.
 Function parameters may use only the `in`, `out`, and `ref` parameter storage
 annotations. Laser-D rejects `scope`, `lazy`, `return`, `auto ref`, and `final`
 parameter annotations. Functions and function literals cannot return by `ref`;
-return values are ordinary values. This removes lifetime annotations, lazy
-thunks, inferred reference passing, and reference-return aliasing from function
-boundaries.
+return values are ordinary values, and an explicitly `ref`-annotated
+constructor is rejected. The frontend's internal in-place constructor return
+does not constitute a source annotation. This removes lifetime annotations,
+lazy thunks, inferred reference passing, and reference-return aliasing from
+function boundaries.
 
 Every function type in Laser-D is implicitly `nothrow`, `@nogc`, and `@system`.
 These are language invariants rather than optional annotations: they apply to
@@ -319,11 +321,10 @@ Required instances continue to be emitted in mandatory BetterC mode.
 
 The supported template machinery composes with the retained Laser-D scalar,
 immutable, aggregate, bit-field, fixed-array, slice, string, function-pointer,
-delegate, cleanup, CTFE, and reflection features. A current frontend limitation
-is that an ordinary constructor declared in a struct template is incorrectly
-diagnosed as a rejected `ref` return when the struct is instantiated. Aggregate
-initialization of a struct template instance remains available while this issue
-is unresolved.
+delegate, cleanup, CTFE, and reflection features. This includes ordinary
+constructors in struct templates and templated constructors in ordinary
+structs. The frontend's internal reference-return representation for struct
+constructors is not exposed as a Laser-D source-level `ref` return.
 
 Compile-time function execution, manifest constants, `__ctfe`, `static if`,
 `static foreach`, and `static assert` are supported. Compile-time execution is

@@ -2584,6 +2584,9 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
         auto parameterList = parseParameterList(null);
         stc = parsePostfix(stc, &udas);
 
+        if (stc & STC.ref_)
+            error(loc, "`ref` return values are not supported in Laser-D");
+
         if (parameterList.varargs != VarArg.none || AST.Parameter.dim(parameterList.parameters) != 0)
         {
             if (stc & STC.static_)

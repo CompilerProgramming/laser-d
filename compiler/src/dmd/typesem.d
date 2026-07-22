@@ -3768,7 +3768,8 @@ Type typeSemantic(Type type, Loc loc, Scope* sc)
             tf.isNogc = true;
         if (sc.stc & STC.ref_)
             tf.isRef = true;
-        if (tf.isRef && loc.isValid() && sc._module.filetype != FileType.c)
+        // Struct constructors return by reference internally to initialize in place.
+        if (tf.isRef && !tf.isCtor && loc.isValid() && sc._module.filetype != FileType.c)
         {
             .error(loc, "`ref` return values are not supported in Laser-D");
             errors = true;

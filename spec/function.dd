@@ -35,7 +35,9 @@ $(H3 Function Parameters)
 
 $(P_LASER_D Parameter storage annotations are limited to `in`, `out`, and
 `ref`. Laser-D rejects `scope`, `lazy`, `return`, `auto ref`, and `final`
-parameters. Functions and function literals cannot return by `ref`.)
+parameters. Functions and function literals cannot return by `ref`, and
+constructors cannot be explicitly annotated `ref`. The frontend's internal
+in-place representation of a struct constructor is unaffected.)
 
 $(GRAMMAR
 $(GNAME Parameters):
