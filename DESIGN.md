@@ -333,8 +333,15 @@ subject to the normal non-owning-array restrictions.
 
 Legacy D1-style operator hooks are rejected as aggregate instance methods.
 Laser-D uses the modern templated hooks exclusively, avoiding a second set of
-names for the same operations. The complete multidimensional index/slice
-rewrite surface has not yet been classified.
+names for the same operations.
+
+Modern multidimensional indexing and slicing are supported. Compile-time
+dimension arguments to `opSlice` and `opDollar` distinguish each coordinate,
+and mixed indices and slice descriptors may be passed to `opIndex`,
+`opIndexAssign`, `opIndexOpAssign`, and `opIndexUnary`. The container expression
+is evaluated once before these rewrites. Slice descriptor types and backing
+storage are ordinary Laser-D values; the feature does not imply dynamic
+allocation or GC-backed multidimensional arrays.
 
 ### Templates and compile-time execution
 

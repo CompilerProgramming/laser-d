@@ -14,8 +14,11 @@ $(P_LASER_D Operator hooks remain subject to all Laser-D restrictions. Classes,
 are supported. Index mutation uses assignment hooks rather than a
 reference-returning `opIndex`; returned slices must remain non-owning. Legacy
 D1-style hooks are rejected on aggregate instance methods; modern templated
-hooks provide their supported replacements. The complete multidimensional
-indexing surface remains under review.)
+hooks provide their supported replacements. Modern multidimensional indexing
+and slicing are supported through dimension-tagged `opSlice` and `opDollar`
+templates and the corresponding `opIndex`, assignment, compound-assignment,
+and unary hooks. These rewrites do not provide GC-backed storage; all values
+remain subject to the ordinary Laser-D array and allocation restrictions.)
 
 $(HEADERNAV_TOC)
 
