@@ -95,9 +95,20 @@ guard runs when any of these transfers leave its lexical scope.
 
 Direct `foreach` and `foreach_reverse` iteration over fixed arrays and
 non-owning slices is supported, including index/value and `ref` value forms.
-Numeric range foreach is also supported. Implicit iteration protocols such as
-`opApply`, user-defined ranges, delegate iteration, and runtime `foreach` over
-compile-time sequences require a separate advanced-iteration review.
+Numeric range foreach is also supported. Both `static foreach` and ordinary
+`foreach` over compile-time tuples and sequences are supported; the frontend
+expands them without a runtime iteration protocol.
+
+Value-type ranges are supported through a deliberately small structural
+protocol. Forward iteration requires parameterless instance methods `empty()`
+returning `bool`, `front()` returning a non-`ref` supported value, and
+`popFront()` returning `void`. Reverse iteration substitutes `back()` and
+`popBack()`. The compiler validates this protocol before lowering the loop.
+
+Iteration through `opApply`/`opApplyReverse` or a delegate aggregate is
+rejected. These callback forms hide control flow behind `foreach` and require a
+compiler-generated delegate. Iterate such values with a range, explicit loop,
+or explicit calls instead.
 
 Integral and enum `switch`, `final switch`, case ranges, and explicit default
 handling are supported. String switches are rejected because D lowers them to

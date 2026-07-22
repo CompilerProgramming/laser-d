@@ -279,9 +279,24 @@ $(GNAME ForeachRangeStatement):
 )
 
 $(P Associative-array iteration is excluded with associative arrays. Direct
-array, slice, and numeric-range forms are supported. Implicit $(D opApply),
-user-defined range, delegate, and runtime compile-time-sequence iteration remain
-under review.)
+array, slice, and numeric-range forms are supported. Both $(D static foreach)
+and ordinary $(D foreach) over compile-time tuples and sequences are supported;
+the frontend expands these forms without a runtime iteration protocol.)
+
+$(LASER_NORMATIVE A struct is a forward range when it provides parameterless
+instance methods $(D empty()) returning $(D bool), $(D front()) returning a
+supported non-$(D ref) value, and $(D popFront()) returning $(D void). A struct
+is a bidirectional range when it additionally provides $(D back()) returning a
+supported non-$(D ref) value and $(D popBack()) returning $(D void). The
+frontend validates these signatures and lowers range iteration to calls on a
+private copy of the range value. These compiler-generated calls are the sole
+exception to the general requirement that user function calls include
+parentheses.)
+
+$(LASER_REJECTED Iteration through $(D opApply), $(D opApplyReverse), or a
+delegate aggregate is not supported. These callback forms hide control flow
+behind the loop syntax and require a compiler-generated delegate. Programs must
+use a range, explicit loop, or explicit calls.)
 
 $(H3 $(LEGACY_LNAME2 SwitchStatement, switch-statement, Switch Statements))
 

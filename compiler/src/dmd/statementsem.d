@@ -743,6 +743,7 @@ Statement statementSemanticVisit(Statement s, Scope* sc)
         if (fs.aggr.op == EXP.error)
             return setError();
         Expression oaggr = fs.aggr;     // remember original for error messages
+        Type originalAggregateType = fs.aggr.type ? fs.aggr.type.toBasetype() : null;
         if (fs.aggr.type && fs.aggr.type.toBasetype().isTypeStruct() &&
             fs.aggr.type.toBasetype().isTypeStruct().sym.dtor &&
             !fs.aggr.isTypeExp() && !fs.aggr.isLvalue())
@@ -792,6 +793,28 @@ Statement statementSemanticVisit(Statement s, Scope* sc)
             }
 
             return setError();
+        }
+
+        if (!sc.inCfile && originalAggregateType)
+        {
+            if (originalAggregateType.ty == Tdelegate)
+            {
+                error(fs.loc, "delegate iteration is not supported in Laser-D; call the delegate explicitly");
+                return setError();
+            }
+            if (originalAggregateType.ty == Tstruct)
+            {
+                if (sapply)
+                {
+                    error(fs.loc, "`opApply` iteration is not supported in Laser-D; use a range or explicit loop");
+                    return setError();
+                }
+                if (fs.aggr.type.toBasetype().ty != Tstruct)
+                {
+                    error(fs.loc, "implicit struct slicing for iteration is not supported in Laser-D");
+                    return setError();
+                }
+            }
         }
 
         Dsymbol sapplyOld = sapply; // 'sapply' will be NULL if and after 'inferApplyArgTypes' errors
@@ -1275,6 +1298,55 @@ Statement statementSemanticVisit(Statement s, Scope* sc)
                     idfront = Id.Fback;
                     idpopFront = Id.FpopBack;
                 }
+
+                FuncDeclaration validateRangeMethod(Identifier id, const(char)* name)
+                {
+                    auto symbol = search_function(ad, id);
+                    auto fd = symbol ? symbol.isFuncDeclaration() : null;
+                    if (!fd || !functionSemantic(fd))
+                    {
+                        error(fs.loc, "Laser-D range `%s` requires a callable `%s()` method", oaggr.toChars(), name);
+                        return null;
+                    }
+
+                    auto tf = fd.type.toBasetype().isTypeFunction();
+                    if (!fd.isThis() || !tf || tf.parameterList.length != 0)
+                    {
+                        error(fs.loc, "Laser-D range method `%s.%s` must be a parameterless instance method", oaggr.toChars(), name);
+                        return null;
+                    }
+                    return fd;
+                }
+
+                auto fempty = validateRangeMethod(Id.Fempty, "empty");
+                auto ffront = validateRangeMethod(idfront, fs.op == TOK.foreach_ ? "front" : "back");
+                auto fpopFront = validateRangeMethod(idpopFront, fs.op == TOK.foreach_ ? "popFront" : "popBack");
+                if (!fempty || !ffront || !fpopFront)
+                    return retError();
+
+                auto tfempty = fempty.type.toBasetype().isTypeFunction();
+                if (!tfempty.nextOf().equals(Type.tbool))
+                {
+                    error(fs.loc, "Laser-D range method `%s.empty` must return `bool`", oaggr.toChars());
+                    return retError();
+                }
+
+                const(char)* frontName = fs.op == TOK.foreach_ ? "front" : "back";
+                auto tffront = ffront.type.toBasetype().isTypeFunction();
+                if (tffront.nextOf().ty == Tvoid || tffront.isRef)
+                {
+                    error(fs.loc, "Laser-D range method `%s.%s` must return a non-`ref` value", oaggr.toChars(), frontName);
+                    return retError();
+                }
+
+                const(char)* popFrontName = fs.op == TOK.foreach_ ? "popFront" : "popBack";
+                auto tfpopFront = fpopFront.type.toBasetype().isTypeFunction();
+                if (tfpopFront.nextOf().ty != Tvoid)
+                {
+                    error(fs.loc, "Laser-D range method `%s.%s` must return `void`", oaggr.toChars(), popFrontName);
+                    return retError();
+                }
+
                 auto sfront = ad.search(Loc.initial, idfront);
                 if (!sfront)
                     return retStmt(apply());
@@ -1300,6 +1372,7 @@ Statement statementSemanticVisit(Statement s, Scope* sc)
                 // !__r.empty
                 Expression e = new VarExp(loc, r);
                 e = new DotIdExp(loc, e, Id.Fempty);
+                e = new CallExp(loc, e);
                 Expression condition = new NotExp(loc, e);
 
                 // __r.idpopFront()
@@ -1311,6 +1384,7 @@ Statement statementSemanticVisit(Statement s, Scope* sc)
                  */
                 e = new VarExp(loc, r);
                 Expression einit = new DotIdExp(loc, e, idfront);
+                einit = new CallExp(loc, einit);
                 Statement makeargs, forbody;
                 bool ignoreRef = false; // If a range returns a non-ref front we ignore ref on foreach
 
