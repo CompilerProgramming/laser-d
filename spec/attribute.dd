@@ -733,6 +733,9 @@ $(H3 $(LNAME2 nogc, $(D @nogc) Attribute))
 
 $(H3 $(LNAME2 property, $(D @property) Attribute))
 
+$(P_LASER_D `@property` is not supported. Source-defined behavior must use
+ordinary function declarations and calls instead.)
+
     $(P See $(DDSUBLINK spec/function, property-functions, Property Functions).)
 
 $(H3 $(LNAME2 nothrow, $(D nothrow) Attribute))

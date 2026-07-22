@@ -2,6 +2,19 @@ Ddoc
 
 $(SPEC_S Properties,
 
+$(P_LASER_D Runtime-free properties of supported types are supported. These
+include common and type properties, numeric metadata for retained scalar types,
+aggregate and enum properties, read-only array and slice `.length` and `.ptr`,
+and delegate `.ptr` and `.funcptr`. Properties tied to rejected types or
+GC-backed array operations remain unavailable. The floating-point `.im`
+property remains under review because imaginary and complex types are not part
+of Laser-D.)
+
+$(P_LASER_D User-defined `@property` functions are not supported. Source-defined
+behavior must be invoked using explicit function-call syntax rather than
+field-like property reads or writes. D's separate optional-parentheses rule for
+ordinary zero-argument calls remains under review.)
+
 $(HEADERNAV_TOC)
 
 $(H2 $(LNAME2 common, Common Properties))

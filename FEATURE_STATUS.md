@@ -55,7 +55,7 @@ Each chapter should be split into individual features as it is investigated.
 | Modules (`module.dd`) | Restricted | Core module declarations, namespaces, imports, re-exports, cycles, and separate compilation are supported. `ModuleInfo` and all module lifecycle constructors and destructors are rejected; package-specific facilities require separate review. |
 | Declarations (`declaration.dd`) | Restricted | Basic variables, manifest constants, inference, aliases, multiple declarations, and scalar initialization are supported. Linkage, most storage classes, static initialization, and declarations involving derived types remain to be reviewed. |
 | Types (`type.dd`) | Restricted | Current non-deprecated primitive scalar types and compile-time inspection with `typeof` and `is` are supported. Deprecated scalar types and derived or user-defined types follow their individual classifications. |
-| Properties (`property.dd`) | Undecided | Identify properties that require runtime support or hidden allocation. |
+| Properties (`property.dd`) | Restricted | Runtime-free compiler-provided properties are supported. User-defined `@property` functions are rejected so annotated getters and setters cannot masquerade as fields. Properties tied to rejected types or GC-backed array operations remain rejected. Optional parentheses on ordinary zero-argument calls and the legacy floating-point `.im` property remain undecided. |
 | Attributes (`attribute.dd`) | Restricted | User-defined attributes are rejected. `nothrow` and `@nogc` are implicit and cannot be spelled explicitly; other built-in attributes remain to be classified. |
 | Pragmas (`pragma.dd`) | Undecided | Review each predefined pragma and implementation dependency. |
 | Expressions (`expression.dd`) | Restricted | Basic primary scalar expressions are supported. Dynamic and associative-array literals, GC-backed array allocation, concatenation, and append are rejected. Remaining forms and operators are reviewed by category. |
@@ -233,6 +233,18 @@ Each chapter should be split into individual features as it is investigated.
 | Delegates | Supported | Non-capturing delegate literals and delegates to struct methods are supported as context-and-function-pointer values. | `delegates_accepted.d` |
 | Capturing delegates and closures | Rejected | Lexical capture is rejected regardless of whether the context is stack-scoped or would require heap allocation. Taking the address of a captured named nested function is also rejected. | `capturing_delegates_rejected.d` |
 | Remaining function features | Undecided | Complete parameter/storage-class behavior, named nested functions, variadics, contracts, and generated functions require later review. | None |
+
+## Property decisions
+
+| Feature | Status | Decision | Tests |
+| --- | --- | --- | --- |
+| Common and type properties | Supported | `.init`, `.sizeof`, `.alignof`, `.stringof`, and `.mangleof` are supported for retained types and expressions. | `builtin_properties_accepted.d` |
+| Numeric properties | Restricted | Integral limits and floating-point metadata for `float` and `double` are supported. Properties requiring rejected scalar types remain unavailable; `.im` requires a separate decision. | `builtin_properties_accepted.d`, scalar-type rejection tests |
+| Aggregate and enum properties | Supported | Struct `.tupleof`, field `.offsetof`, layout properties, and the reviewed enum properties are supported. Class properties are unavailable with classes. | `builtin_properties_accepted.d`, `aggregate_types_accepted.d` |
+| Array and slice properties | Restricted | Read-only `.length` and `.ptr` are supported. `.dup`, `.idup`, `.capacity`, and writes to dynamic-array `.length` remain rejected. | `builtin_properties_accepted.d`, `static_arrays_and_slices_accepted.d`, `array_gc_properties_rejected.d` |
+| Delegate properties | Supported | `.ptr` and `.funcptr` expose the context and function pointers without runtime allocation. A non-capturing delegate has a null `.ptr`. | `builtin_properties_accepted.d` |
+| User-defined property functions | Rejected | The built-in `@property` attribute is rejected on member and free functions, including getter, setter, immutable-receiver, and UFCS forms. Source-defined behavior must use explicit function-call syntax. | `property_functions_rejected.d` |
+| Optional function-call parentheses | Undecided | D currently permits some ordinary zero-argument functions to be invoked without `()`, which can still resemble field access without `@property`. This requires a separate syntax review. | None |
 
 ## Operator-overloading decisions
 

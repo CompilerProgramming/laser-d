@@ -311,6 +311,28 @@ This first function review does not yet classify the complete parameter model,
 variadic functions, nested named functions, function contracts, or generated
 special member functions.
 
+### Properties
+
+Compiler-provided properties are supported when their underlying type and
+operation are supported. This includes `.init`, `.sizeof`, `.alignof`,
+`.stringof`, `.mangleof`, numeric limits and floating-point metadata for the
+retained scalar types, aggregate `.tupleof` and field `.offsetof`, enum
+properties, read-only array and slice `.length` and `.ptr`, and delegate `.ptr`
+and `.funcptr`. Properties tied to rejected types are unavailable, and the
+existing array rules continue to reject `.dup`, `.idup`, `.capacity`, and
+writes to dynamic-array `.length`.
+
+User-defined `@property` functions are rejected. Although `@property` is a
+built-in function attribute rather than a UDA, it makes function calls look
+like field reads and writes. Laser-D requires source-defined behavior to use
+explicit function-call syntax so that potentially executable operations remain
+visible at the call site. D also permits parentheses to be omitted for some
+ordinary zero-argument function calls; that separate syntax remains to be
+reviewed before Laser-D can enforce this rule universally.
+
+The floating-point `.im` property requires a separate decision because it is
+legacy surface associated with the removed imaginary and complex type family.
+
 ### Operator overloading
 
 Modern operator overloading on structs is supported where the overload itself

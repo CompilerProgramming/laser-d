@@ -1382,6 +1382,8 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
                     error(attributeLoc, "attribute `@%s` is not supported in Laser-D; all functions are implicitly `@system`", token.ident.toChars());
                 else if (stc & STC.live)
                     error(attributeLoc, "attribute `@live` is not supported in Laser-D");
+                else if (stc & STC.property)
+                    error(attributeLoc, "attribute `@property` is not supported in Laser-D; call functions explicitly");
                 return stc;
             }
 
