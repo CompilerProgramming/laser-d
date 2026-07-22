@@ -238,13 +238,14 @@ Each chapter should be split into individual features as it is investigated.
 
 | Feature | Status | Decision | Tests |
 | --- | --- | --- | --- |
-| Core templates | Supported | Type, value, alias, variadic, recursive, eponymous, function, aggregate, enum, variable, and alias templates are supported. | `templates_accepted.d` |
+| Core templates | Supported | Type, value, alias, variadic, recursive, eponymous, function, aggregate, enum, variable, and alias templates are supported and compose with the reviewed Laser-D feature set. | `templates_accepted.d`, `template_supported_features_accepted.d` |
 | Selection and instantiation | Supported | Explicit instantiation, IFTI, specialization, default arguments, and constraints are supported. | `templates_accepted.d` |
 | Template emission | Supported | Instances needed across separately compiled modules are emitted without requiring the D runtime. | `betterc_template_emission.d` |
 | CTFE | Supported | Functions may execute at compile time for manifest constants, assertions, template arguments, initializers, and fixed-array dimensions; `__ctfe` is supported. | `ctfe_accepted.d` |
 | Compile-time control flow | Supported | `static if`, `static foreach`, and `static assert` are supported. | `ctfe_accepted.d` |
 | Type inspection | Supported | `typeof` is non-evaluating and supports expression and return-type queries. `is` supports validity, equivalence, conversion, category, and pattern-deduction queries over supported Laser-D types. | `type_inspection_accepted.d` |
 | Existing language restrictions | Restricted | Templates and CTFE do not bypass rejected Laser-D features; string mixins remain rejected inside templates. | `template_string_mixin_rejected.d` |
+| Struct-template constructors | Known issue | Instantiating a struct template with an ordinary constructor currently misdiagnoses the constructor as a rejected `ref` return. Aggregate initialization remains available. | `template_struct_constructor_issue.d` |
 
 ## Trait decisions
 

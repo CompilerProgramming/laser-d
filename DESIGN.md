@@ -317,6 +317,14 @@ specialization, defaults, constraints, recursive and eponymous templates;
 function, aggregate, alias, enum, and variable templates; and template mixins.
 Required instances continue to be emitted in mandatory BetterC mode.
 
+The supported template machinery composes with the retained Laser-D scalar,
+immutable, aggregate, bit-field, fixed-array, slice, string, function-pointer,
+delegate, cleanup, CTFE, and reflection features. A current frontend limitation
+is that an ordinary constructor declared in a struct template is incorrectly
+diagnosed as a rejected `ref` return when the struct is instantiated. Aggregate
+initialization of a struct template instance remains available while this issue
+is unresolved.
+
 Compile-time function execution, manifest constants, `__ctfe`, `static if`,
 `static foreach`, and `static assert` are supported. Compile-time execution is
 not a second language mode: every existing Laser-D restriction also applies in
