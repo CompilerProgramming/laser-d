@@ -311,6 +311,29 @@ This first function review does not yet classify the complete parameter model,
 variadic functions, nested named functions, function contracts, or generated
 special member functions.
 
+### Operator overloading
+
+Modern operator overloading on structs is supported where the overload itself
+uses supported Laser-D types and function features. Unary and binary operators,
+right-hand binary dispatch, equality and ordering, casts, calls, assignment and
+compound assignment, postfix increment, indexing, index assignment, slicing,
+`$`, and `opDispatch` forwarding lower to ordinary or templated method calls and
+do not inherently require allocation, TypeInfo, or the D runtime.
+
+Operator hooks remain subject to every cross-cutting Laser-D restriction.
+Classes are unavailable, overloads cannot use `const` or `inout`, and they
+cannot return by `ref`. Immutable receiver methods remain supported. Index and
+slice mutation should use `opIndexAssign`, `opIndexOpAssign`, or their slice
+counterparts instead of a reference-returning `opIndex`. Assignment hooks may
+return a value or `void` when reference-return chaining is not required.
+Postfix operators copy their left operand before invoking the prefix overload;
+that is supported for ordinary value-copyable structs, but cannot introduce a
+rejected postblit. Any array or slice value produced by an overload remains
+subject to the normal non-owning-array restrictions.
+
+Legacy D1-style operator hooks and the complete multidimensional index/slice
+rewrite surface have not yet been classified.
+
 ### Templates and compile-time execution
 
 The template and CTFE machinery is supported. This includes type, value, alias,

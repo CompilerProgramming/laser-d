@@ -68,7 +68,7 @@ Each chapter should be split into individual features as it is investigated.
 | Enums (`enum.dd`) | Supported | Named, anonymous, manifest, based, and opaque enum declarations and ordinary enum properties are supported. Opaque enums have no default initializer, and automatic numbering is rejected when the base type is itself an enum. |
 | Type qualifiers (`const3.dd`) | Restricted | `immutable` is supported with normal D transitive semantics. `const`, `inout`, and `shared` are rejected. Remaining immutable conversions and initialization details require review. |
 | Functions (`function.dd`) | Restricted | Ordinary functions, function pointers, non-capturing literals, non-capturing delegates, and method delegates are supported. Parameters may use only `in`, `out`, or `ref`; source-level `ref` returns, including explicitly `ref`-annotated constructors, are rejected. Capturing delegates and closures are rejected. Variadics, contracts, and remaining generated-function behavior require further review. |
-| Operator overloading (`operatoroverloading.dd`) | Undecided | Check lowering for hidden runtime or allocation dependencies. |
+| Operator overloading (`operatoroverloading.dd`) | Restricted | Modern struct operator hooks are supported and lower to ordinary calls without inherent runtime allocation. Hooks remain subject to Laser-D type and function restrictions; legacy D1 forms and the complete multidimensional indexing surface remain undecided. |
 | Templates (`template.dd`) | Supported | Template declaration, selection, instantiation, inference, specialization, constraints, recursion, and emission are supported. Template contents remain subject to every Laser-D language restriction. |
 | Template mixins (`template-mixin.dd`) | Supported | Mixin template declarations and template mixin instantiations are supported; string mixins are rejected separately. |
 | Contracts (`contracts.dd`) | Undecided | Determine assertion failure behavior and runtime dependencies. |
@@ -233,6 +233,17 @@ Each chapter should be split into individual features as it is investigated.
 | Delegates | Supported | Non-capturing delegate literals and delegates to struct methods are supported as context-and-function-pointer values. | `delegates_accepted.d` |
 | Capturing delegates and closures | Rejected | Lexical capture is rejected regardless of whether the context is stack-scoped or would require heap allocation. Taking the address of a captured named nested function is also rejected. | `capturing_delegates_rejected.d` |
 | Remaining function features | Undecided | Complete parameter/storage-class behavior, named nested functions, variadics, contracts, and generated functions require later review. | None |
+
+## Operator-overloading decisions
+
+| Feature | Status | Decision | Tests |
+| --- | --- | --- | --- |
+| Modern struct operators | Supported | Unary, binary, right-hand binary, equality, ordering, cast, call, assignment, compound assignment, and POD postfix operators lower to runtime-free method calls. | `operator_overloading_accepted.d` |
+| Indexing and slicing hooks | Supported | Value-returning indexing, index assignment, index compound assignment, one-dimensional slicing, slice assignment, and `$` are supported. Non-owning slice results retain the normal array restrictions. | `operator_overloading_accepted.d` |
+| Operator forwarding | Supported | `opDispatch` forwarding through supported templates is retained. | `operator_overloading_accepted.d` |
+| Immutable receiver operators | Supported | Operators may be declared for and invoked on immutable struct values without requiring the rejected `const` qualifier. | `operator_overloading_accepted.d` |
+| Cross-cutting restrictions | Restricted | Operator hooks cannot use rejected qualifiers, `ref` returns, classes, postblits, GC-backed arrays, or other rejected constructs. Index mutation uses assignment hooks rather than a reference-returning `opIndex`. | `operator_overloading_restrictions.d` and the individual feature-rejection tests |
+| Legacy and advanced indexing | Undecided | D1-style operator hooks and the complete multidimensional index/slice rewrite surface require separate review. | None |
 
 ## Template and compile-time execution decisions
 

@@ -2,6 +2,20 @@ Ddoc
 
 $(SPEC_S Operator Overloading,
 
+$(P_LASER_D Modern operator overloading on structs is supported when the
+overload uses supported Laser-D types and function features. This includes
+unary and binary operators, comparisons, casts, calls, assignment forms,
+postfix operations on ordinarily copyable values, indexing, slicing, `$`, and
+`opDispatch`. These forms lower to ordinary or templated method calls and do
+not inherently require the D runtime.)
+
+$(P_LASER_D Operator hooks remain subject to all Laser-D restrictions. Classes,
+`const`, `inout`, and `ref` returns are unavailable. Immutable receiver methods
+are supported. Index mutation uses assignment hooks rather than a
+reference-returning `opIndex`; returned slices must remain non-owning. Legacy
+D1-style hooks and the complete multidimensional indexing surface remain under
+review.)
+
 $(HEADERNAV_TOC)
 
         $(P Operator overloading is accomplished by rewriting operators whose
