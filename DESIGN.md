@@ -316,6 +316,13 @@ concatenation, append, `.dup`, `.idup`, `.capacity`, and assignment to dynamic
 array `.length` are rejected because they allocate, resize, or depend on GC
 allocation metadata. Associative-array types and literals are rejected.
 
+Built-in associative arrays are rejected as a complete feature rather than
+restricted by key or value type. Their hash-table storage, growth, lookup,
+removal, iteration, hashing, equality, and destruction depend on hidden runtime
+management and type metadata. Programs may instead implement an explicit
+container as an ordinary struct over fixed, caller-provided, manually managed,
+or C-owned storage, optionally exposing the validated value-range protocol.
+
 All `new` expressions are rejected, including scalar, struct, placement, class,
 and array forms. Laser-D has no source-level implicit allocation operation.
 Programs that need dynamic storage must obtain and release it explicitly, for
