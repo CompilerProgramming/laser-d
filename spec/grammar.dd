@@ -2,87 +2,41 @@ Ddoc
 
 $(SPEC_S Grammar,
 
-    $(P After the $(DDLINK spec/lex, Lexical, lexical analyzer) has created tokens
-    from the source text, the tokens are parsed into the following key constructs:)
+$(P The Laser-D grammar defines the source forms accepted before semantic
+restrictions are applied. After the lexical analyzer creates tokens, the parser
+organizes them into modules, declarations, types, statements, and expressions.)
 
-$(COMMENT Don't use GLINK2 macros for reference links because they are retargeted to
-this page.)
-
-    * A $(DDSUBLINK spec/module, Module, *Module*) normally has
-      $(DDSUBLINK spec/module, DeclDef, *DeclDef*)s.
-    * *DeclDef* can be a $(DDSUBLINK spec/declaration, Declaration, *Declaration*).
-    * *Declaration* includes
-      $(DDSUBLINK spec/declaration, VarDeclarations, *VarDeclarations*),
-      $(DDSUBLINK spec/function, FuncDeclaration, *FuncDeclaration*) and
-      $(DDSUBLINK spec/declaration, AggregateDeclaration, *AggregateDeclaration*)
-      (e.g. class and struct declarations).
-
-$(NOTE Many nodes are omitted from these diagrams.)
-
-$(COMMENT To generate images/declaration.{svg,eps} refer to
-images/declaration.dot.)
-
-$(HTMLTAG3 center, ,
-  <img id="conversions" alt="Declaration sub nodes"
-    src="$(STATIC images/declaration.svg)">
-)
-$(LATEX
-{\centering
-\includegraphics{images/declaration.eps}
-}
+$(UL
+$(LI A $(DDSUBLINK spec/module, Module, *Module*) contains declarations.)
+$(LI Declarations include variables, functions, aliases, enums, structs,
+unions, and templates.)
+$(LI Functions contain explicit block statements; function contracts and
+contract-style $(D do) bodies are not grammar alternatives.)
+$(LI Types include supported scalar, pointer, function, aggregate, fixed-array,
+and non-owning slice forms.)
+$(LI Expressions and statements use only productions retained by their
+normative Laser-D chapters.)
 )
 
-    * *VarDeclarations* declares one or more variables with a
-      $(DDSUBLINK spec/type, Type, *Type*).
-    * Each concrete *AggregateDeclaration* has *DeclDef* members.
-    * *FuncDeclaration* can have a $(DDSUBLINK spec/statement, BlockStatement, *BlockStatement*).
-    * *BlockStatement* can have $(DDSUBLINK spec/statement, Statement, *Statement*)s.
-    * *Statement* includes *BlockStatement*,
-      $(DDSUBLINK spec/statement, DeclarationStatement, *DeclarationStatement*),
-      $(DDSUBLINK spec/statement, ExpressionStatement, *ExpressionStatement*) and
-      control-flow statements.
+$(P A production being syntactically valid does not make it semantically valid.
+For example, template contents remain subject to the same type, allocation,
+lifetime, and runtime restrictions as non-template source.)
 
-$(COMMENT To generate images/statement.{svg,eps} refer to
-images/statement.dot.)
+$(H2 $(LNAME2 transition, Grammar Conversion Status))
 
-$(HTMLTAG3 center, ,
-  <img id="conversions" alt="Statement sub nodes"
-    src="$(STATIC images/statement.svg)">
-)
-$(LATEX
-{\centering
-\includegraphics{images/statement.eps}
-}
-)
+$(P The aggregate summary below is generated from grammar fragments distributed
+throughout the specification chapters. Those fragments are being converted
+category by category from upstream D to Laser-D.)
 
-     * *DeclarationStatement* has a *Declaration*.
-     * *ExpressionStatement* has an $(DDSUBLINK spec/expression, Expression, *Expression*).
-     * *Expression* includes $(DDSUBLINK spec/expression, PrimaryExpression, *PrimaryExpression*),
-       $(DDSUBLINK spec/expression, AssignExpression, *AssignExpression*) and
-       $(DDSUBLINK spec/expression, PostfixExpression, *PostfixExpression*) (e.g. for a function call).
-
-$(COMMENT To generate images/expression.{svg,eps} refer to
-images/expression.dot.)
-
-$(HTMLTAG3 center, ,
-  <img id="conversions" alt="Expression sub nodes"
-    src="$(STATIC images/expression.svg)">
-)
-$(LATEX
-{\centering
-\includegraphics{images/expression.eps}
-}
-)
-
-    * *PrimaryExpression* includes $(GLINK_LEX Identifier) and
-      $(DDSUBLINK spec/expression, LiteralExpression, *LiteralExpression*).
-    * *AssignExpression* and *PostfixExpression* each have at least one kind of *Expression*.
-    * Every *Expression* has a $(DDSUBLINK spec/type, Type, *Type*).
-
-    $(NOTE The remainder of this page is auto-generated, see the other pages for
-    semantic details.)
+$(NOTE Until that conversion is complete, the aggregate summary is a
+transitional editing aid, not an independent grant of Laser-D syntax. A
+production classified as rejected elsewhere is not part of Laser-D even if it
+still appears below. Each category conversion must update its source grammar,
+prose, and tests together.)
 
 $(HEADERNAV_TOC)
+
+$(H2 Transitional Aggregate Grammar)
 
 $(GRAMMAR_SUMMARY)
 
@@ -91,7 +45,7 @@ $(SPEC_SUBNAV_PREV_NEXT istring, Interpolation Expression Sequence, module, Modu
 
 Macros:
         CHAPTER=4
-        TITLE=D Grammar
+        TITLE=Laser-D Grammar
         IDENTIFIER=$(GLINK Identifier)
         EXPRESSION=$(GLINK Expression)
         ASSIGNEXPRESSION=$(GLINK AssignExpression)

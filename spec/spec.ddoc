@@ -21,6 +21,15 @@ RATIONALE= $(DIVC spec-boxes rationale, $(B Rationale:) $0)
 $(COMMENT While not part of the spec, provides additional relevant information)
 NOTE= $(DIVC spec-boxes note, $(B Note:) $0)
 
+$(COMMENT Marks normative Laser-D language text during specification conversion)
+LASER_NORMATIVE=$(DIVC spec-boxes best-practice, $(B Laser-D Normative:) $0)
+
+$(COMMENT Marks an upstream D facility excluded from Laser-D)
+LASER_EXCLUDED=$(DIVC spec-boxes undefined-behavior, $(B Excluded from Laser-D:) $0)
+
+$(COMMENT Marks an area that is not yet a Laser-D language guarantee)
+LASER_UNDER_REVIEW=$(DIVC spec-boxes implementation-defined, $(B Laser-D Under Review:) $0)
+
 _ =
 
 BODY_PREFIX =
@@ -62,7 +71,7 @@ SUBNAV_HEAD = $(DIVC head, $(H2 $1) $(TC p, $4, $(LINK2 $2, $3)))
 SUBNAV=$(SUBNAV_SPEC)
 SUBNAV_SPEC=
 $(SUBNAV_TEMPLATE
-    $(SUBNAV_HEAD Language Reference, $(ROOT_DIR)spec/spec.html, table of contents, subnav-duplicate)
+    $(SUBNAV_HEAD Laser-D Language Reference, $(ROOT_DIR)spec/spec.html, table of contents, subnav-duplicate)
     $(UL
         $(SUBMENU2
             $(ROOT_DIR)spec/intro.html, Introduction,
