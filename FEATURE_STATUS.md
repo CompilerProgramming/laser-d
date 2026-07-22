@@ -68,7 +68,7 @@ Each chapter should be split into individual features as it is investigated.
 | Enums (`enum.dd`) | Supported | Named, anonymous, manifest, based, and opaque enum declarations and ordinary enum properties are supported. Opaque enums have no default initializer, and automatic numbering is rejected when the base type is itself an enum. |
 | Type qualifiers (`const3.dd`) | Restricted | `immutable` is supported with normal D transitive semantics. `const`, `inout`, and `shared` are rejected. Remaining immutable conversions and initialization details require review. |
 | Functions (`function.dd`) | Restricted | Ordinary functions, function pointers, non-capturing literals, non-capturing delegates, and method delegates are supported. Parameters may use only `in`, `out`, or `ref`; source-level `ref` returns, including explicitly `ref`-annotated constructors, are rejected. Capturing delegates and closures are rejected. Variadics, contracts, and remaining generated-function behavior require further review. |
-| Operator overloading (`operatoroverloading.dd`) | Restricted | Modern struct operator hooks are supported and lower to ordinary calls without inherent runtime allocation. Hooks remain subject to Laser-D type and function restrictions; legacy D1 forms and the complete multidimensional indexing surface remain undecided. |
+| Operator overloading (`operatoroverloading.dd`) | Restricted | Modern struct operator hooks are supported and lower to ordinary calls without inherent runtime allocation. Hooks remain subject to Laser-D type and function restrictions. Legacy D1 hooks are rejected; the complete multidimensional indexing surface remains undecided. |
 | Templates (`template.dd`) | Supported | Template declaration, selection, instantiation, inference, specialization, constraints, recursion, and emission are supported. Template contents remain subject to every Laser-D language restriction. |
 | Template mixins (`template-mixin.dd`) | Supported | Mixin template declarations and template mixin instantiations are supported; string mixins are rejected separately. |
 | Contracts (`contracts.dd`) | Undecided | Determine assertion failure behavior and runtime dependencies. |
@@ -243,7 +243,8 @@ Each chapter should be split into individual features as it is investigated.
 | Operator forwarding | Supported | `opDispatch` forwarding through supported templates is retained. | `operator_overloading_accepted.d` |
 | Immutable receiver operators | Supported | Operators may be declared for and invoked on immutable struct values without requiring the rejected `const` qualifier. | `operator_overloading_accepted.d` |
 | Cross-cutting restrictions | Restricted | Operator hooks cannot use rejected qualifiers, `ref` returns, classes, postblits, GC-backed arrays, or other rejected constructs. Index mutation uses assignment hooks rather than a reference-returning `opIndex`. | `operator_overloading_restrictions.d` and the individual feature-rejection tests |
-| Legacy and advanced indexing | Undecided | D1-style operator hooks and the complete multidimensional index/slice rewrite surface require separate review. | None |
+| Legacy D1 operator hooks | Rejected | The legacy unary, binary, reverse-binary, membership, postfix, dereference, concatenation, and compound-assignment hook names are rejected on aggregate instance methods. Modern templated operator hooks provide the supported equivalents. | `legacy_d1_operators_rejected.d` |
+| Advanced indexing | Undecided | The complete multidimensional index/slice rewrite surface requires separate review. | None |
 
 ## Template and compile-time execution decisions
 

@@ -331,8 +331,10 @@ that is supported for ordinary value-copyable structs, but cannot introduce a
 rejected postblit. Any array or slice value produced by an overload remains
 subject to the normal non-owning-array restrictions.
 
-Legacy D1-style operator hooks and the complete multidimensional index/slice
-rewrite surface have not yet been classified.
+Legacy D1-style operator hooks are rejected as aggregate instance methods.
+Laser-D uses the modern templated hooks exclusively, avoiding a second set of
+names for the same operations. The complete multidimensional index/slice
+rewrite surface has not yet been classified.
 
 ### Templates and compile-time execution
 

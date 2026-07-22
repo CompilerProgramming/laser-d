@@ -67,6 +67,29 @@ import dmd.typesem;
 import dmd.visitor;
 import dmd.visitor.statement_rewrite_walker;
 
+private bool isLegacyD1Operator(Identifier ident)
+{
+    if (!ident)
+        return false;
+
+    switch (ident.toString())
+    {
+    case "opAdd", "opAdd_r", "opSub", "opSub_r", "opMul", "opMul_r":
+    case "opDiv", "opDiv_r", "opMod", "opMod_r":
+    case "opAnd", "opOr", "opXor":
+    case "opShl", "opShl_r", "opShr", "opShr_r", "opUShr", "opUShr_r":
+    case "opCat", "opCat_r":
+    case "opPos", "opNeg", "opCom", "opPostInc", "opPostDec", "opStar":
+    case "opIn", "opIn_r":
+    case "opAddAssign", "opSubAssign", "opMulAssign", "opDivAssign":
+    case "opModAssign", "opAndAssign", "opOrAssign", "opXorAssign":
+    case "opShlAssign", "opShrAssign", "opUShrAssign", "opCatAssign":
+        return true;
+    default:
+        return false;
+    }
+}
+
 bool addPostInvariant(FuncDeclaration _this)
 {
     static bool visitFuncDeclaration(FuncDeclaration _this)
@@ -478,6 +501,11 @@ void funcDeclarationSemantic(Scope* sc, FuncDeclaration funcdecl)
 
     funcdecl.storage_class |= sc.stc & ~STC.ref_;
     AggregateDeclaration ad = funcdecl.isThis();
+    if (ad && sc._module.filetype != FileType.c && isLegacyD1Operator(funcdecl.ident))
+    {
+        .error(funcdecl.loc, "legacy D1 operator hook `%s` is not supported in Laser-D; use modern operator templates", funcdecl.ident.toChars());
+        funcdecl.errors = true;
+    }
     // Don't nest structs b/c of generated methods which should not access the outer scopes.
     // https://issues.dlang.org/show_bug.cgi?id=16627
     if (ad && !funcdecl.isGenerated)

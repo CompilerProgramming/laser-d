@@ -13,8 +13,9 @@ $(P_LASER_D Operator hooks remain subject to all Laser-D restrictions. Classes,
 `const`, `inout`, and `ref` returns are unavailable. Immutable receiver methods
 are supported. Index mutation uses assignment hooks rather than a
 reference-returning `opIndex`; returned slices must remain non-owning. Legacy
-D1-style hooks and the complete multidimensional indexing surface remain under
-review.)
+D1-style hooks are rejected on aggregate instance methods; modern templated
+hooks provide their supported replacements. The complete multidimensional
+indexing surface remains under review.)
 
 $(HEADERNAV_TOC)
 
@@ -1308,6 +1309,9 @@ void main()
 )
 
 $(H2 $(LEGACY_LNAME2 Old-Style, old-style, D1 style operator overloading))
+
+$(P_LASER_D D1-style operator hook names are not supported. Use the modern
+`opUnary`, `opBinary`, `opBinaryRight`, and `opOpAssign` templates.)
 
         $(P
         The $(LINK2 http://digitalmars.com/d/1.0/operatoroverloading.html, D1 operator overload mechanisms)
