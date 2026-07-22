@@ -72,9 +72,21 @@ make programs smaller in semantic surface area and easier to audit: calls,
 allocation, cleanup, aliasing, and external interaction should be apparent from
 the source wherever practical.
 
-Constructors and overloaded operators are deliberate exceptions because they
-can invoke user code through specialized syntax. Their supported behavior is
-therefore tested narrowly and remains subject to all other Laser-D restrictions.
+Constructors and overloaded operators are narrow, deliberate exceptions to the
+preference for explicit calls. They are retained for fixed-storage,
+primitive-like value abstractions: constructors make small values convenient to
+initialize, while operators allow natural notation for types such as matrices,
+big integers, and fixed-precision decimals. Removing operator overloading
+entirely would force method-heavy expressions even where the mathematical
+meaning of an operator is clearer.
+
+Laser-D cannot reliably prove that every constructor or overload is used only
+in this style. Instead, it constrains the mechanisms around them: no hidden GC
+allocation, destructors, postblits, exceptions, reference returns, virtual
+dispatch, or runtime metadata. Constructors and operators remain subject to all
+other Laser-D restrictions and are tested around predictable value semantics.
+Code review and library design must enforce the final requirement that their
+behavior is unsurprising and appropriate to the notation.
 
 In short:
 
