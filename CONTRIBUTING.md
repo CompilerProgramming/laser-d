@@ -223,7 +223,7 @@ without control flow statements.
 
 16. Try not to mix functions that "answer a question" with functions that
 "mutate the data".
-This was done successfully in src/dmd/escape.d, it wasn't easy, but
+This was done successfully in compiler/src/dmd/escape.d, it wasn't easy, but
 it was well worth it.
 
 17. Try to eliminate reliance on `global.errors`, use `dmd.errorsink: ErrorSink` instead.
