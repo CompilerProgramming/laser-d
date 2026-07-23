@@ -1,377 +1,106 @@
 Ddoc
 
-$(SPEC_S Interfaces,
+$(SPEC_S Interfaces (Excluded),
 
 $(HEADERNAV_TOC)
 
-$(H2 $(LNAME2 declarations, Interface Declarations))
+$(LASER_NORMATIVE Interfaces are not part of Laser-D. The frontend recognizes
+interface syntax only to issue a Laser-D diagnostic; an interface declaration
+does not create a type, contract, method table, or conversion relationship.)
 
-$(P_LASER_D Native D, COM, Objective-C, and C++ interfaces are not part of Laser-D.
-Plain interface declarations, explicit $(D extern(D)) interface declarations,
-the COM $(D IUnknown) root, and $(D extern(Objective-C)) linkage are rejected.
-Interface declarations under $(D extern(C++)) linkage are also rejected.)
+$(H2 $(LNAME2 rejected-declarations, Rejected Interface Declarations))
 
-    $(P An $(I Interface) describes a list of functions that a class which inherits
-    from the interface must implement.)
+$(LASER_EXCLUDED The rejection applies to every interface declaration in
+Laser-D source, including:)
 
-$(GRAMMAR
-$(GNAME InterfaceDeclaration):
-    $(D interface) $(GLINK_LEX Identifier) $(D ;)
-    $(D interface) $(GLINK_LEX Identifier) $(GLINK BaseInterfaceList)$(OPT) $(GLINK2 struct, AggregateBody)
-    $(GLINK2 template, InterfaceTemplateDeclaration)
-
-$(GNAME BaseInterfaceList):
-    $(D :) $(GLINK2 class, Interfaces)
+$(UL
+$(LI forward declarations and definitions,)
+$(LI plain and explicit $(D extern(D)) interfaces,)
+$(LI templated and nested interfaces,)
+$(LI interfaces with base-interface lists,)
+$(LI the magic COM $(D IUnknown) root and interfaces derived from it,)
+$(LI Objective-C protocols expressed through
+$(D extern(Objective-C)) linkage,)
+$(LI interfaces declared with $(D extern(C++)) linkage, including explicit
+C++ class-mangling forms.)
 )
 
-    $(IMPLEMENTATION_DEFINED $(P Specialized interfaces may be supported:)
+$(P Rejecting an interface declaration before its body is analyzed does not
+make any methods, aliases, templates, or nested declarations within the body
+available to Laser-D source.)
 
-    $(OL
-    $(LI $(RELATIVE_LINK2 com-interfaces, $(I COM Interfaces))
-    are binary compatible with COM/OLE/ActiveX objects for Windows.
-    )
+$(H2 $(LNAME2 unavailable-model, Unavailable Interface Model))
 
-    $(LI $(RELATIVE_LINK2 cpp-interfaces, $(I C++ Interfaces))
-    are binary compatible with C++ abstract classes.
-    )
+$(LASER_EXCLUDED Because interface types do not exist, Laser-D has no:)
 
-    $(LI [Objective-C Interfaces](objc_interface.html#protocols)
-    are binary compatible with Objective-C protocols.
-    )
-    )
-    )
-
-
-    $(P A class that implements an interface can be implicitly converted to a reference
-    to that interface.)
-
-    $(P Interfaces cannot derive from classes; only from other interfaces.
-    Classes cannot derive from an interface multiple times.
-    )
-
-------
-interface I
-{
-    void foo();
-}
-
-class A : I, I  // error, duplicate interface
-{
-}
-------
-
-$(P An instance of an interface cannot be created.)
-
-------
-interface I
-{
-    void foo();
-}
-
-...
-
-I iface = new I();  // error, cannot create instance of interface
-------
-
-$(H3 $(LNAME2 method-bodies, Interface Method Bodies))
-
-    $(P Virtual interface member functions do not have implementations.
-    Interfaces can implement $(DDSUBLINK spec/attribute, static, static)
-    or $(DDSUBLINK spec/function, final, final) functions.
-    )
-
-------
-interface I
-{
-    void bar() { }  // error, implementation not allowed
-    static void foo() { } // ok
-    final void abc() { } // ok
-}
-------
-
-     $(P Interfaces can have function templates in the members.
-         All instantiated functions are implicitly `final`.
-     )
-
----
-interface I
-{
-    void foo(T)() { }  // ok, it's implicitly final
-}
----
-
-    $(P Classes that inherit from an interface may not override final or
-    static interface member functions.)
-
-------
-interface I
-{
-    void bar();
-    static void foo() { }
-    final void abc() { }
-}
-
-class C : I
-{
-    void bar() { } // ok
-    void foo() { } // error, cannot override static I.foo()
-    void abc() { } // error, cannot override final I.abc()
-}
-------
-
-$(H3 $(LNAME2 implementing-interfaces, Implementing Interfaces))
-
-    $(P All virtual interface functions must be defined in a class that inherits
-    from that interface:
-    )
-------
-interface I
-{
-    void foo();
-}
-
-class A : I
-{
-    void foo() { }  // ok, provides implementation
-}
-
-class B : I
-{
-    int foo() { }   // error, no `void foo()` implementation
-}
-------
-
-$(P Interfaces can be inherited from a base class, and interface functions overridden:)
-
-$(SPEC_RUNNABLE_EXAMPLE_RUN
-------
-interface I
-{
-    int foo();
-}
-
-class A : I
-{
-    int foo() { return 1; }
-}
-
-class B : A
-{
-    override int foo() { return 2; }
-}
-
-B b = new B();
-assert(b.foo() == 2);
-
-I i = b;    // ok since B inherits A's I implementation
-assert(i.foo() == 2);
-------
+$(UL
+$(LI interface inheritance or implementation declarations,)
+$(LI implicit conversion from a value to an interface reference,)
+$(LI interface references, virtual method tables, or adjustment thunks,)
+$(LI runtime interface discovery, querying, downcasts, or upcasts,)
+$(LI COM reference-counting conventions derived from $(D IUnknown),)
+$(LI Objective-C protocol dispatch,)
+$(LI C++ abstract-class ABI compatibility,)
+$(LI interface $(D TypeInfo), identity comparisons, or class recovery.)
 )
 
-$(H4 $(LNAME2 reimplementing-interfaces, Reimplementing Interfaces))
+$(P BetterC mode alone does not define a portable, runtime-free interface
+subset. Interface representation and dispatch depend on the selected object
+model and ABI, while D interface conversions and metadata also depend on
+facilities excluded from Laser-D.)
 
-    $(P Interfaces can be reimplemented in derived classes:)
+$(H2 $(LNAME2 structural-protocols, Explicit Structural Protocols))
 
-$(SPEC_RUNNABLE_EXAMPLE_RUN
-------
-interface I
+$(P A supported language feature may validate a documented set of ordinary
+struct methods without creating an interface type. Range iteration is the
+principal example: the compiler checks the required range operations on the
+concrete value and lowers the loop to explicit method calls.)
+
+$(P Such validation is feature-specific and structural. It does not create a
+common reference type, virtual dispatch, implicit conversion, or runtime
+interface query.)
+
+$(H2 $(LNAME2 explicit-dispatch, Explicit Dispatch))
+
+$(P Programs that require runtime-selected behavior may represent it explicitly
+with a context pointer and function pointers. The layout and ownership are then
+ordinary program data rather than a hidden language interface.)
+
+$(D_CODE
+struct Operations
 {
-    int foo();
+    extern(C) int function(void* context, int value) apply;
 }
 
-class A : I
+struct OperationHandle
 {
-    int foo() { return 1; }
+    void* context;
+    Operations* operations;
 }
 
-class B : A, I
+int invoke(ref OperationHandle handle, int value)
 {
-    override int foo() { return 2; }
+    return handle.operations.apply(handle.context, value);
 }
-
-B b = new B();
-assert(b.foo() == 2);
-I i = b;
-assert(i.foo() == 2);
-
-A a = b;
-I i2 = a;
-assert(i2.foo() == 2); // i2 has A's virtual pointer for foo which points to B.foo
-------
 )
 
-    $(P A reimplemented interface must implement all the interface
-    functions, it does not inherit them from a super class:
-    )
+$(P The program is responsible for ensuring that the context, operation table,
+and selected functions remain valid. Laser-D does not add null checking,
+lifetime management, synchronization, or ownership transfer.)
 
-------
-interface I
-{
-    int foo();
-}
+$(H2 $(LNAME2 foreign-interfaces, Foreign Interfaces))
 
-class A : I
-{
-    int foo() { return 1; }
-}
+$(P Foreign object systems may be accessed through an explicitly declared
+C-style API using opaque pointers and free functions. Declaring such functions
+does not enable D, COM, Objective-C, or C++ interface syntax or ABI lowering.)
 
-class B : A, I
-{
-}       // error, no foo() for interface I
-------
-
-$(SECTION3 $(LEGACY_LNAME2 InterfaceContracts, interface-contracts, Interface Method Contracts),
-
-    $(P Interface member functions can have contracts even though there
-    is no body for the function. The contracts are inherited by any
-    class member function that implements that interface member function.
-    )
-
----
-interface I
-{
-    int foo(int i)
-    in { assert(i > 7); }
-    out (result) { assert(result & 1); }
-
-    void bar();
-}
----
-)
-
-$(SECTION3 $(LEGACY_LNAME2 ConstInterface, const-interface, Const and Immutable Interfaces),
-    $(P If an interface has $(CODE const) or $(CODE immutable) storage
-    class, then all members of the interface are
-    $(CODE const) or $(CODE immutable).
-    This storage class is not inherited.
-    )
-)
-
-
-$(SECTION2 $(LEGACY_LNAME2 COM-Interfaces, com-interfaces, COM Interfaces),
-
-    $(P_LASER_D COM interfaces and classes are not supported. Laser-D rejects
-    declaration of the special $(D IUnknown) interface that would otherwise
-    establish the COM object-model root.)
-
-    $(P A variant on interfaces is the COM interface. A COM interface is
-    designed to map directly onto a Windows COM object. Any COM object
-    can be represented by a COM interface, and any D object with
-    a COM interface can be used by external COM clients.
-    )
-
-    $(P A COM interface is defined as one that derives from the interface
-    $(D core.sys.win)$(SHY)$(D dows.com.IUnknown). A COM interface differs from
-    a regular D interface in that:
-    )
-
-    $(UL
-    $(LI It derives from the interface $(D core.sys.windows.com.IUnknown).)
-    $(LI It cannot be the argument to $(REF1 destroy, object).)
-    $(LI References cannot be upcast to the enclosing class object, nor
-    can they be downcast to a derived interface.
-    Implement $(D QueryInterface())
-    for that interface in standard COM fashion to convert to another COM interface.)
-    $(LI Classes derived from COM interfaces are COM classes.)
-    $(LI The default linkage for member functions of COM classes
-    is $(D extern(System)).
-
-    $(NOTE To implement or override any base-class methods of
-    D interfaces or classes (ones which do not inherit from $(D IUnknown)),
-    explicitly mark them as having the $(D extern(D)) linkage.)
-
-    ---
-    import core.sys.windows.windows;
-    import core.sys.windows.com;
-
-    interface IText
-    {
-        void write();
-    }
-
-    abstract class Printer : IText
-    {
-        void print() { }
-    }
-
-    class C : Printer, IUnknown
-    {
-        // Implements the IText `write` class method.
-        extern(D) void write() { }
-
-        // Overrides the Printer `print` class method.
-        extern(D) override void print() { }
-
-        // Overrides the Object base class `toString` method.
-        extern(D) override string toString() { return "Class C"; }
-
-        // Methods of class implementing the IUnknown interface have
-        // the extern(System) calling convention by default.
-        HRESULT QueryInterface(const(IID)*, void**);
-        uint AddRef();
-        uint Release();
-    }
-    ---
-
-    $(P The same applies to other $(D Object) methods such as $(D opCmp), $(D toHash), etc.)
-
-    )
-    $(LI The first member of the COM $(D vtbl[]) is not the pointer
-    to the InterfaceInfo, but the first virtual function pointer.)
-    )
-
-    $(P See also
-    $(LINK2 http://www.lunesu.com/uploads/ModernCOMProgramminginD.pdf, Modern COM Programming in D)
-    )
-
-)
-
-$(SECTION2 $(LEGACY_LNAME2 CPP-Interfaces, cpp-interfaces, C++ Interfaces),
-
-    $(P_LASER_D C++ interfaces are not supported and declarations using this
-    form are rejected.)
-
-    $(P C++ interfaces are interfaces declared with C++ linkage:
-    )
-
----
-extern (C++) interface Ifoo
-{
-    void foo();
-    void bar();
-}
----
-
-which is meant to correspond with the following C++ declaration:
-
-$(CPPLISTING
-class Ifoo
-{
-    virtual void foo();
-    virtual void bar();
-};
-)
-
-    $(P Any interface that derives from a C++ interface is also
-    a C++ interface.
-    A C++ interface differs from a D interface in that:
-    )
-
-    $(UL
-    $(LI It cannot be the argument to $(REF1 destroy, object).)
-    $(LI References cannot be upcast to the enclosing class object, nor
-    can they be downcast to a derived interface.)
-    $(LI The C++ calling convention is the default convention
-    for its member functions, rather than the D calling convention.)
-    $(LI The first member of the $(D vtbl[]) is not the pointer
-    to the $(D Interface), but the first virtual function pointer.)
-    )
-)
-
+$(P ImportC input retains its separately reviewed C declaration rules. A C
+structure containing function pointers remains a C data layout, not a
+Laser-D interface.)
 
 $(SPEC_SUBNAV_PREV_NEXT class, Classes, enum, Enums)
 )
 
 Macros:
-    CHAPTER=17
-    TITLE=Interfaces
+CHAPTER=17
+TITLE=Interfaces (Excluded)
