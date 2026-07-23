@@ -595,3 +595,23 @@ attributes rather than D UDAs and remain governed by the ImportC review.
 `__traits(getAttributes)` remains recognized for compatibility with generic D
 code, but supported Laser-D source declarations cannot contribute UDAs to its
 result.
+
+### C standard library bindings
+
+Laser-D supplies a standard-library source tree under `library/`. The initial
+`core.stdc` subset contains C ABI types, constants, and `extern(C)`
+declarations derived from druntime and adapted to compile as Laser-D. These
+modules do not implement or initialize a D runtime.
+
+The supported initial modules are `config`, `stddef`, `stdint`, `stdarg`,
+`stdlib`, `string`, and a basic `stdio` surface. Their function symbols are
+provided by the platform C runtime. The compiler therefore emits ordinary C
+ABI references which the native linker resolves through the Windows CRT,
+Linux libc, or macOS libSystem. No Laser-D static library is required for these
+declaration-only modules.
+
+Library APIs are supported only where they have focused cross-platform tests
+under `library/test`. Those tests are compiled and linked directly with
+Laser-D, separately from the language-conformance suite under
+`compiler/test/laser-d`. The remaining upstream `core.stdc` modules are not
+implicitly supported merely because their source still exists under druntime.

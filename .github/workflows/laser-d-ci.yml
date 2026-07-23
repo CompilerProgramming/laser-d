@@ -69,6 +69,9 @@ jobs:
         working-directory: compiler/test
         run: '"${DMD}" -i -run run.d laser-d'
 
+      - name: Test the Laser-D standard library
+        run: '"${{ matrix.compiler }}" -conf= -Ilibrary -run library/test/core_stdc.d'
+
       - name: Install Python for documentation checks
         if: runner.os == 'Linux'
         uses: actions/setup-python@v6

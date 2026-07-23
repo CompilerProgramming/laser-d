@@ -206,6 +206,7 @@ This repository is based on DMD and retains its overall structure.
 | [`compiler/src`](compiler/src) | Compiler sources and build instructions |
 | [`compiler/test`](compiler/test) | Test infrastructure and upstream tests |
 | [`compiler/test/laser-d`](compiler/test/laser-d) | Laser-D executable language specification |
+| [`library`](library) | Laser-D standard-library source modules, beginning with verified C runtime bindings |
 | [`spec`](spec) | Language specification with Laser-D decisions |
 | [`spec-markdown`](spec-markdown) | Markdown mirror of reviewed specification chapters |
 | [`druntime`](druntime) | Upstream runtime sources; not part of the Laser-D runtime contract |

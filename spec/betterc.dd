@@ -7,11 +7,11 @@ $(HEADERNAV_TOC)
 $(P BetterC is a subset of D that doesn't depend on the D runtime library, only the C runtime library.
 )
 
-$(P $(RED Warning:) While the D runtime library and standard library are not linked in,
-it is still possible to import several packages (``core.*`` and ``std.*``) and use some templates, types and function declarations without bodies.
-However, these libraries were not written for BetterC, so you will need to determine which symbols may be used.
-Expect cryptic compiler or linker errors.
-)
+$(P Laser-D does not expose arbitrary druntime or Phobos modules. Its
+compiler-distributed standard library contains a reviewed $(D core.stdc)
+subset whose declarations compile as Laser-D and resolve against the platform
+C runtime. An import outside the distributed library is not made supported
+merely because an upstream D installation provides a module with that name.)
 
 $(H2 $(LNAME2 linking, Linking))
 
