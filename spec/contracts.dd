@@ -1,62 +1,54 @@
 Ddoc
 
-$(SPEC_S Contract Programming,
-
-$(P_LASER_D Function contracts are not supported. Laser-D rejects `in`
-preconditions, `out` postconditions, and contract-style `do` function bodies.
-Validation must use explicit function-body statements and return values. This
-does not decide the separate `assert` expression.)
+$(SPEC_S Function Contracts (Excluded),
 
 $(HEADERNAV_TOC)
 
-        $(P Contracts enable specifying conditions that must hold true
-        when the flow of runtime execution reaches the contract.
-        If a contract is not true, then the program is assumed to have entered
-        an undefined state.)
+$(LASER_NORMATIVE Function contracts are not part of Laser-D. Functions use a
+single ordinary $(D { ... }) body, and validation or error reporting must be
+written explicitly in that body or by the caller.)
 
-        $(RATIONALE
-        $(P Building contract support into the language provides:)
+$(H2 $(LNAME2 rejected-syntax, Rejected Syntax))
 
-        $(OL
-        $(LI a consistent look and feel for the contracts)
-        $(LI tool support)
-        $(LI the implementation can generate better code using information gathered
-        from the contracts)
-        $(LI easier management and enforcement of contracts)
-        $(LI handling of contract inheritance)
-        )
-        )
+$(LASER_EXCLUDED Laser-D rejects:)
 
-$(HTMLTAG3V img, src="$(ROOT_DIR)images/d4.gif" style="max-width:100%" alt="Contracts make D bug resistant" border="0")
+$(UL
+$(LI $(D in) preconditions in expression and block forms,)
+$(LI $(D out) postconditions in expression and block forms,)
+$(LI named postcondition result variables,)
+$(LI contract-style $(D do) function bodies.)
+)
 
-$(H2 $(LNAME2 assert_contracts, Assert Contract))
+$(P These forms are rejected on free functions, methods, constructors,
+templates, and function literals. Contract inheritance and overriding behavior
+are unavailable because classes and interfaces are rejected.)
 
-        $(P See $(GLINK2 expression, AssertExpression).)
+$(H2 $(LNAME2 assertions, Assertions))
 
-$(H2 $(LNAME2 pre_post_contracts, Pre and Post Contracts))
+$(P Runtime $(D assert) expressions are rejected independently of contracts.
+Compile-time $(D static assert) remains supported for conditions evaluated by
+the compiler.)
 
-        $(P See:)
-        * $(DDSUBLINK spec/function, preconditions, $(D in) contracts).
-        * $(DDSUBLINK spec/function, postconditions, $(D out) contracts).
+$(H2 $(LNAME2 alternatives, Explicit Validation))
 
+$(P Preconditions should be checked with ordinary control flow and represented
+through the function's documented result or an explicitly called error API.
+Postconditions should likewise be checked before each successful return when
+they are required.)
 
-$(H2 $(LNAME2 Invariants, Invariants))
+$(P Laser-D does not add hidden contract calls, build-mode-dependent contract
+removal, exception throwing, or runtime contract hooks.)
 
-        $(P Invariant declarations are not supported in Laser-D. In D, see
-        $(DDSUBLINK spec/struct, Invariant, Struct Invariants) and
-        $(DDSUBLINK spec/class, invariants, Class Invariants).)
+$(H2 $(LNAME2 rationale, Rationale))
 
-
-$(H2 $(LNAME2 references, References))
-
-        $(LIST
-        $(LINK2 https://web.archive.org/web/20080919174640/http://people.cs.uchicago.edu/~robby/contract-reading-list/, Contracts Reading List),
-        $(LINK2 http://jan.newmarch.name/java/contracts/paper-long.html, Adding Contracts to Java)
-        )
+$(P A single function-body syntax keeps executable validation visible and
+avoids a second assertion-based error path whose execution can depend on
+compiler options. Explicit results also work with the no-exceptions and
+no-D-runtime model.)
 
 $(SPEC_SUBNAV_PREV_NEXT template-mixin, Template Mixins, version, Conditional Compilation)
 )
 
 Macros:
-        CHAPTER=24
-        TITLE=Contract Programming
+CHAPTER=24
+TITLE=Function Contracts (Excluded)
