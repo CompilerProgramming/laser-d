@@ -293,9 +293,14 @@ remain rejected by their existing rules. An enclosing aggregate instance is
 not available: member aggregate types have no outer value, and local structs
 requiring hidden context are rejected.
 
-Non-array type properties, operators, assignment, calls, casts, and other
-postfix expressions retain their individual review status. Other primary forms
-are recorded in the feature inventory.
+The primary-expression grammar is fully classified. Root-qualified names and
+template instances, `$` in indexing, retained literals and type properties,
+scalar construction, `typeof`, `is`, parentheses, special keywords, and
+non-capturing function literals are supported. Dynamic and associative-array
+literals, `typeid`, compile-time import expressions, string mixin expressions,
+`new`, `super`, and forms that introduce rejected types remain unavailable
+under their individual decisions. Operators, assignment, calls, casts, and
+other non-primary expressions retain their individual review status.
 
 ### Mixins
 

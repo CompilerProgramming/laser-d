@@ -353,6 +353,20 @@ $(GNAME LiteralExpression):
     $(GLINK FunctionLiteral)
 )
 
+$(LASER_NORMATIVE The primary-expression grammar is fully classified.
+Identifiers, root-qualified identifiers, template instances, $(D $) in an
+indexing context, literals of retained types, retained compiler properties,
+scalar construction, $(D typeof), $(D is), parentheses, the supported special
+keywords, and non-capturing function literals are available. Each form remains
+subject to its type and feature-specific restrictions.)
+
+$(LASER_EXCLUDED Primary forms that allocate, require runtime type metadata,
+perform compile-time file I/O, inject source text, introduce a rejected type,
+or depend on classes are unavailable. This includes dynamic and associative
+array literals, $(D typeid), import expressions, string mixin expressions,
+$(D new), $(D super), and literals or properties belonging to rejected scalar
+families.)
+
 $(H3 $(LNAME2 this, $(D this)))
 
 $(LASER_SUPPORTED Inside a struct or union constructor or instance method,

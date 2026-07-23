@@ -1,8 +1,14 @@
 // TEST_MODE: runnable
 
+immutable int rootValue = 9;
+
+T identity(T)(T value)
+{
+    return value;
+}
+
 extern(C) int main()
 {
-    int moduleValue = 9;
     bool booleanFalse = false;
     bool booleanTrue = true;
     int decimalInteger = 42;
@@ -15,11 +21,31 @@ extern(C) int main()
     dchar unicodeCharacter = '\U0001F680';
     void* nullPointer = null;
 
-    int identifierExpression = moduleValue;
+    int identifierExpression = .rootValue;
     int parenthesizedExpression = (((identifierExpression)));
     int defaultConstructed = int();
     int explicitlyConstructed = int(42);
     double converted = double(explicitlyConstructed);
+    int rootTemplateResult = .identity!int(42);
+
+    int[3] fixedValues;
+    fixedValues[0] = 10;
+    fixedValues[1] = 20;
+    fixedValues[2] = 30;
+    int lastValue = fixedValues[$ - 1];
+
+    int function(int) explicitFunctionLiteral =
+        function int(int value) { return value + 1; };
+
+    static assert(is(typeof(identifierExpression) == int));
+    static assert(int.sizeof > 0);
+    static assert((int).sizeof == int.sizeof);
+    static assert(__FILE__.length > 0);
+    static assert(__FILE_FULL_PATH__.length >= __FILE__.length);
+    static assert(__MODULE__.length > 0);
+    static assert(__LINE__ > 0);
+    static assert(__FUNCTION__.length > 0);
+    static assert(__PRETTY_FUNCTION__.length >= __FUNCTION__.length);
 
     if (booleanFalse || !booleanTrue)
         return 1;
@@ -35,5 +61,9 @@ extern(C) int main()
         return 6;
     if (explicitlyConstructed != 42 || converted != 42.0)
         return 7;
+    if (rootTemplateResult != 42 || lastValue != 30)
+        return 8;
+    if (explicitFunctionLiteral(41) != 42)
+        return 9;
     return 0;
 }
