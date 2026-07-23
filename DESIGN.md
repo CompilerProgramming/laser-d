@@ -254,7 +254,10 @@ imported without a handwritten D binding. ImportC remains a C11 compiler; the
 restrictions on Laser-D source syntax do not remove C types required to compile
 C. For example, C `long double` continues to use the frontend's internal
 extended floating-point representation even though Laser-D source cannot name
-the D `real` type.
+the D `real` type. ImportC does not admit D declarations, expressions,
+templates, attributes, or type syntax into C source. Its reuse of the frontend
+AST, semantic analysis, CTFE implementation, optimizer, and backend is an
+implementation detail rather than a source-language feature.
 
 The initial ImportC baseline uses preprocessed `.i` translation units and
 covers standalone compilation and execution plus
@@ -262,7 +265,9 @@ mixed D/C use of functions, globals, structs, unions, enums, function pointers,
 initializers, and static assertions. The external preprocessing pipeline,
 headers, macros, conditional compilation, atomics, vector extensions, inline
 assembly, and implementation-specific C extensions remain to be audited in
-separate reviewable categories.
+separate reviewable categories. The intended extension policy is C11 plus a
+small set of individually reviewed GNU-compatible C extensions, not wholesale
+compatibility with a vendor extension family.
 
 ## Expressions
 

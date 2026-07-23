@@ -14,6 +14,11 @@ of the reviewed ImportC baseline. Conversely, acceptance by the upstream
 ImportC implementation does not make an unaudited C extension a Laser-D
 guarantee.)
 
+$(LASER_NORMATIVE ImportC does not admit D declarations, expressions,
+statements, templates, attributes, or type syntax into C source. The shared
+frontend representation and semantic machinery are implementation details, not
+a mechanism for mixing the two source languages within one translation unit.)
+
 $(H2 $(LNAME2 relationship, Relationship to Laser-D))
 
 $(P Laser-D and ImportC share the compiler frontend, optimizer, backend, object
@@ -152,6 +157,11 @@ the Laser-D ImportC contract only when this specification and conformance tests
 classify it. Sharing an internal AST representation with D is an implementation
 detail, not a source-language promise.)
 
+$(P The frontend may internally evaluate C declarations or expressions while
+performing semantic analysis. Reuse of CTFE machinery does not expose D CTFE
+syntax, $(D __ctfe), templates, traits, static control flow, or other D
+compile-time features to ImportC source.)
+
 $(H2 $(LNAME2 upstream-tests, Upstream Compatibility Evidence))
 
 $(P The Laser-D suite contains copies of 41 upstream preprocessed ImportC tests
@@ -179,28 +189,35 @@ translation, and platform-specific driver behavior.)
 $(P Projects requiring the current reviewed baseline should provide
 preprocessed $(TT .i) files explicitly.)
 
-$(H2 $(LNAME2 extensions, Extended ImportC Surface (Under Review)))
+$(H2 $(LNAME2 extensions, C Extensions (Under Review)))
 
-$(LASER_UNDER_REVIEW The following ImportC areas require separate,
-feature-specific review:)
+$(P The intended extension policy is C11 plus a small set of individually
+reviewed GNU-compatible C extensions needed for practical interoperability.
+No GNU, Clang, Microsoft, Digital Mars, or ImportC-specific extension family is
+accepted wholesale.)
+
+$(LASER_UNDER_REVIEW The following C and toolchain areas require separate,
+feature-specific review before any individual extension becomes normative:)
 
 $(UL
 $(LI headers, macros, conditional preprocessing, and preprocessing pragmas,)
 $(LI C atomics and memory-ordering facilities,)
 $(LI vector types and compiler vector extensions,)
 $(LI basic or extended inline assembly,)
-$(LI GNU, Clang, Microsoft, and Digital Mars attributes, declarations, and
-calling-convention extensions beyond individually tested cases,)
+$(LI GNU-compatible attributes, declarations, builtins, and calling-convention
+extensions beyond individually reviewed cases,)
+$(LI Clang, Microsoft, and Digital Mars vendor extensions,)
 $(LI implementation-specific builtins and the generated ImportC builtin
-interface,)
-$(LI C-to-D import-generation facilities,)
-$(LI ImportC-specific imports in the reverse C-to-D direction,)
-$(LI CTFE or other D-frontend extensions when applied to C declarations.)
+interface.)
 )
 
 $(P Current acceptance of an item in this list is implementation behavior, not
 normative Laser-D support. Current rejection likewise does not settle the final
 decision until the feature is audited.)
+
+$(P ImportC-specific syntax for importing D modules, generating D interfaces,
+or otherwise exposing D language facilities to C source is outside the C11 and
+GNU-compatible extension policy and is not part of the reviewed baseline.)
 
 $(H2 $(LNAME2 portability, Portability and ABI))
 
