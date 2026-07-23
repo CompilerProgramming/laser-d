@@ -336,9 +336,6 @@ class Lexer
             case TOK.rvalue:
                 error(token.loc, "`__rvalue` is not supported in Laser-D because explicit move and ownership hints are disabled");
                 break;
-            case TOK.const_:
-                error(token.loc, "`const` is not supported in Laser-D; use `immutable` for permanently unmodifiable data");
-                break;
             case TOK.inout_:
                 error(token.loc, "`inout` is not supported in Laser-D because qualifier wildcard matching is disabled");
                 break;

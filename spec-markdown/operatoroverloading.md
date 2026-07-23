@@ -183,8 +183,9 @@ features.
 ## <a id="immutable-receivers"></a>Immutable Receivers
 
 Operator hooks may be declared for an `immutable` receiver and invoked
-on immutable struct values. Parameters may likewise use supported immutable
-types. The rejected `const` and `inout` qualifiers are not available.
+on immutable struct values. Parameters may use supported `const` or
+`immutable` types. Postfix `const` receiver qualifiers and all `inout`
+qualifiers remain unavailable.
 
 ## <a id="restrictions"></a>Cross-Cutting Restrictions
 
@@ -192,7 +193,7 @@ types. The rejected `const` and `inout` qualifiers are not available.
 
 - classes, interfaces, inheritance, or virtual dispatch,
 - reference return values,
-- `const`, `inout`, `shared`, or rejected function annotations,
+- postfix `const`, `inout`, `shared`, or rejected function annotations,
 - postblits, copy or move constructors, destructors, or hidden contexts,
 - GC-backed allocation, array growth, associative arrays, or capturing delegates,
 - optional call parentheses or `@property`.

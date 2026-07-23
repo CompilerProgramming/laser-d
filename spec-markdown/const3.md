@@ -6,38 +6,44 @@ source: ../spec/const3.dd
 
 # Type Qualifiers
 
-Laser-D supports `immutable` as its sole source-level type qualifier.
-It retains D's transitive immutable semantics: after initialization, an
-immutable value and every value reachable through it cannot be modified.
+Laser-D supports the `const` and `immutable` source-level type
+qualifiers. `const` provides an aliasable read-only view. `immutable`
+retains D's transitive immutable semantics: after initialization, an immutable
+value and every value reachable through it cannot be modified.
 
 > **Rejected in Laser-D:**
 >
-> The D qualifiers `const`, `inout`, and `shared` are
-> not supported in Laser-D source. ImportC retains the C qualifiers required to
-> represent and compile C declarations; that does not make those spellings
-> available to Laser-D modules.
+> The D qualifiers `inout` and `shared` are not supported
+> in Laser-D source. Postfix `const` function and receiver qualifiers are also
+> rejected; `const` is retained solely as a type qualifier.
 
 ## <a id="Type"></a>Qualifier Grammar
 
 ```text
-ImmutableType:
+QualifiedType:
+    const ( Type )
+    const Type
     immutable ( Type )
     immutable Type
 ```
 
 The prefix storage-class form and the type-constructor form describe the
-same immutable type where both grammars are valid.
+same qualified type where both grammars are valid.
 
 ```d
+const int readOnly = 1;
+const(int) alsoReadOnly = 2;
 immutable int first = 1;
 immutable(int) second = 2;
 ```
 
-## <a id="const_and_immutable"></a>Mutable and Immutable Values
+## <a id="const_and_immutable"></a>and Immutable Values
 
 An unqualified Laser-D value is mutable unless another rule makes the
-particular storage unmodifiable. An `immutable` value is initialized once
-and cannot subsequently be assigned or mutated.
+particular view unmodifiable. A `const` view cannot be used to modify its
+referent, although another mutable alias may modify the same data. An
+`immutable` value is initialized once and cannot subsequently be assigned
+or mutated through any alias.
 
 Immutability is transitive. Applying `immutable` to a pointer, slice, fixed array, or aggregate applies to its reachable components and fields, not
 only to the outer reference value.
@@ -53,9 +59,10 @@ immutable Pair pair = Pair(1, 2);
 // pair.first = 3; // rejected
 ```
 
-`immutable` means permanently unmodifiable, not merely read-only through
-one reference. Laser-D intentionally has no source qualifier corresponding to
-D's aliasable read-only `const` view.
+`immutable` means permanently unmodifiable, whereas `const` means
+read-only through the qualified view. This distinction permits accurate C
+library declarations without claiming that foreign data is permanently
+immutable.
 
 ## <a id="immutable_storage_class"></a>Immutable Declarations
 
@@ -105,13 +112,20 @@ rules. They require no mutable static storage or module lifecycle function.
 > a module constructor. Module constructors, including shared module
 > constructors, are rejected.
 
-## <a id="const_storage_class"></a>Rejected `const` Storage Class
+## <a id="const_storage_class"></a>Const Type Qualifier
+
+Both `const Type` and `const(Type)` form a read-only view of a
+supported type. Qualification is transitive through pointers, slices, fixed
+arrays, and aggregate fields as defined by D's type system. Mutable and
+immutable values may be viewed as `const` when the ordinary qualifier
+conversion rules permit it.
 
 > **Rejected in Laser-D:**
 >
-> The `const` storage class and `const(Type)` constructor
-> are rejected. Use `immutable` only when the value can never change, or use an
-> ordinary mutable type and an explicit API that does not mutate it.
+> Writing `const` after a function parameter list would
+> qualify a member-function receiver rather than a data type. That postfix form
+> is rejected; use an `immutable` receiver only when the complete value is
+> permanently immutable.
 
 ## <a id="immutable_type"></a>Immutable Types
 
@@ -177,15 +191,14 @@ int inspect()
 ```
 
 Overload resolution may distinguish mutable and immutable receiver methods.
-The rejected `const`, `inout`, and `shared` receiver forms are not
-candidates.
+The rejected postfix `const`, `inout`, and `shared` receiver forms are
+not candidates.
 
-## <a id="const_type"></a>Rejected `const` Type
+## <a id="const_type"></a>Const Types
 
-> **Rejected in Laser-D:**
->
-> `const(Type)` and every derived type containing source-level
-> `const` are rejected in Laser-D modules.
+`const(Type)` and derived types containing `const` are supported when
+their underlying types are supported. Qualification does not make an otherwise
+rejected type available.
 
 ## <a id="const_member_functions"></a>Rejected `const` Methods
 

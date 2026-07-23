@@ -1439,6 +1439,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             switch (token.value)
             {
             case TOK.const_:
+                error(token.loc, "`const` function qualifiers are not supported in Laser-D; use `immutable` for a permanently unmodifiable receiver");
                 stc = STC.const_;
                 break;
 

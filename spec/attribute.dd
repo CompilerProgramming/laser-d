@@ -191,7 +191,7 @@ Programs may call explicit C threading and synchronization APIs.)
 $(H2 $(LNAME2 rejected_attributes, Other Rejected Attributes))
 
 $(LASER_EXCLUDED $(D @live), $(D scope), $(D lazy), parameter/result
-$(D return), $(D inout), $(D const), $(D final) parameters, $(D __rvalue),
+$(D return), $(D inout), $(D final) parameters, $(D __rvalue),
 $(D abstract), $(D final), and $(D override) are rejected in the source
 locations governed by their corresponding feature decisions.)
 

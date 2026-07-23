@@ -4,36 +4,42 @@ $(D_S Type Qualifiers,
 
 $(HEADERNAV_TOC)
 
-$(P Laser-D supports $(D immutable) as its sole source-level type qualifier.
-It retains D's transitive immutable semantics: after initialization, an
-immutable value and every value reachable through it cannot be modified.)
+$(P Laser-D supports the $(D const) and $(D immutable) source-level type
+qualifiers. $(D const) provides an aliasable read-only view. $(D immutable)
+retains D's transitive immutable semantics: after initialization, an immutable
+value and every value reachable through it cannot be modified.)
 
-$(LASER_REJECTED The D qualifiers $(D const), $(D inout), and $(D shared) are
-not supported in Laser-D source. ImportC retains the C qualifiers required to
-represent and compile C declarations; that does not make those spellings
-available to Laser-D modules.)
+$(LASER_REJECTED The D qualifiers $(D inout) and $(D shared) are not supported
+in Laser-D source. Postfix $(D const) function and receiver qualifiers are also
+rejected; $(D const) is retained solely as a type qualifier.)
 
 $(H2 $(LNAME2 Type, Qualifier Grammar))
 
 $(GRAMMAR
-$(GNAME ImmutableType):
+$(GNAME QualifiedType):
+    $(D const $(LPAREN)) $(GLINK2 type, Type) $(D $(RPAREN))
+    $(D const) $(GLINK2 type, Type)
     $(D immutable $(LPAREN)) $(GLINK2 type, Type) $(D $(RPAREN))
     $(D immutable) $(GLINK2 type, Type)
 )
 
 $(P The prefix storage-class form and the type-constructor form describe the
-same immutable type where both grammars are valid.)
+same qualified type where both grammars are valid.)
 
 ---
+const int readOnly = 1;
+const(int) alsoReadOnly = 2;
 immutable int first = 1;
 immutable(int) second = 2;
 ---
 
-$(H2 $(LNAME2 const_and_immutable, Mutable and Immutable Values))
+$(H2 $(LNAME2 const_and_immutable, Mutable, Const, and Immutable Values))
 
 $(P An unqualified Laser-D value is mutable unless another rule makes the
-particular storage unmodifiable. An $(D immutable) value is initialized once
-and cannot subsequently be assigned or mutated.)
+particular view unmodifiable. A $(D const) view cannot be used to modify its
+referent, although another mutable alias may modify the same data. An
+$(D immutable) value is initialized once and cannot subsequently be assigned
+or mutated through any alias.)
 
 $(P Immutability is transitive. Applying $(D immutable) to a pointer, slice,
 fixed array, or aggregate applies to its reachable components and fields, not
@@ -50,9 +56,10 @@ immutable Pair pair = Pair(1, 2);
 // pair.first = 3; // rejected
 ---
 
-$(P $(D immutable) means permanently unmodifiable, not merely read-only through
-one reference. Laser-D intentionally has no source qualifier corresponding to
-D's aliasable read-only $(D const) view.)
+$(P $(D immutable) means permanently unmodifiable, whereas $(D const) means
+read-only through the qualified view. This distinction permits accurate C
+library declarations without claiming that foreign data is permanently
+immutable.)
 
 $(H2 $(LNAME2 immutable_storage_class, Immutable Declarations))
 
@@ -100,11 +107,18 @@ $(LASER_REJECTED An immutable static declaration cannot defer initialization to
 a module constructor. Module constructors, including shared module
 constructors, are rejected.)
 
-$(H2 $(LNAME2 const_storage_class, Rejected `const` Storage Class))
+$(H2 $(LNAME2 const_storage_class, Const Type Qualifier))
 
-$(LASER_REJECTED The $(D const) storage class and $(D const(Type)) constructor
-are rejected. Use $(D immutable) only when the value can never change, or use an
-ordinary mutable type and an explicit API that does not mutate it.)
+$(P Both $(D const Type) and $(D const(Type)) form a read-only view of a
+supported type. Qualification is transitive through pointers, slices, fixed
+arrays, and aggregate fields as defined by D's type system. Mutable and
+immutable values may be viewed as $(D const) when the ordinary qualifier
+conversion rules permit it.)
+
+$(LASER_REJECTED Writing $(D const) after a function parameter list would
+qualify a member-function receiver rather than a data type. That postfix form
+is rejected; use an $(D immutable) receiver only when the complete value is
+permanently immutable.)
 
 $(H2 $(LNAME2 immutable_type, Immutable Types))
 
@@ -170,13 +184,14 @@ int inspect()
 )
 
 $(P Overload resolution may distinguish mutable and immutable receiver methods.
-The rejected $(D const), $(D inout), and $(D shared) receiver forms are not
-candidates.)
+The rejected postfix $(D const), $(D inout), and $(D shared) receiver forms are
+not candidates.)
 
-$(H2 $(LNAME2 const_type, Rejected `const` Type))
+$(H2 $(LNAME2 const_type, Const Types))
 
-$(LASER_REJECTED $(D const(Type)) and every derived type containing source-level
-$(D const) are rejected in Laser-D modules.)
+$(P $(D const(Type)) and derived types containing $(D const) are supported when
+their underlying types are supported. Qualification does not make an otherwise
+rejected type available.)
 
 $(H2 $(LNAME2 const_member_functions, Rejected `const` Methods))
 

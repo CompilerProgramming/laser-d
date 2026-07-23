@@ -199,8 +199,9 @@ features.)
 $(H2 $(LNAME2 immutable-receivers, Immutable Receivers))
 
 $(P Operator hooks may be declared for an $(D immutable) receiver and invoked
-on immutable struct values. Parameters may likewise use supported immutable
-types. The rejected $(D const) and $(D inout) qualifiers are not available.)
+on immutable struct values. Parameters may use supported $(D const) or
+$(D immutable) types. Postfix $(D const) receiver qualifiers and all $(D inout)
+qualifiers remain unavailable.)
 
 $(H2 $(LNAME2 restrictions, Cross-Cutting Restrictions))
 
@@ -209,7 +210,7 @@ $(LASER_EXCLUDED Operator hooks cannot use or implicitly restore:)
 $(UL
 $(LI classes, interfaces, inheritance, or virtual dispatch,)
 $(LI reference return values,)
-$(LI $(D const), $(D inout), $(D shared), or rejected function annotations,)
+$(LI postfix $(D const), $(D inout), $(D shared), or rejected function annotations,)
 $(LI postblits, copy or move constructors, destructors, or hidden contexts,)
 $(LI GC-backed allocation, array growth, associative arrays, or capturing
 delegates,)

@@ -20,6 +20,7 @@ $(GNAME TypeCtors):
     $(GLINK TypeCtor) $(GSELF TypeCtors)
 
 $(GNAME TypeCtor):
+    $(D const)
     $(D immutable)
 
 $(GNAME BasicType):

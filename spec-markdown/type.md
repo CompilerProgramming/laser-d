@@ -23,6 +23,7 @@ TypeCtors:
     TypeCtor TypeCtors
 
 TypeCtor:
+    const
     immutable
 
 BasicType:

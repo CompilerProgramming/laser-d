@@ -216,7 +216,7 @@ of variables.
 > **Excluded from Laser-D:**
 >
 > `@live`, `scope`, `lazy`, parameter/result
-> `return`, `inout`, `const`, `final` parameters, `__rvalue`, `abstract`, `final`, and `override` are rejected in the source
+> `return`, `inout`, `final` parameters, `__rvalue`, `abstract`, `final`, and `override` are rejected in the source
 > locations governed by their corresponding feature decisions.
 
 ### <a id="scope"></a>`scope`
