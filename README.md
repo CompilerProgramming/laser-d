@@ -98,7 +98,9 @@ In short:
 The current design rationale is recorded in [DESIGN.md](DESIGN.md), and the
 feature inventory is maintained in [FEATURE_STATUS.md](FEATURE_STATUS.md).
 Laser-D-specific language notes are incorporated into the relevant chapters
-under [`spec`](spec).
+under [`spec`](spec). Reviewed chapters are also available in the parallel
+Markdown specification under [`spec-markdown`](spec-markdown); the Ddoc sources
+remain unchanged during the migration.
 
 The executable language specification lives under
 [`compiler/test/laser-d`](compiler/test/laser-d). Each accepted feature has a
@@ -117,6 +119,7 @@ This repository is based on DMD and retains its overall structure.
 | [`compiler/test`](compiler/test) | Test infrastructure and upstream tests |
 | [`compiler/test/laser-d`](compiler/test/laser-d) | Laser-D executable language specification |
 | [`spec`](spec) | Language specification with Laser-D decisions |
+| [`spec-markdown`](spec-markdown) | Markdown mirror of reviewed specification chapters |
 | [`druntime`](druntime) | Upstream runtime sources; not part of the Laser-D runtime contract |
 
 The upstream DMD project and D language resources are available at
