@@ -127,6 +127,9 @@ The following tools are required:
 
 - DMD with `dmd` and `rdmd` available on `PATH` (recommended), or compatible
   `ldmd2`/`gdmd` wrappers;
+- Dub for building the compiler;
+- CMake 3.24 or later for standard-library compilation, testing, installation,
+  and packaging;
 - a native C++ toolchain;
 - Visual Studio or Microsoft C++ Build Tools on Windows; or
 - GCC/Clang and the usual development tools on Linux and macOS.
@@ -139,31 +142,17 @@ version 2.079.1 or later.
 From the repository root:
 
 ```console
-rdmd compiler/src/build.d dmd
+dub build dmd:compiler --build=release
 ```
 
-On Windows PowerShell, the equivalent command is:
+Dub writes `laserd` (`laserd.exe` on Windows) to the repository root. It is
+deliberately not named `dmd`, so it cannot be mistaken for the full upstream
+compiler used to bootstrap the build.
 
-```powershell
-rdmd compiler\src\build.d dmd
-```
-
-The release executable is written beneath the platform-specific generated
-directory. It is named `laserd` so it cannot be mistaken for the full upstream
-`dmd` compiler used to bootstrap the build:
-
-```text
-generated/windows/release/64/laserd.exe
-generated/linux/release/64/laserd
-generated/osx/release/64/laserd
-```
-
-The build uses `dmd` from `PATH` by default. To select another full host
-compiler explicitly, pass the build variable described by the upstream build
-system:
+The build uses the full D compiler selected by Dub. To choose it explicitly:
 
 ```console
-rdmd compiler/src/build.d dmd HOST_DMD=/path/to/dmd
+dub build dmd:compiler --build=release --compiler=/path/to/dmd
 ```
 
 ### Run the Laser-D tests
@@ -193,24 +182,40 @@ To run one test, pass its path relative to `compiler/test`:
 rdmd run.d laser-d/templates_accepted.d
 ```
 
-The test driver automatically selects the newly built compiler under
-`generated` as the compiler under test. `HOST_DMD` is used only to build the
-full-D test infrastructure.
+The test driver automatically selects the Dub-built `laserd` in the repository
+root as the compiler under test. `HOST_DMD` is used only to build the full-D
+test infrastructure. Set `LASERD_COMPILER` to override the compiler under test.
 
 ### Build a distribution
 
-After building the compiler, use the full host D toolchain and Dub to assemble
-a native distribution:
+After building the compiler, configure and build the standard library with
+CMake:
 
 ```console
-dub run dmd:distribution
+cmake -S library -B generated/cmake-library \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLASERD_COMPILER="$PWD/laserd"
+cmake --build generated/cmake-library --config Release
+ctest --test-dir generated/cmake-library \
+    --build-config Release --output-on-failure
+cmake --build generated/cmake-library --config Release --target package
 ```
 
-The command creates a staged directory and ZIP archive under `dist/`, named for
-the Laser-D version, host platform, and `x86_64` architecture. For example:
+On Windows PowerShell, pass the executable explicitly:
+
+```powershell
+cmake -S library -B generated\cmake-library `
+    -DLASERD_COMPILER="$PWD\laserd.exe"
+cmake --build generated\cmake-library --config Release
+ctest --test-dir generated\cmake-library `
+    --build-config Release --output-on-failure
+cmake --build generated\cmake-library --config Release --target package
+```
+
+CMake and CPack create a ZIP archive under `dist/`, named for the Laser-D
+version, host platform, and `x86_64` architecture. For example:
 
 ```text
-dist/laser-d-v2.113.0-beta.1-linux-x86_64/
 dist/laser-d-v2.113.0-beta.1-linux-x86_64.zip
 ```
 
@@ -220,13 +225,25 @@ Each distribution contains:
 - an adjacent compiler configuration that automatically adds the packaged
   `import/` directory;
 - `import/object.d` and the supported `core.stdc` source modules; and
+- `lib/liblaserd_checksum.a` (`lib/laserd_checksum.lib` on Windows), its
+  `laserd.checksum` import module, C header, and rebuildable example sources;
 - the project and standard-library documentation and licence.
 
-The current `core.stdc` modules are declarations for the platform C runtime, so
-there is no Laser-D runtime or standard-library binary to include. The native
-linker resolves those declarations against the Windows CRT, Linux libc, or
-macOS libSystem. A distribution is platform-specific and must be built on its
-target platform; CI publishes separate Windows, Linux, and macOS ZIP artifacts.
+The `core.stdc` modules remain declarations for the platform C runtime. The
+checksum example is a genuine native C static library built by CMake and called
+through a reviewed Laser-D `extern(C)` binding. A distribution is
+platform-specific and must be built on its target platform; CI publishes
+separate Windows, Linux, and macOS ZIP artifacts.
+
+After extracting a distribution, its installed example can be rebuilt without
+the Laser-D source repository:
+
+```console
+cmake -S share/laserd/examples/checksum -B build/checksum
+cmake --build build/checksum --config Release
+ctest --test-dir build/checksum \
+    --build-config Release --output-on-failure
+```
 
 ## Repository layout
 

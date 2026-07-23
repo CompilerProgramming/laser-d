@@ -72,8 +72,14 @@ string model()
 
 string dmdPath()
 {
-    static string dmdPath;
-    return dmdPath ? dmdPath : (dmdPath = buildOutputPath.buildPath(laserDFilename));
+    const configured = environment.get("LASERD_COMPILER", "");
+    if (configured.length)
+        return configured;
+
+    const dubCompiler = projectRootDir.buildPath(laserDFilename);
+    return dubCompiler.exists
+        ? dubCompiler
+        : buildOutputPath.buildPath(laserDFilename);
 }
 
 string resultsDir()

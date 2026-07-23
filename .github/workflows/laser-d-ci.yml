@@ -25,21 +25,18 @@ jobs:
           - name: Linux x86-64
             os: ubuntu-24.04
             host-compiler: dmd
-            compiler: generated/linux/release/64/laserd
+            compiler: laserd
             distribution-platform: linux
-            distribution-compiler: laserd
           - name: Windows x86-64
             os: windows-2025
             host-compiler: dmd
-            compiler: generated/windows/release/64/laserd.exe
+            compiler: laserd.exe
             distribution-platform: windows
-            distribution-compiler: laserd.exe
           - name: macOS x86-64
             os: macos-15-intel
             host-compiler: ldc
-            compiler: generated/osx/release/64/laserd
+            compiler: laserd
             distribution-platform: macos
-            distribution-compiler: laserd
 
     defaults:
       run:
@@ -66,27 +63,40 @@ jobs:
           "${DMD}" --version
 
       - name: Build Laser-D
-        run: '"${DMD}" -i -run compiler/src/build.d dmd'
+        run: dub build dmd:compiler --build=release --compiler="${DMD}"
 
       - name: Check the Laser-D executable
-        run: '"${{ matrix.compiler }}" --version'
+        run: '"./${{ matrix.compiler }}" --version'
 
       - name: Run the Laser-D test suite
         working-directory: compiler/test
-        run: '"${DMD}" -i -run run.d laser-d'
+        run: |
+          LASERD_COMPILER="${GITHUB_WORKSPACE}/${{ matrix.compiler }}" \
+            "${DMD}" -i -run run.d laser-d
 
       - name: Test the Laser-D standard library
-        run: '"${{ matrix.compiler }}" -conf= -Ilibrary -run library/test/core_stdc.d'
+        run: '"./${{ matrix.compiler }}" -conf= -Ilibrary -run library/test/core_stdc.d'
+
+      - name: Configure the Laser-D standard library
+        run: |
+          cmake -S library -B generated/cmake-library \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLASERD_COMPILER="${GITHUB_WORKSPACE}/${{ matrix.compiler }}"
+
+      - name: Build the Laser-D standard library
+        run: cmake --build generated/cmake-library --config Release
+
+      - name: Test C and Laser-D interoperability
+        run: |
+          ctest --test-dir generated/cmake-library \
+            --build-config Release \
+            --output-on-failure
 
       - name: Build the Laser-D distribution
-        run: dub run dmd:distribution
-
-      - name: Test the staged Laser-D distribution
         run: |
-          VERSION="$(tr -d '\r\n' < VERSION)"
-          DIST_ROOT="dist/laser-d-${VERSION}-${{ matrix.distribution-platform }}-x86_64"
-          "${DIST_ROOT}/bin/${{ matrix.distribution-compiler }}" \
-            -run library/test/core_stdc.d
+          cmake --build generated/cmake-library \
+            --config Release \
+            --target package
 
       - name: Upload the Laser-D distribution
         uses: actions/upload-artifact@v4

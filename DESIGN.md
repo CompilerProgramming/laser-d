@@ -616,13 +616,21 @@ Laser-D, separately from the language-conformance suite under
 `compiler/test/laser-d`. The remaining upstream `core.stdc` modules are not
 implicitly supported merely because their source still exists under druntime.
 
-The Dub `dmd:distribution` subpackage assembles a native ZIP containing the
-already-built Laser-D compiler and these source imports. The compiler executable
-is named `laserd` (`laserd.exe` on Windows), distinguishing it from the full
-upstream `dmd` compiler used to build Laser-D. Its compiler
-configuration locates the packaged `import/` directory relative to the
-executable, so installed programs do not depend on the repository layout.
-There is no standard-library binary at this stage because `core.stdc` consists
-only of declarations resolved by the target platform's C runtime. Distribution
-archives are therefore built and tested independently on Windows, Linux, and
-macOS.
+Dub builds the compiler executable as `laserd` (`laserd.exe` on Windows),
+distinguishing it from the full upstream `dmd` compiler used to bootstrap the
+build. CMake owns standard-library C compilation, mixed C/Laser-D integration
+tests, installation, and CPack distribution assembly. The installed compiler
+configuration locates `import/` relative to the executable, so programs do not
+depend on the repository layout.
+
+The `checksum` component is the reference C-backed library. CMake builds a
+native static archive from its C implementation and installs the C header
+beside a reviewed `laserd.checksum` import module. CTest compiles and runs a
+Laser-D consumer that calls both the raw `extern(C)` declaration and a
+slice-based Laser-D wrapper. Its source is included in the distribution as the
+template for future C libraries.
+
+No archive is produced for `core.stdc` because those modules consist only of
+declarations resolved by the platform C runtime. Other standard-library
+components may contribute native archives explicitly. Distribution archives
+are built and tested independently on Windows, Linux, and macOS.
