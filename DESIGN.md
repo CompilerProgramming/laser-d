@@ -374,8 +374,15 @@ generate source-level entry points. Libraries need no `main` function.
 Frontend-generated helpers required to implement supported structs, templates,
 function literals, and other retained constructs remain compiler internals.
 They are not additional source-level function forms and must not expose a
-rejected runtime protocol. Language `unittest` blocks remain a separate review
-category.
+rejected runtime protocol.
+
+Language `unittest` blocks are rejected. In BetterC they are compiled as hidden
+functions only when `-unittest` is supplied, are not automatically run, and
+must be discovered with `__traits(getUnitTests)` and called by user code.
+Laser-D instead uses explicit test functions and an explicit C `main`, following
+the same visible execution model as ordinary programs. The `-unittest` option
+and `__traits(getUnitTests)` are rejected, and the predefined `unittest`
+version is never enabled. Assertion expressions remain a separate decision.
 
 Function contracts are rejected. This includes expression and block forms of
 `in` preconditions and `out` postconditions, named postcondition results, and
@@ -480,8 +487,9 @@ virtual-method traits consequently have no valid class operands in Laser-D.
 text and crosses the same compile-time text-to-language boundary as rejected
 string mixins. `__traits(getPointerBitmap)` is rejected because it exposes
 metadata for precise garbage-collector scanning, for which Laser-D has no
-runtime contract. `__traits(getUnitTests)` is deferred until language unit-test
-declarations and execution are reviewed.
+runtime contract. `__traits(getUnitTests)` is rejected because language
+unit-test declarations and their hidden-function discovery protocol are not
+part of Laser-D.
 
 ### Compile-time I/O
 

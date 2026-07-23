@@ -489,53 +489,10 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
                 goto Lerror;
 
             case TOK.unittest_:
-                /**
-                 * Ignore unittests in non-root modules.
-                 *
-                 * This mainly means that unittests *inside templates* are only
-                 * ever instantiated if the module lexically declaring the
-                 * template is one of the root modules.
-                 *
-                 * E.g., compiling some project with `-unittest` does NOT
-                 * compile and later run any unittests in instantiations of
-                 * templates declared in other libraries.
-                 *
-                 * Declaring unittests *inside* templates is considered an anti-
-                 * pattern. In almost all cases, the unittests don't depend on
-                 * the template parameters, but instantiate the template with
-                 * fixed arguments (e.g., Nullable!T unittests instantiating
-                 * Nullable!int), so compiling and running identical tests for
-                 * each template instantiation is hardly desirable.
-                 * But adding a unittest right below some function being tested
-                 * is arguably good for locality, so unittests end up inside
-                 * templates.
-                 * To make sure a template's unittests are run, it should be
-                 * instantiated in the same module, e.g., some module-level
-                 * unittest.
-                 *
-                 * Another reason for ignoring unittests in templates from non-
-                 * root modules is for template codegen culling via
-                 * TemplateInstance.needsCodegen(). If the compiler decides not
-                 * to emit some Nullable!bool because there's an existing
-                 * instantiation in some non-root module, it has no idea whether
-                 * that module was compiled with -unittest too, and so whether
-                 * Nullable!int (instantiated in some unittest inside the
-                 * Nullable template) can be culled too. By ignoring unittests
-                 * in non-root modules, the compiler won't consider any
-                 * template instantiations in these unittests as candidates for
-                 * further codegen culling.
-                 */
-                // The isRoot check is here because it can change after parsing begins (see dmodule.d)
-                if (doUnittests && mod.isRoot())
                 {
-                    linkage = LINK.d; // unittests have D linkage
-                    s = parseUnitTest(pAttrs);
-                    if (*pLastDecl)
-                        (*pLastDecl).ddocUnittest = cast(AST.UnitTestDeclaration)s;
-                }
-                else
-                {
-                    // Skip over unittest block by counting { }
+                    error(token.loc, "`unittest` blocks are not supported in Laser-D; use explicit test functions and an explicit C entry point");
+
+                    // Skip over the rejected block by counting braces.
                     Loc loc = token.loc;
                     int braces = 0;
                     while (1)
@@ -563,8 +520,8 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
                         }
                         break;
                     }
-                    // Workaround 14894. Add an empty unittest declaration to keep
-                    // the number of symbols in this scope independent of -unittest.
+
+                    // Preserve declaration indexing after reporting the rejection.
                     s = new AST.UnitTestDeclaration(loc, token.loc, STC.none, null);
                 }
                 break;

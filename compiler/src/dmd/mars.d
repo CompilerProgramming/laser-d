@@ -1638,7 +1638,7 @@ bool parseCommandLine(const ref Strings arguments, const size_t argc, out Param 
             params.nothrowOptimizations = true;
         }
         else if (arg == "-unittest")
-            params.useUnitTests = true;
+            eSink.error(Loc.initial, "`-unittest` is not supported in Laser-D; use explicit test programs");
         else if (p[1] == 'I')              // https://dlang.org/dmd.html#switch-I
         {
             params.imppath.push(ImportPathInfo(p + 2 + (p[2] == '=')));

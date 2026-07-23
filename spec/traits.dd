@@ -8,7 +8,7 @@ $(P_LASER_D Read-only traits that inspect supported Laser-D declarations are
 supported. Predicates may ask whether a declaration has a rejected language
 kind, but traits cannot make that kind available. `__traits(toType)` and
 `__traits(getPointerBitmap)` are not supported. `__traits(getUnitTests)` is
-deferred to the unit-test feature review.)
+also rejected because language unit-test blocks are unavailable.)
 
 $(H2 $(LNAME2 grammar, Grammar))
 
@@ -1795,83 +1795,10 @@ version (CppRuntime_Microsoft)
 
 $(H3 $(GNAME getUnitTests))
 
-        $(P_LASER_D This trait is not yet classified. Its Laser-D status will be
-        decided with language unit-test declarations and execution.)
-
-        $(P
-                Takes one argument, a symbol of an aggregate (e.g. struct/class/module).
-                The result is a symbol sequence of all the unit test functions of that aggregate.
-                The functions returned are like normal nested static functions,
-                $(DDSUBLINK spec/glossary, ctfe, CTFE) will work and
-                $(DDSUBLINK spec/attribute, uda, UDAs) will be accessible.
-        )
-
-        $(NOTE
-                The `-unittest` flag needs to be passed to the compiler. If the flag
-                is not passed, $(CODE __traits(getUnitTests)) will always return an
-                empty sequence.
-        )
-
-$(SPEC_RUNNABLE_EXAMPLE_COMPILE
----
-module foo;
-
-import core.runtime;
-import std.stdio;
-
-struct name { string name; }
-
-class Foo
-{
-    unittest
-    {
-        writeln("foo.Foo.unittest");
-    }
-}
-
-@name("foo") unittest
-{
-    writeln("foo.unittest");
-}
-
-template Tuple (T...)
-{
-    alias Tuple = T;
-}
-
-shared static this()
-{
-  // Override the default unit test runner to do nothing. After that, "main" will
-  // be called.
-  Runtime.moduleUnitTester = { return true; };
-}
-
-void main()
-{
-    writeln("start main");
-
-    alias tests = Tuple!(__traits(getUnitTests, foo));
-    static assert(tests.length == 1);
-
-    alias attributes = Tuple!(__traits(getAttributes, tests[0]));
-    static assert(attributes.length == 1);
-
-    foreach (test; tests)
-        test();
-
-    foreach (test; __traits(getUnitTests, Foo))
-        test();
-}
----
-)
-
-        $(P By default, the above will print:)
-
-$(CONSOLE
-start main
-foo.unittest
-foo.Foo.unittest
-)
+        $(LASER_REJECTED This trait is rejected. Laser-D has no language
+        unit-test declarations and therefore exposes no compiler-generated test
+        functions for discovery. Tests use ordinary functions and explicit
+        calls.)
 
 $(H3 $(GNAME parent))
 

@@ -887,11 +887,6 @@ dmd -cov -unittest myprog.d
         Option("transition=[h|help|?]",
             "list all language changes"
         ),
-        Option("unittest",
-            "compile in unit tests",
-            `Compile in $(LINK2 spec/unittest.html, unittest) code, turns on asserts, and sets the
-             $(D unittest) $(LINK2 spec/version.html#PredefinedVersions, version identifier)`,
-        ),
         Option("v",
             "verbose",
             `Enable verbose output for each compiler pass`,

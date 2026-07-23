@@ -1969,62 +1969,8 @@ Expression semanticTraits(TraitsExp e, Scope* sc)
     }
     if (e.ident == Id.getUnitTests)
     {
-        if (dim != 1)
-            return dimError(1);
-
-        auto o = (*e.args)[0];
-        auto s = getDsymbolWithoutExpCtx(o);
-        if (!s)
-        {
-            error(e.loc, "argument `%s` to __traits(getUnitTests) must be a module or aggregate",
-                o.toChars());
-            return ErrorExp.get();
-        }
-        if (auto imp = s.isImport()) // https://issues.dlang.org/show_bug.cgi?id=10990
-            s = imp.mod;
-
-        auto sds = s.isScopeDsymbol();
-        if (!sds || sds.isTemplateDeclaration())
-        {
-            error(e.loc, "argument `%s` to __traits(getUnitTests) must be a module or aggregate, not a %s",
-                s.toChars(), s.kind());
-            return ErrorExp.get();
-        }
-
-        auto exps = new Expressions();
-        if (global.params.useUnitTests)
-        {
-            bool[void*] uniqueUnitTests;
-
-            void symbolDg(Dsymbol s)
-            {
-                if (auto ad = s.isAttribDeclaration())
-                {
-                    ad.include(null).foreachDsymbol(&symbolDg);
-                }
-                else if (auto tm = s.isTemplateMixin())
-                {
-                    tm.members.foreachDsymbol(&symbolDg);
-                }
-                else if (auto ud = s.isUnitTestDeclaration())
-                {
-                    if (cast(void*)ud in uniqueUnitTests)
-                        return;
-
-                    uniqueUnitTests[cast(void*)ud] = true;
-
-                    auto ad = new FuncAliasDeclaration(ud.ident, ud, false);
-                    ad.visibility = ud.visibility;
-
-                    auto e = new DsymbolExp(Loc.initial, ad, false);
-                    exps.push(e);
-                }
-            }
-
-            sds.members.foreachDsymbol(&symbolDg);
-        }
-        auto te = new TupleExp(e.loc, exps);
-        return te.expressionSemantic(sc);
+        error(e.loc, "`__traits(getUnitTests)` is not supported in Laser-D because language unit-test blocks are disabled");
+        return ErrorExp.get();
     }
     if (e.ident == Id.getVirtualIndex)
     {

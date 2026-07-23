@@ -79,9 +79,9 @@ Each chapter should be split into individual features as it is investigated.
 | Template mixins (`template-mixin.dd`) | Supported | Mixin template declarations and template mixin instantiations are supported; string mixins are rejected separately. |
 | Function contracts (`contracts.dd`) | Rejected | `in` preconditions, `out` postconditions, and contract-style `do` bodies are rejected. Assertion expressions remain a separate decision. |
 | Conditional compilation (`version.dd`) | Restricted | `D_BetterC` is always defined; review remaining predefined versions and debug behavior. |
-| Traits (`traits.dd`) | Restricted | Read-only type, function, parameter, and symbol reflection is supported. `__traits(toType)` and `__traits(getPointerBitmap)` are rejected; `getUnitTests` is deferred to the unit-test review. |
+| Traits (`traits.dd`) | Restricted | Read-only type, function, parameter, and symbol reflection is supported. `__traits(toType)`, `__traits(getPointerBitmap)`, and `__traits(getUnitTests)` are rejected. |
 | Error handling (`errors.dd`) | Restricted | D exceptions are rejected. Errors must be represented and propagated explicitly, such as through return values or C APIs. `scope(exit)` provides deterministic cleanup. |
-| Unit tests (`unittest.dd`) | Undecided | Decide whether language `unittest` blocks are supported and how they run without druntime. |
+| Unit tests (`unittest.dd`) | Rejected | Language `unittest` blocks, `-unittest`, `__traits(getUnitTests)`, and the predefined `unittest` version are unavailable. Tests are explicit Laser-D programs with an explicit C entry point. |
 | Garbage collection (`garbage.dd`) | Rejected | Document the absence of the GC and enumerate rejected or alternative memory-management operations. |
 | Floating point (`float.dd`) | Undecided | Review target portability, compile-time behavior, and C runtime dependencies. |
 | Inline assembler (`iasm.dd`) | Rejected | D-style and GCC-style inline assembly are rejected in Laser-D source. ImportC inline assembly remains a separate undecided ImportC feature. |
@@ -295,7 +295,7 @@ Each chapter should be split into individual features as it is investigated.
 | Initialization symbol | Supported | `__traits(initSymbol)` is retained for supported aggregate types. | `traits_type_and_function_accepted.d` |
 | String-to-type generation | Rejected | `__traits(toType)` is rejected because it creates a type from string/mangled text and would restore a form of compile-time text-to-language generation. | `traits_removed_operations_rejected.d` |
 | GC pointer metadata | Rejected | `__traits(getPointerBitmap)` is rejected because Laser-D has no garbage collector or GC scanning metadata contract. | `traits_removed_operations_rejected.d` |
-| Unit-test discovery | Undecided | `__traits(getUnitTests)` will be classified together with language unit-test declarations and execution. | None |
+| Unit-test discovery | Rejected | `__traits(getUnitTests)` is rejected because Laser-D has no language unit-test declarations or hidden test-function discovery protocol. | `unit_test_discovery_rejected.d` |
 
 ## Compile-time I/O decisions
 
