@@ -501,8 +501,12 @@ inside a CTFE-capable function remains rejected; CTFE does not change its
 source-language classification. ImportC retains C $(D _Static_assert).)
 
 $(H3 $(LNAME2 interpolation_expressions, Interpolation Expressions))
-$(LASER_UNDER_REVIEW Interpolation expression sequences remain to be reviewed
-and are not currently a Laser-D portability guarantee.)
+$(LASER_REJECTED Interpolation expression sequences are rejected in all lexical
+forms. Their string-like syntax lowers to a tuple-like sequence of sentinels,
+template metadata, and embedded values, automatically imports
+$(D core.interpolation), and reparses stored expression text through an
+internal string mixin. Use ordinary string literals and explicit formatting or
+argument passing.)
 
 $(SPEC_SUBNAV_PREV_NEXT pragma, Pragmas, statement, Statements)
 )

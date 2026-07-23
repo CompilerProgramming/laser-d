@@ -56,7 +56,7 @@ Each chapter should be split into individual features as it is investigated.
 | --- | --- | --- |
 | Introduction (`intro.dd`) | Undecided | Replace full-D assumptions with the Laser-D execution and runtime model. |
 | Lexical analysis (`lex.dd`) | Supported | Laser-D retains D source text, whitespace, comments, identifiers, tokens, literals, escape sequences, keywords, and special tokens unchanged. Malformed lexical constructs are rejected according to the D lexical grammar. See the detailed lexical decisions below. |
-| Interpolated expression sequences (`istring.dd`) | Undecided | Determine generated constructs and any runtime or allocation dependencies. |
+| Interpolated expression sequences (`istring.dd`) | Rejected | All string-like IES forms are rejected. Their tuple-like lowering automatically imports `core.interpolation`, creates template metadata, and reparses embedded source text through an internal string mixin. |
 | Grammar (`grammar.dd`) | Undecided | Record grammar retained through the no-new-syntax compatibility rule and identify semantically rejected productions. |
 | Modules (`module.dd`) | Restricted | Core module declarations, namespaces, imports, re-exports, cycles, and separate compilation are supported. `ModuleInfo` and all module lifecycle constructors and destructors are rejected; package-specific facilities require separate review. |
 | Declarations (`declaration.dd`) | Restricted | Basic variables, manifest constants, inference, aliases, multiple declarations, and scalar initialization are supported. Linkage, most storage classes, static initialization, and declarations involving derived types remain to be reviewed. |
@@ -214,7 +214,8 @@ Each chapter should be split into individual features as it is investigated.
 | `__rvalue` | Rejected | Both `__rvalue(expression)` and the `__rvalue` function attribute are rejected. Laser-D does not expose this unchecked explicit-move and ownership hint. | `rvalue_rejected.d` |
 | Runtime assertions | Rejected | Runtime `assert`, message forms, `assert(0)`, and assertions inside CTFE-capable functions are rejected. Failure requires druntime hooks and ordinary assertions have build-mode-dependent removal semantics. | `runtime_assertions_rejected.d`, `runtime_assert_release_rejected.d` |
 | Static assertions | Supported | `static assert` conditions and optional compile-time messages are evaluated entirely by the compiler. ImportC retains C `_Static_assert`. | `static_assertions_accepted.d`, existing template and CTFE tests, `importc_standalone.i` |
-| Remaining primary expressions | Undecided | Interpolation, `this`, and non-array type properties require separate review. Function literals, ordinary template instances, `is` expressions, traits, import expressions, `typeid`, and `new` are classified separately; array literals and string mixins retain their existing restrictions. | `dynamic_array_literal_rejected.d`, `associative_array_literal_rejected.d` |
+| Interpolated expression sequences | Rejected | Double-quoted, backtick, and token-string IES forms are rejected before their hidden template, automatic-import, and internal string-mixin lowering. | `interpolated_expressions_rejected.d` |
+| Remaining primary expressions | Undecided | `this` and non-array type properties require separate review. Function literals, ordinary template instances, `is` expressions, traits, import expressions, `typeid`, `new`, and interpolation are classified separately; array literals and string mixins retain their existing restrictions. | `dynamic_array_literal_rejected.d`, `associative_array_literal_rejected.d` |
 
 ## Mixin decisions
 

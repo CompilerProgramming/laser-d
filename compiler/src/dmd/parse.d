@@ -8374,6 +8374,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             break;
 
         case TOK.interpolated:
+            error(loc, "interpolated expression sequences are not supported in Laser-D; use ordinary strings and explicit formatting or arguments");
             e = new AST.InterpExp(loc, token.interpolatedSet, token.postfix);
             nextToken();
             break;

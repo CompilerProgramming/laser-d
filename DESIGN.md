@@ -315,6 +315,15 @@ implicitly converted to a mutable character slice. The conventional `string`,
 `wstring`, and `dstring` names are aliases normally supplied by `object.d`, not
 intrinsic front-end types.
 
+Interpolated expression sequences are rejected in double-quoted, backtick, and
+token-string forms. Despite their string-like spelling, they produce a
+tuple-like sequence of sentinel values, template-instantiated metadata, and
+the embedded values rather than a string. Their lowering automatically imports
+`core.interpolation` and reparses each embedded expression from stored source
+text through an internal string mixin. This conflicts with Laser-D's explicit
+argument model and its rejection of text-to-language generation. Programs use
+ordinary string literals and explicit formatting or argument passing.
+
 Compile-time initializers for statically allocated fixed-size arrays remain
 supported. Dynamic array literal expressions, array allocation with `new`,
 concatenation, append, `.dup`, `.idup`, `.capacity`, and assignment to dynamic
