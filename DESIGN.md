@@ -361,8 +361,21 @@ argument protocol requires D runtime machinery. Typesafe runtime variadics,
 including lazy variadics, are also rejected because they introduce implicit
 argument aggregation and, for lazy parameters, implicit delegates. Variadic
 template parameters remain supported: they are a compile-time mechanism and do
-not use a runtime variadic calling convention. Generated special functions
-remain unclassified.
+not use a runtime variadic calling convention.
+
+Executable Laser-D programs use an explicit C runtime entry point. The only
+supported signatures are `extern(C) int main()` and
+`extern(C) int main(int argc, char** argv)`. D-linkage `main`, D array
+arguments, inferred or non-`int` returns, the POSIX environment-pointer
+extension, and the special `WinMain` and `DllMain` entry points are rejected.
+The `-main` compiler switch is also rejected because Laser-D does not silently
+generate source-level entry points. Libraries need no `main` function.
+
+Frontend-generated helpers required to implement supported structs, templates,
+function literals, and other retained constructs remain compiler internals.
+They are not additional source-level function forms and must not expose a
+rejected runtime protocol. Language `unittest` blocks remain a separate review
+category.
 
 Function contracts are rejected. This includes expression and block forms of
 `in` preconditions and `out` postconditions, named postcondition results, and

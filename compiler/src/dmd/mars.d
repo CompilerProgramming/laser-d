@@ -1783,7 +1783,7 @@ bool parseCommandLine(const ref Strings arguments, const size_t argc, out Param 
         }
         else if (arg == "-main")             // https://dlang.org/dmd.html#switch-main
         {
-            params.addMain = true;
+            eSink.error(Loc.initial, "`-main` is not supported in Laser-D; define an explicit `extern(C) int main` entry point");
         }
         else if (startsWith(p + 1, "man"))   // https://dlang.org/dmd.html#switch-man
         {

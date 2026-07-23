@@ -634,12 +634,6 @@ dmd -cov -unittest myprog.d
             $(LINK2 https://msdn.microsoft.com/en-us/library/dd831853(v=vs.100).aspx, Microsoft Visual Studio 10)
             or later compiler.`,
         ),
-        Option("main",
-            "add default main() if not present already (e.g. for unittesting)",
-            `Add a default $(D main()) function when compiling. This is useful when
-            unittesting a library, as it enables running the unittests
-            in a library without having to manually define an entry-point function.`,
-        ),
         Option("makedeps[=<filename>]",
             "print dependencies in Makefile compatible format to <filename> or stdout.",
             `Print dependencies in Makefile compatible format.

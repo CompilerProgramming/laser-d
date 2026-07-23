@@ -427,9 +427,25 @@ restricted Laser-D function surface.)
 
 $(H2 $(LNAME2 main, Program Entry Point))
 
-$(LASER_UNDER_REVIEW The complete D $(D main) wrapper and generated entry-point
-surface requires separate review. Laser-D tests currently use an explicit
-$(D extern(C) int main()) entry point compatible with the C runtime.)
+$(LASER_SUPPORTED An executable Laser-D program shall define exactly one of:
+
+$(D_CODE
+extern(C) int main();
+extern(C) int main(int argc, char** argv);
+)
+
+The entry point is explicit and uses the target C runtime ABI. A library need
+not define an entry point.)
+
+$(LASER_REJECTED D-linkage $(D main), $(D string[]) arguments, inferred,
+$(D void), or $(D noreturn) return types, other parameter lists, the POSIX
+third environment-pointer parameter, and the special $(D WinMain) and
+$(D DllMain) entry points are rejected. The $(D -main) compiler option is
+rejected because it would silently generate an entry point.)
+
+$(P ImportC source retains C entry-point rules. Frontend-generated function
+helpers needed by otherwise supported constructs are implementation details,
+not additional source-level entry points.)
 
 $(H2 $(LNAME2 function-templates, Function Templates))
 
@@ -514,8 +530,8 @@ method delegates, UFCS, function templates, and CTFE. Rejected attributes,
 contracts, reference returns, lifetime annotations, lazy parameters, closure
 capture, virtual dispatch, property calls, and optional parentheses are outside
 the language. Named nested functions and D runtime variadics are rejected; C
-ABI variadics are supported. Generated/special entry points remain under
-review.)
+ABI variadics are supported. Executables use one of the two explicit C
+$(D main) signatures specified above.)
 
 $(SPEC_SUBNAV_PREV_NEXT const3, Type Qualifiers, operatoroverloading, Operator Overloading)
 )

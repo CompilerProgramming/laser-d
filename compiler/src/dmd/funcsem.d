@@ -3274,18 +3274,22 @@ bool isRootTraitsCompilesScope(Scope* sc) @safe
  +/
 extern (D) void checkMain(FuncDeclaration fd)
 {
-    if (fd.ident != Id.main || fd.isMember() || fd.isNested())
-        return; // Not a main function
+    if (fd.isMember() || fd.isNested())
+        return;
+
+    const isLaserDSource = fd.getModule().filetype != FileType.c;
+    if (isLaserDSource && (fd.isWinMain() || fd.isDllMain()))
+    {
+        .error(fd.loc, "`%s` entry points are not supported in Laser-D; use `extern(C) int main`", fd.ident.toChars());
+        return;
+    }
+
+    if (fd.ident != Id.main)
+        return;
 
     TypeFunction tf = fd.type.toTypeFunction();
 
     Type retType = tf.nextOf();
-    if (!retType)
-    {
-        // auto main(), check after semantic
-        assert(fd.inferRetType);
-        return;
-    }
 
     /// Checks whether `t` is equivalent to `char**`
     /// Ignores qualifiers and treats enums according to their base type
@@ -3309,6 +3313,37 @@ extern (D) void checkMain(FuncDeclaration fd)
     bool argerr;
 
     const linkage = fd.resolvedLinkage();
+    if (isLaserDSource)
+    {
+        bool valid = linkage == LINK.c &&
+                     retType &&
+                     retType.toBasetype().ty == Tint32 &&
+                     tf.parameterList.varargs == VarArg.none;
+
+        if (valid && nparams == 2)
+        {
+            auto argCount = tf.parameterList[0];
+            auto argPtr = tf.parameterList[1];
+            valid = !(argCount.storageClass & invalidSTC) &&
+                    argCount.type.toBasetype().ty == Tint32 &&
+                    !(argPtr.storageClass & invalidSTC) &&
+                    isCharPtrPtr(argPtr.type);
+        }
+        else if (nparams != 0)
+            valid = false;
+
+        if (!valid)
+            .error(fd.loc, "Laser-D entry point must be `extern(C) int main()` or `extern(C) int main(int, char**)`");
+        return;
+    }
+
+    if (!retType)
+    {
+        // auto main(), check after semantic
+        assert(fd.inferRetType);
+        return;
+    }
+
     if (linkage == LINK.d)
     {
         if (nparams == 1)
