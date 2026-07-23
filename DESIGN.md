@@ -352,8 +352,17 @@ discipline as other non-owning pointers.
 Named nested functions are rejected, including capturing, context-free, and
 `static` forms. This prevents direct calls from carrying a hidden enclosing
 context and avoids a second local-function form; module-level helpers and
-non-capturing function literals cover the explicit alternatives. Variadic
-functions and generated special functions remain unclassified.
+non-capturing function literals cover the explicit alternatives.
+
+C ABI variadic functions declared with `extern(C)` are supported for C
+interoperability, including declarations, definitions, function pointers, and
+calls. D-style untyped variadics are rejected because their hidden TypeInfo
+argument protocol requires D runtime machinery. Typesafe runtime variadics,
+including lazy variadics, are also rejected because they introduce implicit
+argument aggregation and, for lazy parameters, implicit delegates. Variadic
+template parameters remain supported: they are a compile-time mechanism and do
+not use a runtime variadic calling convention. Generated special functions
+remain unclassified.
 
 Function contracts are rejected. This includes expression and block forms of
 `in` preconditions and `out` postconditions, named postcondition results, and

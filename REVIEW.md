@@ -17,3 +17,14 @@ misclassified before its value establishes a fixed-array dimension. The arrays
 specification requires integral compile-time dimension expressions, so this is
 an implementation defect. Positive coverage for manifest and other symbolic
 dimensions should accompany the fix.
+
+## ImportC variadic declarations
+
+The variadic-function audit confirmed Laser-D-authored `extern(C)` variadic
+definitions, function pointers, and calls. Adding a variadic prototype to the
+minimal ImportC fixture, however, made ImportC request
+`__importc_builtins.d`; that module is not present on the fixture's configured
+import paths. The prototype was therefore removed from this change rather than
+masking the dependency with a test-only stub. ImportC variadic declarations
+need dedicated coverage when the minimal ImportC environment provides the
+compiler's builtins module.

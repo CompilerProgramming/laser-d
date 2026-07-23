@@ -3805,6 +3805,17 @@ Type typeSemantic(Type type, Loc loc, Scope* sc)
         if (tf.linkage == LINK.system)
             tf.linkage = target.systemLinkage();
 
+        if (sc._module.filetype != FileType.c &&
+            tf.parameterList.varargs != VarArg.none &&
+            (tf.parameterList.varargs != VarArg.variadic || sc.linkage != LINK.c))
+        {
+            if (tf.parameterList.varargs == VarArg.typesafe)
+                .error(loc, "typesafe variadic functions are not supported in Laser-D; use variadic template parameters or an explicit aggregate");
+            else
+                .error(loc, "D-style variadic functions are not supported in Laser-D; use `extern(C)` variadics for C interoperability");
+            errors = true;
+        }
+
         version (none)
         {
             /* If the parent is @safe, then this function defaults to safe

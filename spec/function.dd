@@ -308,28 +308,33 @@ $(LASER_REJECTED User-defined attributes on parameters are rejected.)
 
 $(H3 $(LNAME2 variadic, Variadic Functions))
 
-$(LASER_UNDER_REVIEW Variadic functions require a separate ABI and runtime
-review. No variadic form is guaranteed merely because the parser accepts it.)
+$(P Laser-D supports C ABI variadic functions solely for C interoperability.
+D runtime variadic forms are rejected. Variadic template parameters are a
+separate supported compile-time feature.)
 
 $(H4 $(LNAME2 c_style_variadic_functions, C-Style Variadic Functions))
 
-$(P C variadics are expected to matter for C interoperability but require
-target ABI tests before becoming a Laser-D guarantee.)
+$(LASER_SUPPORTED A function type declared with $(D extern(C)) may end its
+parameter list with $(D ...). Such functions may be declared, defined, called,
+and used through function pointers. Their arguments and return values use the
+target C ABI. At least one named parameter is required.)
 
 $(H4 $(LNAME2 d_style_variadic_functions, D-Style Variadic Functions))
 
-$(P D runtime variadics remain under review and cannot rely on TypeInfo.)
+$(LASER_REJECTED D-style untyped variadic functions are rejected. Laser-D does
+not provide the hidden TypeInfo argument list used by that calling convention.)
 
 $(H4 $(LNAME2 typesafe_variadic_functions, Typesafe Variadic Functions))
 
-$(P Typesafe runtime variadics remain under review. Variadic template parameters
-are a separate, supported compile-time template feature.)
+$(LASER_REJECTED Typesafe runtime variadic parameters are rejected. Callers
+must pass an explicit supported aggregate or use variadic template parameters
+when compile-time expansion is intended.)
 
 $(H4 $(LNAME2 lazy_variadic_functions, Lazy Variadic Functions))
 
-$(P Lazy variadics are incompatible with the rejection of lazy parameters and
-implicit capturing delegates, but their final diagnostic boundary remains part
-of the variadic review.)
+$(LASER_REJECTED Lazy variadic parameters are rejected by both the lazy
+parameter and runtime variadic restrictions. Laser-D does not create implicit
+delegates for variadic arguments.)
 
 $(H3 $(LNAME2 hidden-parameters, Hidden Parameters))
 
@@ -508,8 +513,9 @@ variables, function pointers, non-capturing literals and delegates, struct
 method delegates, UFCS, function templates, and CTFE. Rejected attributes,
 contracts, reference returns, lifetime annotations, lazy parameters, closure
 capture, virtual dispatch, property calls, and optional parentheses are outside
-the language. Named nested functions are rejected; variadics and
-generated/special entry points remain under review.)
+the language. Named nested functions and D runtime variadics are rejected; C
+ABI variadics are supported. Generated/special entry points remain under
+review.)
 
 $(SPEC_SUBNAV_PREV_NEXT const3, Type Qualifiers, operatoroverloading, Operator Overloading)
 )
