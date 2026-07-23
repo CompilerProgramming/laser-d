@@ -24,12 +24,15 @@ jobs:
         include:
           - name: Linux x86-64
             os: ubuntu-24.04
+            host-compiler: dmd
             compiler: generated/linux/release/64/dmd
           - name: Windows x86-64
             os: windows-2025
+            host-compiler: dmd
             compiler: generated/windows/release/64/dmd.exe
           - name: macOS x86-64
             os: macos-15-intel
+            host-compiler: ldc
             compiler: generated/osx/release/64/dmd
 
     defaults:
@@ -43,7 +46,7 @@ jobs:
       - name: Install the host D compiler
         uses: dlang-community/setup-dlang@v2
         with:
-          compiler: dmd
+          compiler: ${{ matrix.host-compiler }}
 
       - name: Configure MSVC
         if: runner.os == 'Windows'
@@ -57,14 +60,14 @@ jobs:
           "${DMD}" --version
 
       - name: Build Laser-D
-        run: rdmd compiler/src/build.d dmd
+        run: '"${DMD}" -i -run compiler/src/build.d dmd'
 
       - name: Check the Laser-D executable
         run: '"${{ matrix.compiler }}" --version'
 
       - name: Run the Laser-D test suite
         working-directory: compiler/test
-        run: rdmd run.d laser-d
+        run: '"${DMD}" -i -run run.d laser-d'
 
       - name: Install Python for documentation checks
         if: runner.os == 'Linux'
