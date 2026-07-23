@@ -431,8 +431,10 @@ method, template, and UFCS calls even when no explicit argument is passed or
 all parameters have defaults. Setter-like assignment to a function name is
 also rejected.
 
-The floating-point `.im` property requires a separate decision because it is
-legacy surface associated with the removed imaginary and complex type family.
+The floating-point `.im` property is rejected. It is legacy surface associated
+with the removed imaginary and complex type family and has no role once those
+types are unavailable. This restriction applies only to the compiler-provided
+numeric property; aggregates may declare an ordinary field named `im`.
 
 ### Operator overloading
 

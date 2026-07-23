@@ -6,6 +6,11 @@ struct Record
     ushort code;
 }
 
+struct ImaginaryNamedField
+{
+    int im;
+}
+
 union Storage
 {
     uint unsignedValue;
@@ -33,6 +38,7 @@ static assert(float.min_normal > 0);
 static assert(is(typeof(float.nan) == float));
 static assert(is(typeof(double.nan) == double));
 static assert((1.5).re == 1.5);
+static assert(ImaginaryNamedField(4).im == 4);
 static assert(int.stringof == "int");
 static assert(int.mangleof == "i");
 static assert((1 + 2).stringof == "1 + 2");

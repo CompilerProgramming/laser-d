@@ -6318,6 +6318,11 @@ Expression dotExp(Type mt, Scope* sc, Expression e, Identifier ident, DotExpFlag
         }
         else if (ident == Id.im)
         {
+            if (!sc.inCfile)
+            {
+                error(e.loc, "floating-point property `.im` is not supported in Laser-D");
+                return ErrorExp.get();
+            }
             Type t2;
             switch (mt.ty)
             {

@@ -60,9 +60,9 @@ $(TROW $(D .re), the value itself)
 $(LASER_EXCLUDED Numeric properties on $(D real), imaginary, complex, 128-bit
 integer, or vector types are unavailable because those types are rejected.)
 
-$(LASER_UNDER_REVIEW The legacy floating-point $(D .im) property is not yet a
-Laser-D guarantee. It is being reviewed separately because its D result belongs
-to the rejected imaginary type family.)
+$(LASER_EXCLUDED The legacy floating-point $(D .im) property is not part of
+Laser-D. It belongs to D's imaginary and complex number model, whose types are
+rejected. An aggregate may still declare an ordinary field named $(D im).)
 
 $(H2 $(LNAME2 init, $(D .init) Property))
 
