@@ -497,6 +497,15 @@ void funcDeclarationSemantic(Scope* sc, FuncDeclaration funcdecl)
     funcdecl.parent = sc.parent;
     Dsymbol parent = funcdecl.toParent();
 
+    if (sc._module.filetype != FileType.c &&
+        !funcdecl.isGenerated &&
+        !funcdecl.isFuncLiteralDeclaration() &&
+        funcdecl.toParentDecl().isFuncDeclaration())
+    {
+        .error(funcdecl.loc, "named nested functions are not supported in Laser-D; use a module-level function or non-capturing function literal");
+        funcdecl.errors = true;
+    }
+
     funcdecl.foverrides.setDim(0); // reset in case semantic() is being retried for this function
 
     funcdecl.storage_class |= sc.stc & ~STC.ref_;

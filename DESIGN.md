@@ -72,8 +72,8 @@ Laser-D function type carries the live-analysis attribute.
 
 `compiler/test/laser-d/implicit_function_attributes.d` covers declarations,
 external functions, pointers, delegates, inferred return types, member
-functions, nested functions, and lambdas. The explicit-attribute tests verify
-rejection on declarations, function pointers, and delegate types.
+functions, and lambdas. The explicit-attribute tests verify rejection on
+declarations, function pointers, and delegate types.
 
 ## Lexical analysis
 
@@ -349,8 +349,11 @@ outer local. A struct-method delegate remains supported: its explicit object
 context is not a captured lexical frame and follows the same manual lifetime
 discipline as other non-owning pointers.
 
-This first function review does not yet classify variadic functions, nested
-named functions, or generated special member functions.
+Named nested functions are rejected, including capturing, context-free, and
+`static` forms. This prevents direct calls from carrying a hidden enclosing
+context and avoids a second local-function form; module-level helpers and
+non-capturing function literals cover the explicit alternatives. Variadic
+functions and generated special functions remain unclassified.
 
 Function contracts are rejected. This includes expression and block forms of
 `in` preconditions and `out` postconditions, named postcondition results, and

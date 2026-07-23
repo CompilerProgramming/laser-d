@@ -365,9 +365,9 @@ chapters.)
 
 $(H2 $(LNAME2 nested, Named Nested Functions))
 
-$(LASER_UNDER_REVIEW Named nested functions require a separate review. Capturing
-a parent local is already rejected when a delegate or function address would
-carry the hidden context.)
+$(LASER_REJECTED Named functions declared inside another function are rejected,
+including capturing, context-free, and $(D static) forms. Use a module-level
+helper or a non-capturing function literal.)
 
 $(H3 $(LNAME2 nested-qualifiers, Nested Function Qualifiers))
 
@@ -375,8 +375,8 @@ $(P Nested functions cannot restore rejected qualifiers or attributes.)
 
 $(H3 $(LNAME2 nested-declaration-order, Nested Declaration Order))
 
-$(P Declaration-order and forward-reference behavior will be finalized with the
-named nested-function review.)
+$(P Nested-function declaration order is unavailable because named nested
+functions are rejected.)
 
 $(H2 $(LNAME2 function-pointers-delegates, Function Pointers and Delegates))
 
@@ -392,9 +392,9 @@ $(H3 $(LNAME2 closures, Delegates and Closures))
 $(P A delegate stores a context pointer and function pointer. Non-capturing
 delegate literals are supported and have no captured lexical state.)
 
-$(LASER_REJECTED A function or delegate literal that captures a local variable,
-and taking the address of a named nested function that captures a local, are
-rejected. Laser-D does not allocate or preserve closure frames.)
+$(LASER_REJECTED A function or delegate literal that captures a local variable
+is rejected. Named nested functions are rejected separately. Laser-D does not
+allocate or preserve closure frames.)
 
 $(H3 $(LNAME2 method-delegates, Method Delegates))
 
@@ -508,8 +508,8 @@ variables, function pointers, non-capturing literals and delegates, struct
 method delegates, UFCS, function templates, and CTFE. Rejected attributes,
 contracts, reference returns, lifetime annotations, lazy parameters, closure
 capture, virtual dispatch, property calls, and optional parentheses are outside
-the language. Named nested functions, variadics, and generated/special entry
-points remain under review.)
+the language. Named nested functions are rejected; variadics and
+generated/special entry points remain under review.)
 
 $(SPEC_SUBNAV_PREV_NEXT const3, Type Qualifiers, operatoroverloading, Operator Overloading)
 )

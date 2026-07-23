@@ -23,19 +23,12 @@ void functionForms()
 {
     void function() functionPointer;
     void delegate() delegateValue;
-    void nestedFunction()
-    {
-    }
 
     auto lambda = () {};
 
-    static assert(hasAttribute!(nestedFunction, "nothrow"));
-    static assert(hasAttribute!(nestedFunction, "@nogc"));
-    static assert(hasAttribute!(nestedFunction, "@system"));
     static assert(hasAttribute!(lambda, "nothrow"));
     static assert(hasAttribute!(lambda, "@nogc"));
     static assert(hasAttribute!(lambda, "@system"));
-    static assert(!hasAttribute!(nestedFunction, "pure"));
     static assert(!hasAttribute!(lambda, "pure"));
 
     static assert(hasAttribute!(functionPointer, "nothrow"));
