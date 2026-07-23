@@ -2,12 +2,12 @@ Ddoc
 
 $(SPEC_S Enums,
 
-$(P Laser-D supports named, anonymous, manifest, based, and opaque enum
-declarations. Enum base types must themselves be available in Laser-D. Opaque
-enums have no default initializer, and members of an enum based on another enum
-must use explicit values after the first member.)
-
 $(HEADERNAV_TOC)
+
+$(P Laser-D supports named, anonymous, based, and opaque enums together with
+single-member manifest constants. Enum declarations create compile-time values
+and, for named enums, lightweight value types. They require no D runtime or
+TypeInfo.)
 
 $(GRAMMAR
 $(GNAME EnumDeclaration):
@@ -28,19 +28,9 @@ $(GNAME EnumMembers):
     $(GLINK EnumMember) $(D ,) $(GSELF EnumMembers)
 
 $(GNAME EnumMember):
-    $(GLINK EnumMemberAttributes)$(OPT) $(GLINK_LEX Identifier)
-    $(GLINK EnumMemberAttributes)$(OPT) $(GLINK_LEX Identifier) $(D =) $(ASSIGNEXPRESSION)
+    $(GLINK_LEX Identifier)
+    $(GLINK_LEX Identifier) $(D =) $(ASSIGNEXPRESSION)
 
-$(GNAME EnumMemberAttributes):
-    $(GLINK EnumMemberAttribute)
-    $(GLINK EnumMemberAttribute) $(GSELF EnumMemberAttributes)
-
-$(GNAME EnumMemberAttribute):
-    $(GLINK2 attribute, DeprecatedAttribute)
-    $(GLINK2 attribute, UserDefinedAttribute)
-    $(D @) $(LINK2 attribute.html#disable, $(D disable))
-)
-$(GRAMMAR
 $(GNAME AnonymousEnumDeclaration):
     $(D enum) $(D :) $(GLINK EnumBaseType) $(D {) $(GLINK EnumMembers) $(D })
     $(D enum) $(D {) $(GLINK AnonymousEnumMembers) $(D })
@@ -52,364 +42,211 @@ $(GNAME AnonymousEnumMembers):
 
 $(GNAME AnonymousEnumMember):
     $(GLINK EnumMember)
-    $(GLINK EnumMemberAttributes)$(OPT) $(GLINK2 type, Type) $(GLINK_LEX Identifier) $(D =) $(ASSIGNEXPRESSION)
+    $(GLINK2 type, Type) $(GLINK_LEX Identifier) $(D =) $(ASSIGNEXPRESSION)
 )
 
-        $(P Enum declarations are used to define a group of constants.
-        )
+$(LASER_REJECTED Enum members cannot carry user-defined attributes or
+$(D @disable). Other built-in declaration attributes are available only when
+their individual Laser-D specifications permit them.)
 
 $(H2 $(LNAME2 named_enums, Named Enums))
 
-        $(P
-        Named enums are used to declare related
-        constants and group them by giving them a unique type.
-        The $(GLINK EnumMembers) are declared in the scope of the named enum. The named
-        enum declares a new type, and all the $(I EnumMembers) have that type.
-        )
+$(P A named enum introduces a distinct value type. Its members are declared in
+the enum's scope and have the named enum type.)
 
-        $(P This defines a new type $(CODE X) which has values
-        $(CODE X.A = 0), $(CODE X.B = 1), $(CODE X.C = 2):)
+---
+enum Direction : ubyte
+{
+    north,
+    east,
+    south,
+    west,
+}
+---
 
-        ---
-        enum X { A, B, C }  // named enum
-        ---
+$(P A named enum base may be a retained primitive scalar type or another named
+enum. If no base is written, the base is inferred from the first explicit
+member value when possible and otherwise defaults to $(D int). A rejected type
+cannot be introduced as an enum base.)
 
-        $(LEGACY_LNAME2 enum_default_initializer, enum_variables)
+$(P An enum value implicitly converts to its base type where the ordinary
+conversion rules allow. A base-type value does not implicitly convert to the
+named enum; an explicit cast or an enum member is required.)
 
-        $(P A variable can be of named enum type.
-        Its default initializer is the first member defined for the enum type.
-        )
+$(LEGACY_LNAME2 enum_default_initializer, enum_variables)
 
-$(SPEC_RUNNABLE_EXAMPLE_RUN
-------
-enum X { A = 3, B, C }
+$(P A defined named enum default-initializes to the value of its first member,
+not necessarily to numeric zero.)
 
-X x;
-assert(x == X.A);
-x |= X.B;
-assert(x & X.A);
-------
+$(SPEC_RUNNABLE_EXAMPLE_COMPILE
+---
+enum Status : int
+{
+    ready = 4,
+    running = 7,
+}
+
+Status value;
+static assert(Status.init == Status.ready);
+---
 )
-
-        $(P The result type of a binary operation on a named enum is defined
-        $(DDSUBLINK spec/type, enum-ops, here).)
-
-        $(P If the $(GLINK EnumBaseType) is not explicitly set, and the first
-        $(I EnumMember) has an *AssignExpression*, it is set to the type of that
-        *AssignExpression*. Otherwise, it defaults to
-        type $(CODE int).)
-
-        * A named enum member can be implicitly cast to its $(I EnumBaseType).
-        * An $(I EnumBaseType) instance cannot be implicitly cast to a named enum type.
-
-$(SPEC_RUNNABLE_EXAMPLE_FAIL
--------------------
-enum Foo { E }
-
-Foo f;
-int i;
-i = f;           // OK
-f = i;           // error
-f = cast(Foo)i;  // OK
-f = 0;           // error
-f = Foo.E;       // OK
--------------------
-)
-
-        $(P A named enum member cannot declare its own $(I Type).)
-
-        $(P See also: $(DDSUBLINK spec/statement, final-switch-statement, `final switch`) on a named enum.)
 
 $(H3 $(LNAME2 member_values, Enum Member Values))
 
-        $(P The value of an $(GLINK EnumMember) is given by its *AssignExpression* if present.
-        If there is no *AssignExpression* and it is the first $(I EnumMember),
-        its value is converted to $(GLINK EnumBaseType) from `0`.
-        If there is no *AssignExpression* and it is not the first $(I EnumMember),
-        it is given the value of the previous $(I EnumMember)` + 1`:)
+$(P A member with an initializer uses its compile-time value after conversion
+to the enum base. The initializer is subject to all ordinary Laser-D and CTFE
+restrictions.)
 
-        * If the value of the previous $(I EnumMember) is $(GLINK EnumBaseType)`.max`,
-          it is an error. This prevents value overflow. It is an error if the previous
-          member cannot be compared with *EnumBaseType*`.max` at compile-time.
-        * It is an error if the base type does not define a compile-time
-          evaluable `+ 1` operation.
-        * If the value of the previous $(I EnumMember)` + 1` is the same as the
-          value of the previous $(I EnumMember), it is an error. (This can happen
-          with floating point types).
+$(P For an enum whose base is not another enum, the first uninitialized member
+has the base type's zero/default value. Each later uninitialized member is the
+previous member plus one. The compiler rejects overflow, a base without a
+compile-time $(D + 1) operation, or an increment that does not change the
+value.)
 
-$(SPEC_RUNNABLE_EXAMPLE_FAIL
+$(SPEC_RUNNABLE_EXAMPLE_COMPILE
 ---
-enum E : char
+enum Code : ushort
 {
-    a,
-    b = char.max,
-    c // overflow
+    first,
+    second,
+    explicitValue = 10,
+    following,
 }
 
-static assert(E.a == 0);
+static assert(Code.first == 0);
+static assert(Code.second == 1);
+static assert(Code.following == 11);
 ---
 )
 
-        $(P All $(I EnumMember)s are in scope for the *AssignExpression*s.
-        )
+$(P All members are visible to member initializer expressions, subject to
+normal forward-reference and circular-dependency diagnostics.)
 
-$(SPEC_RUNNABLE_EXAMPLE_FAIL
+$(H4 $(LNAME2 enum-based-values, Enum-Based Values))
+
+$(LASER_NORMATIVE When the base type is another enum, the first member may use
+the base enum's default value or an explicit value. Every member after the
+first must have an explicit initializer. Laser-D does not implicitly apply
+arithmetic to produce the next value of another enum type.)
+
 ---
-enum A = 3;
-enum B
+enum Base : int { zero, one }
+
+enum Derived : Base
 {
-    A = A // error, circular reference
-}
-enum C
-{
-    A = B,  // A = 4
-    B = D,  // B = 4
-    C = 3,  // C = 3
-    D       // D = 4
-}
-enum E : C
-{
-    E1 = C.D,
-    E2      // error, C.D is C.max
+    first = Base.zero,
+    second = Base.one,
 }
 ---
-)
 
-        $(P An empty enum body signifies an opaque enum - the enum members are unknown.)
-        ---
-        enum X;          // opaque enum
-        writeln(X.init); // error: enum X is opaque and has no default initializer
-        ---
+$(H4 $(LNAME2 opaque-enums, Opaque Enums))
+
+$(P A named declaration with a base type and no body introduces an opaque enum.)
+
+---
+enum NativeHandle : uint;
+---
+
+$(LASER_NORMATIVE An opaque enum has a known size and alignment but no known
+members and no default initializer. It may be used in declarations that supply
+an explicit value, in function signatures, and for interoperability. A
+default-initialized variable of opaque enum type is rejected.)
 
 $(H3 $(LNAME2 enum_properties, Enum Properties))
 
-        $(P Enum properties only exist for named enums.
-        )
+$(TABLE2 Named enum properties,
+    $(THEAD Property, Meaning)
+    $(TROW $(D .init), Value of the first declared member)
+    $(TROW $(D .min), Smallest declared member value)
+    $(TROW $(D .max), Largest declared member value)
+    $(TROW $(D .sizeof), Storage size of an enum value)
+)
 
-        $(TABLE
-        $(CAPTION Named Enum Properties)
-        $(TROW $(D .init), First enum member value)
-        $(TROW $(D .min), Smallest enum member value)
-        $(TROW $(D .max), Largest enum member value)
-        $(TROW $(D .sizeof), Size of storage for an enumerated value)
-        )
+$(P Computing $(D .min) and $(D .max) requires member values that the compiler
+can compare at compile time. Opaque enums have $(D .sizeof) through their base
+type but no member-dependent $(D .init), $(D .min), or $(D .max). Generic
+compiler properties such as $(D .stringof) remain governed by the properties
+chapter.)
 
-        $(P For example:)
+$(H3 $(LNAME2 enum_copying_and_assignment, Copying and Assignment))
 
----
-enum X { A = 3, B = 1, C = 4, D, E = 2 }
-X.init   // is X.A
-X.min    // is X.B
-X.max    // is X.D
-X.sizeof // is same as int.sizeof
----
-
-        $(P The $(GLINK EnumBaseType) of named enums must support comparison
-        in order to compute the $(CODE .max) and $(CODE .min) properties.
-        )
-
-$(H3 $(LNAME2 enum_copying_and_assignment, Enum Copying and Assignment))
-
-        $(P A named enum type never has a
-        $(DDSUBLINK spec/struct, struct-copy-constructor, copy constructor),
-        $(DDSUBLINK spec/struct, struct-postblit, postblit), or
-        $(DDSUBLINK spec/struct, assign-overload, identity assignment overload),
-        even if one is defined by its $(GLINK EnumBaseType).)
-
-        $(P When copying a named enum value whose base type is a `struct` with
-        a copy constructor, the copy constructor is not called:)
-
-        $(SPEC_RUNNABLE_EXAMPLE_RUN
-        ---
-        struct S
-        {
-            this(ref S rhs) { assert(0); }
-        }
-
-        enum E : S { A = S.init }
-
-        void main()
-        {
-            E e1;
-            E e2 = e1; // ok - copy constructor not called
-        }
-        ---
-        )
-
-        $(P When copying a named enum value whose base type is a `struct` with
-        a postblit, the postblit is not called:)
-
-        $(SPEC_RUNNABLE_EXAMPLE_RUN
-        ---
-        struct S
-        {
-            this(this) { assert(0); }
-        }
-
-        enum E : S { A = S.init }
-
-        void main()
-        {
-            E e1;
-            E e2 = e1; // ok - postblit not called
-        }
-        ---
-        )
-
-        $(P When assigning a named enum value to another object of the same
-        type, if the base type of those values is a `struct` with an identity
-        assignment overload, the identity assignment overload is not called:)
-
-        $(SPEC_RUNNABLE_EXAMPLE_RUN
-        ---
-        struct S
-        {
-            void opAssign(S rhs) { assert(0); }
-        }
-
-        enum E : S { A = S.init }
-
-        void main()
-        {
-            E e1, e2;
-            e2 = e1; // ok - opAssign not called
-        }
-        ---
-        )
-
+$(P Enum values have ordinary value-copy and assignment semantics. They never
+invoke a struct copy constructor, move constructor, postblit, destructor, or
+assignment hook. Those aggregate lifecycle facilities are independently
+rejected or restricted by the struct and operator chapters.)
 
 $(H2 $(LNAME2 anonymous_enums, Anonymous Enums))
 
-        $(P If the enum $(I Identifier) is not present, then the enum
-        is an $(I anonymous enum), and the $(GLINK EnumMembers) are declared
-        in the scope the $(GLINK EnumDeclaration) appears in.
-        No new type is created.
-        )
-
-        $(P The $(I EnumMembers) can have different types.
-        Those types are given by the first of:
-        )
-
-        $(OL
-        $(LI The $(I Type), if present. Types are not permitted when an
-                $(GLINK EnumBaseType) is present.)
-        $(LI The $(I EnumBaseType), if present.)
-        $(LI The type of the $(I AssignExpression), if present.)
-        $(LI The type of the previous $(I EnumMember), if present.)
-        $(LI $(CODE int))
-        )
-
-
-------
-enum { A, B, C }  // anonymous enum
-------
-
-        $(P Defines the constants $(CODE A = 0), $(CODE B = 1), $(CODE C = 2), all of type `int`.)
-
-        $(P Enums must have at least one member.
-        )
-
-        $(P The value of an $(I EnumMember) is given by its *AssignExpression* if present.
-        If there is no *AssignExpression* and it is the first $(I EnumMember),
-        its value is the $(CODE .init) property of the $(I EnumMember)'s type.
-        If there is no *AssignExpression* and it is not the first $(I EnumMember),
-        it is given the value of the previous $(I EnumMember)` + 1`:)
-
-        * If the value of the previous $(I EnumMember) is the `.max` property
-          of the previous $(I EnumMember)'s type, it is an error.
-          This prevents value overflow. It is an error if the previous
-          member cannot be compared with its `.max` property at compile-time.
-        * It is an error if the type of the previous member does not define a compile-time
-          evaluable `+1` operation.
-        * If the value of the previous $(I EnumMember)`+1` is the same as the
-          value of the previous $(I EnumMember), it is an error. (This can happen
-          with floating point types).
-
-        $(P All $(I EnumMember)s are in scope for the *AssignExpression*s.
-        )
-
-------
-enum { A, B = 5 + 7, C, D = 8 + C, E }
-------
-
-        $(P Sets $(CODE A = 0), $(CODE B = 12), $(CODE C = 13), $(CODE D = 21), and $(CODE E = 22), all of type `int`.)
-
----
-enum : long { A = 3, B }
----
-
-        $(P Sets $(CODE A = 3) and $(CODE B = 4), both of type `long`.)
-
----
-enum : string
-{
-    A = "hello",
-    B = "betty",
-    C     // error, cannot add 1 to "betty"
-}
----
+$(P An enum declaration without a name introduces its members directly into the
+surrounding scope and does not create a new enum type.)
 
 ---
 enum
 {
-    A = 1.2f,  // A is 1.2f of type float
-    B,         // B is 2.2f of type float
-    int C = 3, // C is 3 of type int
-    D          // D is 4 of type int
+    bufferSize = 256,
+    retryCount = 3,
 }
 ---
 
-$(H3 $(LNAME2 single_member, Single Member Syntax))
+$(P With an explicit base, every member has that base type. Without a base, a
+member's type is its explicitly written type, the type of its initializer, the
+previous member's type, or $(D int), in that order where applicable. Every such
+type must itself be supported by Laser-D.)
 
-        $(P If there is only one member of an anonymous enum, the `{ }` can
-        be omitted. Gramatically, this is a form of $(GLINK2 declaration, VarDeclarations).
-        )
+$(P Uninitialized anonymous members use the same initial-value and checked
+increment rules as named enums whose base is not another enum.)
+
+$(H3 $(LNAME2 single_member, Single-Member Syntax))
+
+$(P A single anonymous member may omit braces. This form declares a manifest
+constant.)
 
 ---
-enum i = 4;      // i is 4 of type int
-enum long l = 3; // l is 3 of type long
+enum pageSize = 4096;
+enum ulong elementSize = int.sizeof;
 ---
-        $(P This is also known as a *manifest constant*.)
 
 $(H2 $(LNAME2 manifest_constants, Manifest Constants))
 
-        $(P Enum members are manifest constants, which exist only at compile-time.)
+$(P A manifest constant exists only at compile time. It has no runtime storage,
+is not an lvalue, and its address cannot be taken. Its initializer is evaluated
+by CTFE and must use only supported Laser-D constructs.)
 
-        $(P Manifest constants are not lvalues, meaning their address
-        cannot be taken.  They exist only in the memory of the compiler.)
-
+$(SPEC_RUNNABLE_EXAMPLE_COMPILE
 ---
-enum size = __traits(classInstanceSize, Foo);  // evaluated at compile-time
+enum rows = 3;
+enum columns = 4;
+alias Matrix = int[columns][rows];
+
+static assert(Matrix.sizeof == rows * columns * int.sizeof);
 ---
+)
 
-        $(P The initializer for a manifest constant is evaluated using compile-time function evaluation.)
+$(P Manifest constants may be declared at module, aggregate, function, template,
+or other scopes where an ordinary declaration is permitted. They do not violate
+the rejection of mutable static storage because they have no runtime location.)
 
----
-template Foo(T)
-{
-    // Not bad, but the 'size' variable will be located in the executable.
-    const size_t size = T.sizeof;       // evaluated at compile-time
+$(H2 $(LNAME2 conversions, Enum Conversions and Operations))
 
-    // ... use of 'size' at compile-time ...
-}
+$(P Enum casts, comparisons, arithmetic, bitwise operations, and switch behavior
+follow the type, expression, and statement chapters. Operations cannot produce
+a rejected type or invoke unavailable runtime support. A $(D final switch) over
+a defined named enum provides compile-time exhaustiveness checking over its
+declared members.)
 
-template Bar(T)
-{
-    // Better, the manifest constant has no runtime location in the executable.
-    enum size_t size = T.sizeof;        // evaluated at compile-time
+$(H2 $(LNAME2 conformance, Conformance Boundary))
 
-    // ... use of 'size' at compile time ...
-
-    // Taking the address of Foo!T.size also causes it to go into the exe file.
-    auto p = &Foo!T.size;
-}
----
-
+$(P Laser-D enum conformance includes named and anonymous enums, retained scalar
+and enum bases, explicit and checked implicit member values, ordinary enum
+properties, opaque enum types, manifest constants, value copying, and switch
+use. Attribute-bearing members, rejected base types, default initialization of
+opaque enums, and implicit continuation of enum-based member values are outside
+the language.)
 
 $(SPEC_SUBNAV_PREV_NEXT interface, Interfaces, const3, Type Qualifiers)
 )
 
 Macros:
     CHAPTER=18
-        TITLE=Enums
-        CATEGORY_SPEC=$0
+    TITLE=Enums
+    CATEGORY_SPEC=$0
