@@ -487,9 +487,18 @@ $(H2 $(LNAME2 expressions_under_review, Expressions Under Review))
 
 $(H3 $(LNAME2 assert_expressions, Assert Expressions))
 $(H4 $(LNAME2 AssertExpression, Assert Expression Grammar))
+$(LASER_REJECTED Runtime $(D assert(condition)), message forms, and
+$(D assert(0)) are rejected. Laser-D does not provide the druntime assertion
+failure hooks, and runtime checks do not disappear according to release or
+check-action compiler options. Programs use explicit conditions, return
+values, or C-compatible error reporting.)
+
 $(H4 $(LNAME2 assert-ct, Compile-Time Assertions))
-$(LASER_UNDER_REVIEW Runtime $(D assert) expressions remain to be classified.
-The separate $(D static assert) compile-time declaration is supported.)
+$(LASER_SUPPORTED $(D static assert(condition)) and
+$(D static assert(condition, message)) are supported. They are evaluated by
+the compiler and produce no runtime code. An ordinary runtime $(D assert)
+inside a CTFE-capable function remains rejected; CTFE does not change its
+source-language classification. ImportC retains C $(D _Static_assert).)
 
 $(H3 $(LNAME2 interpolation_expressions, Interpolation Expressions))
 $(LASER_UNDER_REVIEW Interpolation expression sequences remain to be reviewed

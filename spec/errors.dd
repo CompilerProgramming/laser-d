@@ -9,6 +9,14 @@ $(P_LASER_D D exception handling is not supported. Source `try`, `catch`,
 propagate errors explicitly, for example through return values or C APIs.
 `scope(exit)` is the supported deterministic-cleanup construct.)
 
+$(H2 Runtime Assertions)
+
+$(LASER_REJECTED Runtime $(D assert) expressions are rejected. Their failure
+paths require D runtime hooks and their removal under release settings would
+make program behavior depend on compiler configuration. Use explicit
+conditions and explicit error propagation. The compiler-only
+$(D static assert) declaration remains supported.)
+
 $(BLOCKQUOTE_BY Julius C'ster,
 I came, I coded, I crashed.
 )

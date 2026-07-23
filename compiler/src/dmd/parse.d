@@ -8671,6 +8671,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
         case TOK.assert_:
             {
                 // https://dlang.org/spec/expression.html#assert_expressions
+                error(loc, "runtime `assert` expressions are not supported in Laser-D; use explicit error handling or `static assert` for compile-time checks");
                 AST.Expression msg = null;
 
                 nextToken();

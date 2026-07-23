@@ -382,7 +382,8 @@ must be discovered with `__traits(getUnitTests)` and called by user code.
 Laser-D instead uses explicit test functions and an explicit C `main`, following
 the same visible execution model as ordinary programs. The `-unittest` option
 and `__traits(getUnitTests)` are rejected, and the predefined `unittest`
-version is never enabled. Assertion expressions remain a separate decision.
+version is never enabled. Runtime assertions are rejected separately, while
+compiler-only `static assert` remains supported.
 
 Function contracts are rejected. This includes expression and block forms of
 `in` preconditions and `out` postconditions, named postcondition results, and
@@ -466,6 +467,14 @@ not a second language mode: every existing Laser-D restriction also applies in
 template declarations, template instances, and CTFE. In particular, templates
 and CTFE cannot restore string mixins, GC-backed arrays, associative arrays,
 classes, capturing delegates, or any other rejected construct.
+
+Runtime `assert` expressions are rejected, including message forms,
+`assert(0)`, and assertions written in functions intended for CTFE. Their
+failure paths require druntime assertion hooks, ordinary assertions may be
+removed by `-release`, and `assert(0)` changes lowering according to the check
+mode. Laser-D uses explicit runtime conditions and error propagation instead.
+`static assert` remains supported as a compiler-only check with no runtime
+dependency. ImportC retains C `_Static_assert`.
 
 Compile-time introspection mechanisms such as individual `__traits` operations,
 `is` expressions, and `typeof` are documented and tested in their own feature
