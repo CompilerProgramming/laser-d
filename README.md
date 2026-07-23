@@ -108,6 +108,94 @@ compilable or runnable test, while rejected forms have focused diagnostic
 tests. See the [Laser-D test README](compiler/test/laser-d/README.md) for
 instructions.
 
+## Building and testing
+
+### Prerequisites
+
+Building Laser-D requires an installed **full D compiler toolchain**. Use an
+upstream DMD installation, or a compatible LDC/GDC installation with its DMD
+command-line wrapper. The host compiler must include the normal D runtime and
+standard library; a previously built Laser-D compiler is not suitable as the
+bootstrap compiler.
+
+The compiler build and test harness are themselves full-D programs and use
+features intentionally excluded from Laser-D. In particular, `HOST_DMD` must
+refer to the upstream host compiler, not the Laser-D executable under
+`generated`.
+
+The following tools are required:
+
+- DMD with `dmd` and `rdmd` available on `PATH` (recommended), or compatible
+  `ldmd2`/`gdmd` wrappers;
+- a native C++ toolchain;
+- Visual Studio or Microsoft C++ Build Tools on Windows; or
+- GCC/Clang and the usual development tools on Linux and macOS.
+
+The upstream compiler build documentation currently requires a host D compiler
+version 2.079.1 or later.
+
+### Build the compiler
+
+From the repository root:
+
+```console
+rdmd compiler/src/build.d dmd
+```
+
+On Windows PowerShell, the equivalent command is:
+
+```powershell
+rdmd compiler\src\build.d dmd
+```
+
+The release executable is written beneath the platform-specific generated
+directory:
+
+```text
+generated/windows/release/64/dmd.exe
+generated/linux/release/64/dmd
+generated/osx/release/64/dmd
+```
+
+The build uses `dmd` from `PATH` by default. To select another full host
+compiler explicitly, pass the build variable described by the upstream build
+system:
+
+```console
+rdmd compiler/src/build.d dmd HOST_DMD=/path/to/dmd
+```
+
+### Run the Laser-D tests
+
+The test driver must also be compiled by the full host D compiler. From
+`compiler/test`, run the complete Laser-D language suite:
+
+```console
+HOST_DMD="$(command -v dmd)" ./run.d laser-d
+```
+
+On Windows PowerShell:
+
+```powershell
+cd compiler\test
+$env:HOST_DMD = (Get-Command dmd).Source
+rdmd run.d laser-d
+```
+
+To run one test, pass its path relative to `compiler/test`:
+
+```console
+./run.d laser-d/templates_accepted.d
+```
+
+```powershell
+rdmd run.d laser-d/templates_accepted.d
+```
+
+The test driver automatically selects the newly built compiler under
+`generated` as the compiler under test. `HOST_DMD` is used only to build the
+full-D test infrastructure.
+
 ## Repository layout
 
 This repository is based on DMD and retains its overall structure.
