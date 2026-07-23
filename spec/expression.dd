@@ -355,8 +355,19 @@ $(GNAME LiteralExpression):
 
 $(H3 $(LNAME2 this, $(D this)))
 
-$(P Inside a struct or union constructor or instance method, $(D this) denotes
-the current value. Structs have no inheritance or hidden virtual table.)
+$(LASER_SUPPORTED Inside a struct or union constructor or instance method,
+$(D this) denotes the current value. It may qualify field access, be passed or
+returned by value, have its address taken as a non-owning pointer, and form a
+delegate to a method. $(D typeof(this)) yields the receiver type without
+evaluating it. Template $(D this) parameters may infer a mutable or immutable
+receiver type.)
+
+$(P A pointer or delegate derived from $(D this) does not own or extend the
+receiver lifetime. Structs and unions have no inheritance or hidden virtual
+table. Member aggregate types have no enclosing value instance, and local
+structs that require a hidden outer context are rejected. Reference returns,
+closure capture, constructor delegation, and $(D alias this) remain governed
+by their separate rejection rules.)
 
 $(H3 $(LNAME2 super, $(D super) (Excluded)))
 

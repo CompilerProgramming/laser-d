@@ -412,105 +412,31 @@ $(GNAME TemplateThisParameter):
     $(D this) $(GLINK TemplateTypeParameter)
 )
 
-    $(P $(I TemplateThisParameter)s are used in member function templates
-        to pick up the type of the $(I this) reference. It also will
-        infer the mutability of the `this` reference. For example, if
-        `this` is `const`, then the function is marked `const`.)
+$(LASER_SUPPORTED A template $(D this) parameter on a struct or union member
+function infers the type and supported qualifier of the receiver. This is a
+compile-time template mechanism and introduces no runtime type check, hidden
+context, or virtual dispatch.)
 
-        $(SPEC_RUNNABLE_EXAMPLE_COMPILE
-        ---
-        struct S
-        {
-            void foo(this T)() const
-            {
-                pragma(msg, T);
-            }
-        }
+$(D_CODE
+struct Value
+{
+    int receiverSize(this Receiver)()
+    {
+        static assert(is(Receiver == Value));
+        return Receiver.sizeof;
+    }
 
-        void main()
-        {
-            const(S) s;
-            (&s).foo();
-            S s2;
-            s2.foo();
-            immutable(S) s3;
-            s3.foo();
-        }
-        ---
-        )
-
-    Prints:
-
-$(CONSOLE
-const(S)
-S
-immutable(S)
+    int immutableReceiverSize(this Receiver)() immutable
+    {
+        static assert(is(Receiver == immutable(Value)));
+        return Receiver.sizeof;
+    }
+}
 )
 
-$(H4 $(LNAME2 this_rtti, Avoiding Runtime Type Checks))
-
-    $(P *TemplateThisParameter* is especially useful when used with inheritance. For example,
-        consider the implementation of a final base method which returns a derived
-        class type. Typically this would return a base type, but that would prohibit
-        calling or accessing derived properties of the type:)
-
-        ---
-        interface Addable(T)
-        {
-            final auto add(T t)
-            {
-                return this;
-            }
-        }
-
-        class List(T) : Addable!T
-        {
-            List remove(T t)
-            {
-                return this;
-            }
-        }
-
-        void main()
-        {
-            auto list = new List!int;
-            list.add(1).remove(1);  // error: no 'remove' method for Addable!int
-        }
-        ---
-
-    $(P Here the method $(D add) returns the base type, which doesn't implement the
-        $(D remove) method. The template `this` parameter can be used for this purpose:)
-
-        $(SPEC_RUNNABLE_EXAMPLE_COMPILE
-        ---
-        interface Addable(T)
-        {
-            final R add(this R)(T t)
-            {
-                return cast(R)this;  // cast is necessary, but safe
-            }
-        }
-
-        class List(T) : Addable!T
-        {
-            List remove(T t)
-            {
-                return this;
-            }
-        }
-
-        void main()
-        {
-            auto list = new List!int;
-            static assert(is(typeof(list.add(1)) == List!int));
-            list.add(1).remove(1);  // ok, List.add
-
-            Addable!int a = list;
-            // a.add calls Addable.add
-            static assert(is(typeof(a.add(1)) == Addable!int));
-        }
-        ---
-        )
+$(P Class inheritance examples from D do not apply because Laser-D rejects
+classes and interfaces. The inferred receiver and the member function remain
+subject to all ordinary Laser-D qualifier, parameter, and return restrictions.)
 
 $(H3 $(LNAME2 template_value_parameter, Value Parameters))
 

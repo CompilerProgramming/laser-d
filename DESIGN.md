@@ -282,9 +282,20 @@ also rejected. Their explicit move semantics depend on advanced struct
 copy/move and destruction behavior that Laser-D does not retain, and they can
 leave an original lvalue in an unsafe-to-reuse state without ownership checks.
 
-Interpolated expressions, `this`, non-array type properties, operators,
-assignment, calls, casts, and other postfix expressions retain their individual
-review status. Other primary forms are recorded in the feature inventory.
+The `this` expression is supported for struct and union constructors and
+instance methods. It denotes the current value and may qualify fields, be
+passed or returned by value, have its address taken as a non-owning pointer,
+form a struct-method delegate, and participate in `typeof`. Template `this`
+parameters may infer the mutable or immutable receiver type at compile time.
+None of these forms adds inheritance, a virtual table, allocation, or ownership.
+Reference returns, captured receivers, constructor delegation, and `alias this`
+remain rejected by their existing rules. An enclosing aggregate instance is
+not available: member aggregate types have no outer value, and local structs
+requiring hidden context are rejected.
+
+Non-array type properties, operators, assignment, calls, casts, and other
+postfix expressions retain their individual review status. Other primary forms
+are recorded in the feature inventory.
 
 ### Mixins
 
