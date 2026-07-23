@@ -76,7 +76,7 @@ Each chapter should be split into individual features as it is investigated.
 | Functions (`function.dd`) | Restricted | Ordinary declarations, bodies, prototypes, calls, value returns and inference, static overloads, `in`/`out`/`ref` parameters, default arguments, automatic locals, function pointers, non-capturing literals/delegates, method delegates, UFCS, templates, CTFE, C ABI variadics, and the two standard C `main` signatures are supported under the fixed function model. Rejected attributes, contracts, reference returns, lifetime annotations, lazy parameters, closure capture, named nested functions, D runtime variadics, generated or platform-specific entry points, virtual dispatch, property calls, and optional parentheses are rejected. |
 | Operator overloading (`operatoroverloading.dd`) | Restricted | Modern struct operator hooks, including multidimensional indexing and slicing, are supported and lower to ordinary calls without inherent runtime allocation. Hooks remain subject to Laser-D type and function restrictions. Legacy D1 hooks are rejected. |
 | Templates (`template.dd`) | Supported | Template declaration, selection, instantiation, inference, specialization, constraints, recursion, and emission are supported. Template contents remain subject to every Laser-D language restriction. |
-| Template mixins (`template-mixin.dd`) | Supported | Mixin template declarations and template mixin instantiations are supported; string mixins are rejected separately. |
+| Template mixins (`template-mixin.dd`) | Supported | Mixin-template declarations and named or unnamed template-mixin instances compose parsed declarations in supported module, aggregate, template, and local scopes. Injected declarations remain subject to every Laser-D restriction; string reparsing is rejected separately. |
 | Function contracts (`contracts.dd`) | Rejected | Expression and block `in` preconditions, `out` postconditions, named results, and contract-style `do` bodies are rejected. Validation uses visible ordinary control flow and explicit result handling. Runtime assertions are rejected separately. |
 | Conditional compilation (`version.dd`) | Restricted | `D_BetterC` is always defined; review remaining predefined versions and debug behavior. |
 | Traits (`traits.dd`) | Restricted | Read-only type, function, parameter, and symbol reflection is supported. `__traits(toType)`, `__traits(getPointerBitmap)`, and `__traits(getUnitTests)` are rejected. |
@@ -224,7 +224,7 @@ Each chapter should be split into individual features as it is investigated.
 | --- | --- | --- | --- |
 | String mixin declarations and statements | Rejected | Compile-time source-text injection in declaration and statement positions is rejected. | `string_mixin_declaration_rejected.d`, `string_mixin_statement_rejected.d` |
 | String mixin expressions and types | Rejected | Source text cannot be reparsed as an expression or type. | `string_mixin_expression_rejected.d`, `string_mixin_type_rejected.d` |
-| Template mixins | Supported | Mixin template declarations and template mixin instantiations remain supported. | `template_mixins_accepted.d` |
+| Template mixins | Supported | Parameterized and constrained mixin-template declarations and named or unnamed instances may inject supported declarations at module, struct, union, template, and function-local scope. | `template_mixins_accepted.d` |
 
 ## Array decisions
 

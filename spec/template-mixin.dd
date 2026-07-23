@@ -2,22 +2,26 @@ Ddoc
 
 $(SPEC_S Template Mixins,
 
-$(P_LASER_D Template mixin declarations and instantiations are supported.
-String mixins are not supported.)
-
 $(HEADERNAV_TOC)
 
-        $(P A $(I TemplateMixin) takes an arbitrary set of declarations from
-        the body of a $(GLINK2 template, TemplateDeclaration) and inserts them
-        into the current context.)
+$(LASER_NORMATIVE Template mixins compose already parsed declarations.
+A mixin-template declaration defines a parameterized declaration body, and a
+template-mixin instantiation inserts an instance of that body into a supported
+declaration scope.)
+
+$(P Template mixins are distinct from string mixins. They do not construct
+source text, re-run the parser, or permit a string to become a declaration,
+statement, expression, or type.)
+
+$(H2 $(LNAME2 grammar, Grammar))
 
 $(GRAMMAR
 $(GNAME TemplateMixinDeclaration):
-    $(D mixin) $(D template) $(GLINK_LEX Identifier) $(GLINK2 template, TemplateParameters) $(GLINK2 template, Constraint)$(OPT) $(D {) $(GLINK2 module, DeclDefs)$(OPT) $(D })
+    $(D mixin template) $(GLINK_LEX Identifier) $(GLINK2 template, TemplateParameters) $(GLINK2 template, Constraint)$(OPT) $(D {) $(GLINK2 module, DeclDefs)$(OPT) $(D })
 
 $(GNAME TemplateMixin):
     $(D mixin) $(GLINK MixinTemplateName) $(GLINK2 template, TemplateArguments)$(OPT) $(GLINK_LEX Identifier)$(OPT) $(D ;)
-    $(D mixin) $(GLINK_LEX Identifier) `=` $(GLINK MixinTemplateName) $(GLINK2 template, TemplateArguments)$(OPT) $(D ;)
+    $(D mixin) $(GLINK_LEX Identifier) $(D =) $(GLINK MixinTemplateName) $(GLINK2 template, TemplateArguments)$(OPT) $(D ;)
 
 $(GNAME MixinTemplateName):
     $(D .) $(GLINK MixinQualifiedIdentifier)
@@ -30,394 +34,142 @@ $(GNAME MixinQualifiedIdentifier):
     $(GLINK2 template, TemplateInstance) $(D .) $(GSELF MixinQualifiedIdentifier)
 )
 
-        $(P A $(I TemplateMixin) can occur in declaration lists of modules,
-        classes, structs, unions, or as a statement.
-        $(I MixinTemplateName) must refer to a $(I TemplateDeclaration) or
-        $(I TemplateMixinDeclaration).
-        If the $(I TemplateDeclaration) requires no parameters, $(I TemplateArguments)
-        can be omitted.
-        )
+$(H2 $(LNAME2 declarations, Mixin-Template Declarations))
 
-        $(P Unlike a $(DDSUBLINK spec/template, instantiation_scope, template instantiation),
-        a template mixin's body is evaluated
-        within the scope where the mixin appears, not where the template declaration
-        is defined. It is analogous to cutting and pasting the body of
-        the template into the location of the mixin into a $(LINK2 #mixin_scope, nested scope). It is useful for injecting
-        parameterized $(SINGLEQUOTE boilerplate) code, as well as for creating
-        templated nested functions, which is not always possible with
-        template instantiations.
-        )
+$(P A declaration begins with $(D mixin template), has the ordinary supported
+template parameter forms and optional constraint, and contains declarations.
+It can be instantiated only as a template mixin.)
 
-        $(P A $(I TemplateMixinDeclaration) is the same as a $(I TemplateDeclaration),
-        but can not be instantiated outside of a $(I TemplateMixin).
-        )
-
-$(SPEC_RUNNABLE_EXAMPLE_RUN
-------
-int y = 3;
-
-mixin template Foo()
+$(D_CODE
+mixin template Members(T, T initial = T.init)
 {
-    int abc() { return y; }
-}
+    T value = initial;
 
-void test()
-{
-    int y = 8;
-    mixin Foo; // local y is picked up, not global y
-    assert(abc() == 8);
-}
-------
-)
-
-$(SPEC_RUNNABLE_EXAMPLE_RUN
-------
-import std.stdio : writeln;
-
-mixin template Foo()
-{
-    int x = 5;
-}
-
-mixin Foo;
-
-struct Bar
-{
-    mixin Foo;
-}
-
-void main()
-{
-    writeln("x = ", x);         // prints 5
+    T read()
     {
-        Bar b;
-        int x = 3;
-
-        writeln("b.x = ", b.x); // prints 5
-        writeln("x = ", x);     // prints 3
-        {
-            mixin Foo;
-            writeln("x = ", x); // prints 5
-            x = 4;
-            writeln("x = ", x); // prints 4
-        }
-        writeln("x = ", x);     // prints 3
-    }
-    writeln("x = ", x);         // prints 5
-}
-------
-)
-
-$(H2 $(LNAME2 parameters, Mixin Parameters))
-
-        $(P Mixins can be
-        $(DDSUBLINK spec/template, parameters, parameterized):)
-
-------
-mixin template Foo(T)
-{
-    T x = 5;
-}
-
-mixin Foo!(int);           // create x of type int
-------
-
-        $(P Mixins can parameterize symbols using
-        $(DDSUBLINK spec/template, aliasparameters, alias parameters):)
-
-------
-mixin template Foo(alias b)
-{
-    int abc() { return b; }
-}
-
-void test()
-{
-    int y = 8;
-    mixin Foo!(y);
-    assert(abc() == 8);
-}
-------
-
-$(H3 $(LNAME2 example, Example))
-
-        $(P This example uses a mixin to implement a generic Duff's device
-        for an arbitrary statement (in this case, the arbitrary statement
-        is in bold). A nested function is generated as well as a
-        delegate literal, these can be inlined by the compiler:)
-
-$(SPEC_RUNNABLE_EXAMPLE_RUN
-------
-import std.stdio : writeln;
-
-mixin template duffs_device(alias low, alias high, alias fun)
-{
-    void duff_loop()
-    {
-        if (low < high)
-        {
-            auto n = (high - low + 7) / 8;
-            switch ((high - low) % 8)
-            {
-                case 0: do { fun(); goto case;
-                case 7:      fun(); goto case;
-                case 6:      fun(); goto case;
-                case 5:      fun(); goto case;
-                case 4:      fun(); goto case;
-                case 3:      fun(); goto case;
-                case 2:      fun(); goto case;
-                case 1:      fun(); continue;
-                default:     assert(0, "Impossible");
-                        } while (--n > 0);
-            }
-        }
+        return value;
     }
 }
-
-void main()
-{
-    int i = 1;
-    int j = 11;
-
-    mixin duffs_device!(i, j, delegate { writeln("foo"); });
-    duff_loop();  // executes foo() 10 times
-}
-------
 )
 
-$(H2 $(LNAME2 mixin_scope, Mixin Scope))
+$(P Type, value, alias, and sequence parameters, defaults, specializations,
+and constraints follow the Laser-D template rules. The declarations in the
+body are checked under the ordinary Laser-D rules when instantiated.)
 
-        $(P The declarations in a mixin are placed in a nested scope and then
-        $(SINGLEQUOTE imported) into the surrounding
-        scope. If the name of a declaration in a mixin is the same
-        as a declaration in the surrounding scope, the surrounding declaration
-        overrides the mixin one:)
+$(H2 $(LNAME2 instantiation, Instantiation))
 
-$(SPEC_RUNNABLE_EXAMPLE_RUN
-------
-import std.stdio : writeln;
+$(P A template mixin is instantiated with $(D mixin Name!(arguments);).
+Arguments may be omitted when the declaration requires none. The selected
+template must be a mixin-template declaration or an ordinary template whose
+body is valid for mixin insertion.)
 
-int x = 3;
-
-mixin template Foo()
+$(D_CODE
+struct Container
 {
-    int x = 5;
-    int y = 5;
+    mixin Members!(int, 7);
 }
 
-mixin Foo;
-int y = 3;
-
-void main()
-{
-    writeln("x = ", x);  // prints 3
-    writeln("y = ", y);  // prints 3
-}
-------
+static assert(Container.init.value == 7);
 )
 
-        $(P A mixin has its own scope, even if a declaration is overridden
-        by the enclosing one:)
+$(P An unnamed instance inserts its members directly into the receiving scope.
+A named instance places the inserted declarations under that instance name.)
 
-$(SPEC_RUNNABLE_EXAMPLE_RUN
-------
-import std.stdio : writeln;
-
-int x = 4;
-
-mixin template Foo()
+$(D_CODE
+union Storage
 {
-    int x = 5;
-    int bar() { return x; }
+    mixin Members!uint namedMembers;
 }
 
-mixin Foo;
-
-void main()
-{
-    writeln("x = ", x);         // prints 4
-    writeln("bar() = ", bar()); // prints 5
-}
-------
+static assert(is(typeof(Storage.init.namedMembers.value) == uint));
 )
 
-        $(P If two different mixins are put in the same scope, and each
-        define a declaration with the same name, there is an ambiguity
-        error when the declaration is referenced:)
+$(H2 $(LNAME2 supported-scopes, Supported Scopes))
 
-$(SPEC_RUNNABLE_EXAMPLE_FAIL
-------
-import std.stdio : writeln;
+$(P Template mixins may insert supported declarations at module scope, in
+structs and unions, within templates, and in function-local declaration
+scope.)
 
-mixin template Foo()
-{
-    int x = 5;
-    void func(int x) { }
-}
-
-mixin template Bar()
-{
-    int x = 4;
-    void func(long x) { }
-}
-
-mixin Foo;
-mixin Bar;
-
-void main()
-{
-    writeln("x = ", x);    // error, x is ambiguous
-    func(1);               // error, func is ambiguous
-}
-------
-)
-        $(P The call to $(D func()) is ambiguous because
-        `Foo.func` and `Bar.func` are in different scopes.
-        )
-
-$(H3 $(LNAME2 resolving_ambiguities, Resolving Ambiguities))
-
-        $(P If a mixin has an $(I Identifier), it can be used to
-        disambiguate between conflicting symbols:
-        )
-
-$(SPEC_RUNNABLE_EXAMPLE_RUN
-------
-import std.stdio : writeln;
-
-int x = 6;
-
-mixin template Foo()
-{
-    int x = 5;
-    int y = 7;
-    void func() { }
-}
-
-mixin template Bar()
-{
-    int x = 4;
-    void func() { }
-}
-
-mixin Foo F;
-mixin Bar B;
-
-void main()
-{
-    writeln("y = ", y);     // prints 7
-    writeln("x = ", x);     // prints 6
-    writeln("F.x = ", F.x); // prints 5
-    writeln("B.x = ", B.x); // prints 4
-    F.func();                  // calls Foo.func
-    B.func();                  // calls Bar.func
-}
-------
-)
-        $(P Alias declarations can be used to form an
-        $(DDSUBLINK spec/function, overload-sets, overload set) of
-        functions declared in different mixins:)
-
------
-mixin template Foo()
-{
-    void func(int x) {  }
-}
-
-mixin template Bar()
-{
-    void func(long x) {  }
-}
-
-mixin Foo!() F;
-mixin Bar!() B;
-
-alias func = F.func;
-alias func = B.func;
-
-void main()
-{
-    func(1);  // calls B.func
-    func(1L); // calls F.func
-}
------
-
-$(H2 $(LNAME2 aggregate_types, Aggregate Type Mixins))
-
-$(H3 $(LNAME2 virtual_functions, Mixin Virtual Functions))
-
-        $(P Mixins can add virtual functions to a class:)
-
-$(SPEC_RUNNABLE_EXAMPLE_RUN
-------
-import std.stdio : writeln;
-
-mixin template Foo()
-{
-    void func() { writeln("Foo.func()"); }
-}
-
-class Bar
-{
-    mixin Foo;
-}
-
-class Code : Bar
-{
-    override void func() { writeln("Code.func()"); }
-}
-
-void main()
-{
-    Bar b = new Bar();
-    b.func();      // calls Foo.func()
-
-    b = new Code();
-    b.func();      // calls Code.func()
-}
-------
+$(UL
+$(LI At module scope they may introduce supported declarations such as
+aliases, manifest constants, functions, structs, unions, enums, and templates.)
+$(LI In a struct or union they may introduce supported fields, methods,
+constructors, operators, aliases, manifest constants, and nested declarations.)
+$(LI Within another template their declarations may depend on the enclosing
+template's compile-time parameters.)
+$(LI In a function they may introduce supported local declarations that do not
+require a rejected hidden context or named nested function.)
 )
 
-$(H3 $(LNAME2 destructors, Mixin Destructors))
+$(P Class and interface scopes do not exist in Laser-D. ImportC declarations
+remain governed by the separate ImportC rules.)
 
-        $(P An aggregate type can mixin additional destructors.
-        Destructors are run in the opposite order to declaration order.)
+$(H2 $(LNAME2 mixin_scope, Scope and Name Lookup))
 
-$(SPEC_RUNNABLE_EXAMPLE_RUN
----
-import std.stdio;
+$(P Template arguments and names referenced by the mixin-template declaration
+are resolved according to the ordinary template rules. Inserted declarations
+become members of the receiving scope, or of the explicit named mixin instance
+when one is supplied.)
 
-mixin template addNewDtor()
-{
-    ~this()
-    {
-        writeln("Mixin dtor");
-    }
-}
+$(P Name conflicts are diagnosed through ordinary declaration and overload
+rules. Naming a mixin instance can separate otherwise conflicting inserted
+member names.)
 
-struct S
-{
-    ~this()
-    {
-        writeln("Struct dtor");
-    }
+$(P Lexical availability does not authorize hidden runtime capture. A local
+instantiation may use compile-time names visible at that point, but any
+inserted runtime declaration must still satisfy the closure, nested-function,
+and hidden-context restrictions.)
 
-    mixin addNewDtor;
-}
+$(H2 $(LNAME2 composition, Composition))
 
-void main()
-{
-    S s;
-    // prints `Mixin dtor`
-    // prints `Struct dtor`
-}
----
+$(P A mixin-template body may instantiate other supported templates and
+template mixins. Recursive composition must terminate within the compiler's
+normal template-instantiation limits.)
+
+$(P A template mixin may provide methods or operator hooks for a supported
+struct. Those declarations behave exactly as if written directly in that
+struct and receive no additional privileges.)
+
+$(H2 $(LNAME2 excluded-content, Excluded Content))
+
+$(LASER_EXCLUDED A template mixin cannot introduce or restore:)
+
+$(UL
+$(LI classes, interfaces, or C++ structs,)
+$(LI struct destructors, postblits, copy or move constructors, invariants, or
+$(D alias this),)
+$(LI named nested functions, capturing delegates, or hidden-context structs,)
+$(LI mutable global or static storage, module lifecycle functions, or
+threading features,)
+$(LI GC-backed arrays, associative arrays, allocation, or rejected types and
+qualifiers,)
+$(LI contracts, runtime assertions, exceptions, unit-test blocks, inline
+assembly, or rejected attributes,)
+$(LI any other declaration excluded by the Laser-D specification.)
 )
 
-$(SPEC_SUBNAV_PREV_NEXT template, Templates, contracts, Contract Programming)
+$(P Rejection applies when the invalid declaration is instantiated. Placing
+rejected syntax in a template does not make it part of Laser-D.)
+
+$(H2 $(LNAME2 string-mixins, String Mixins (Excluded)))
+
+$(LASER_EXCLUDED The following forms are not template mixins and remain
+rejected:)
+
+$(D_CODE
+mixin("int generated;");
+mixin("1 + 2");
+mixin("int");
+)
+
+$(P Laser-D never reparses a compile-time string as language syntax. Template
+mixins remain supported because their declaration bodies were parsed normally
+at their original source locations.)
+
+$(SPEC_SUBNAV_PREV_NEXT template, Templates, contracts, Function Contracts)
 )
 
 Macros:
-        CHAPTER=23
-        TITLE=Template Mixins
-        _=
+CHAPTER=23
+TITLE=Template Mixins
+_=
