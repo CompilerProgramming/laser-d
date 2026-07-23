@@ -1,5 +1,7 @@
 // TEST_MODE: runnable
 
+import core.stdc.stdarg;
+
 extern(C) int firstArgument(int first, ...)
 {
     return first;

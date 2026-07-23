@@ -346,7 +346,9 @@ separate supported compile-time feature.
 >
 > A function type declared with `extern(C)` may end its
 > parameter list with `...`. Such functions may be declared, defined, called, and used through function pointers. Their arguments and return values use the
-> target C ABI. At least one named parameter is required.
+> target C ABI. At least one named parameter is required. A definition must have
+> the target's `va_list` ABI declarations visible where the ABI requires them;
+> the usual source is `core.stdc.stdarg`.
 
 #### <a id="d_style_variadic_functions"></a>D-Style Variadic Functions
 

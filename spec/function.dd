@@ -317,7 +317,9 @@ $(H4 $(LNAME2 c_style_variadic_functions, C-Style Variadic Functions))
 $(LASER_SUPPORTED A function type declared with $(D extern(C)) may end its
 parameter list with $(D ...). Such functions may be declared, defined, called,
 and used through function pointers. Their arguments and return values use the
-target C ABI. At least one named parameter is required.)
+target C ABI. At least one named parameter is required. A definition must have
+the target's $(D va_list) ABI declarations visible where the ABI requires them;
+the usual source is $(D core.stdc.stdarg).)
 
 $(H4 $(LNAME2 d_style_variadic_functions, D-Style Variadic Functions))
 

@@ -386,7 +386,10 @@ non-capturing function literals cover the explicit alternatives.
 
 C ABI variadic functions declared with `extern(C)` are supported for C
 interoperability, including declarations, definitions, function pointers, and
-calls. D-style untyped variadics are rejected because their hidden TypeInfo
+calls. A definition must make the target's `va_list` ABI declarations visible
+where required, normally by importing `core.stdc.stdarg`; this supplies ABI
+types rather than requiring a D runtime. D-style untyped variadics are rejected
+because their hidden TypeInfo
 argument protocol requires D runtime machinery. Typesafe runtime variadics,
 including lazy variadics, are also rejected because they introduce implicit
 argument aggregation and, for lazy parameters, implicit delegates. Variadic
