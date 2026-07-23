@@ -11,7 +11,7 @@ dependency ":frontend" version="*"
 subPackage {
   name "compiler"
   targetType "executable"
-  targetName "dmd"
+  targetName "laserd"
   sourcePaths "compiler/src/dmd"
   importPaths "compiler/src"
   stringImportPaths "compiler/src/dmd/res" "."

@@ -33,7 +33,7 @@ else
 enum projectRootDir = __FILE_FULL_PATH__.dirName.buildNormalizedPath("..", "..", "..");
 enum generatedDir = projectRootDir.buildPath("generated");
 
-enum dmdFilename = "dmd".setExtension(exeExtension);
+enum laserDFilename = "laserd".setExtension(exeExtension);
 
 enum compilerRootDir = __FILE_FULL_PATH__.dirName.buildNormalizedPath("..", "..");
 alias testPath = path => compilerRootDir.buildPath("test", path);
@@ -61,7 +61,7 @@ string dmdModel()
 
     const prefix = generatedDir.buildPath(os, build);
     return dmdModel = environment.get("DMD_MODEL",
-        prefix.buildPath("64", dmdFilename).exists ? "64" : "32");
+        prefix.buildPath("64", laserDFilename).exists ? "64" : "32");
 }
 
 string model()
@@ -73,7 +73,7 @@ string model()
 string dmdPath()
 {
     static string dmdPath;
-    return  dmdPath ? dmdPath : (dmdPath = buildOutputPath.buildPath(dmdFilename));
+    return dmdPath ? dmdPath : (dmdPath = buildOutputPath.buildPath(laserDFilename));
 }
 
 string resultsDir()

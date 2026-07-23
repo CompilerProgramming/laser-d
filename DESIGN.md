@@ -617,7 +617,9 @@ Laser-D, separately from the language-conformance suite under
 implicitly supported merely because their source still exists under druntime.
 
 The Dub `dmd:distribution` subpackage assembles a native ZIP containing the
-already-built Laser-D compiler and these source imports. Its compiler
+already-built Laser-D compiler and these source imports. The compiler executable
+is named `laserd` (`laserd.exe` on Windows), distinguishing it from the full
+upstream `dmd` compiler used to build Laser-D. Its compiler
 configuration locates the packaged `import/` directory relative to the
 executable, so installed programs do not depend on the repository layout.
 There is no standard-library binary at this stage because `core.stdc` consists

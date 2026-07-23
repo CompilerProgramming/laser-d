@@ -17,8 +17,8 @@ import std.zip : ArchiveMember, CompressionMethod, ZipArchive;
 version (Windows)
 {
     enum platformName = "windows";
-    enum compilerSource = "generated/windows/release/64/dmd.exe";
-    enum compilerName = "laser-d.exe";
+    enum compilerSource = "generated/windows/release/64/laserd.exe";
+    enum compilerName = "laserd.exe";
     enum configName = "sc.ini";
     enum configContents =
         "[Environment]\r\n" ~
@@ -27,8 +27,8 @@ version (Windows)
 else version (OSX)
 {
     enum platformName = "macos";
-    enum compilerSource = "generated/osx/release/64/dmd";
-    enum compilerName = "laser-d";
+    enum compilerSource = "generated/osx/release/64/laserd";
+    enum compilerName = "laserd";
     enum configName = "dmd.conf";
     enum configContents =
         "[Environment]\n" ~
@@ -37,8 +37,8 @@ else version (OSX)
 else version (linux)
 {
     enum platformName = "linux";
-    enum compilerSource = "generated/linux/release/64/dmd";
-    enum compilerName = "laser-d";
+    enum compilerSource = "generated/linux/release/64/laserd";
+    enum compilerName = "laserd";
     enum configName = "dmd.conf";
     enum configContents =
         "[Environment]\n" ~

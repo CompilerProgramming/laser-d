@@ -149,12 +149,13 @@ rdmd compiler\src\build.d dmd
 ```
 
 The release executable is written beneath the platform-specific generated
-directory:
+directory. It is named `laserd` so it cannot be mistaken for the full upstream
+`dmd` compiler used to bootstrap the build:
 
 ```text
-generated/windows/release/64/dmd.exe
-generated/linux/release/64/dmd
-generated/osx/release/64/dmd
+generated/windows/release/64/laserd.exe
+generated/linux/release/64/laserd
+generated/osx/release/64/laserd
 ```
 
 The build uses `dmd` from `PATH` by default. To select another full host
@@ -215,7 +216,7 @@ dist/laser-d-v2.113.0-beta.1-linux-x86_64.zip
 
 Each distribution contains:
 
-- `bin/laser-d` (`bin/laser-d.exe` on Windows);
+- `bin/laserd` (`bin/laserd.exe` on Windows);
 - an adjacent compiler configuration that automatically adds the packaged
   `import/` directory;
 - `import/object.d` and the supported `core.stdc` source modules; and

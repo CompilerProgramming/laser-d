@@ -6,7 +6,7 @@ debug = PRINTF;
 debug (PRINTF) import core.stdc.stdio;
 
 // Run this after codegen changes:
-// env DMD=generated/linux/release/64/dmd rdmd -fPIC -version=update test/runnable/test_cdstrpar.d
+// env DMD=generated/linux/release/64/laserd rdmd -fPIC -version=update test/runnable/test_cdstrpar.d
 version (update)
 {
     import std.algorithm : canFind, find, splitter, until;

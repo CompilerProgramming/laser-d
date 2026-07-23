@@ -434,7 +434,7 @@ alias directoryRule = makeRuleWithArgs!((MethodInitializer!BuildRule builder, Bu
    .msg("mkdirRecurse '%s'".format(dir))
    .commandFunction(() => mkdirRecurse(dir))
 );
-alias dmdSymlink = makeRule!((builder, rule) => builder
+alias laserDSymlink = makeRule!((builder, rule) => builder
     .commandFunction((){
         import std.process;
         version(Windows)
@@ -443,7 +443,7 @@ alias dmdSymlink = makeRule!((builder, rule) => builder
         }
         else
         {
-            spawnProcess(["ln", "-sf", env["DMD_PATH"], "./dmd"]);
+            spawnProcess(["ln", "-sf", env["DMD_PATH"], "./laserd"]);
         }
     })
 );
@@ -1358,7 +1358,7 @@ void processEnvironment()
         }
     }
 
-    env["DMD_PATH"] = env["G"].buildPath("dmd").exeName;
+    env["DMD_PATH"] = env["G"].buildPath("laserd").exeName;
     env.setDefault("DETAB", "detab");
     env.setDefault("TOLF", "tolf");
     version (Windows)

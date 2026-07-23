@@ -15,7 +15,7 @@ Standard-library integration tests live under `library/test` and are compiled
 directly with Laser-D:
 
 ```console
-generated/linux/release/64/dmd -conf= -Ilibrary -run library/test/core_stdc.d
+generated/linux/release/64/laserd -conf= -Ilibrary -run library/test/core_stdc.d
 ```
 
 The distribution builder copies `object.d` and the supported modules under

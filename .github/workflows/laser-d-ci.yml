@@ -25,21 +25,21 @@ jobs:
           - name: Linux x86-64
             os: ubuntu-24.04
             host-compiler: dmd
-            compiler: generated/linux/release/64/dmd
+            compiler: generated/linux/release/64/laserd
             distribution-platform: linux
-            distribution-compiler: laser-d
+            distribution-compiler: laserd
           - name: Windows x86-64
             os: windows-2025
             host-compiler: dmd
-            compiler: generated/windows/release/64/dmd.exe
+            compiler: generated/windows/release/64/laserd.exe
             distribution-platform: windows
-            distribution-compiler: laser-d.exe
+            distribution-compiler: laserd.exe
           - name: macOS x86-64
             os: macos-15-intel
             host-compiler: ldc
-            compiler: generated/osx/release/64/dmd
+            compiler: generated/osx/release/64/laserd
             distribution-platform: macos
-            distribution-compiler: laser-d
+            distribution-compiler: laserd
 
     defaults:
       run:
