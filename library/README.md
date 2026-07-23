@@ -17,3 +17,8 @@ directly with Laser-D:
 ```console
 generated/linux/release/64/dmd -conf= -Ilibrary -run library/test/core_stdc.d
 ```
+
+The distribution builder copies `object.d` and the supported modules under
+`core/` into its `import/` directory. It deliberately excludes `library/test`.
+No library archive is produced while the supported modules contain declarations
+only; programs link directly to the platform C runtime.

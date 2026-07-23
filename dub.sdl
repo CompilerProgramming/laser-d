@@ -130,3 +130,10 @@ subPackage {
 
   dependency "dmd:parser" version="*"
 }
+
+subPackage {
+  name "distribution"
+  targetType "executable"
+  targetName "laser-d-distribution"
+  sourceFiles "tools/build_distribution.d"
+}

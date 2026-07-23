@@ -196,6 +196,37 @@ The test driver automatically selects the newly built compiler under
 `generated` as the compiler under test. `HOST_DMD` is used only to build the
 full-D test infrastructure.
 
+### Build a distribution
+
+After building the compiler, use the full host D toolchain and Dub to assemble
+a native distribution:
+
+```console
+dub run dmd:distribution
+```
+
+The command creates a staged directory and ZIP archive under `dist/`, named for
+the Laser-D version, host platform, and `x86_64` architecture. For example:
+
+```text
+dist/laser-d-v2.113.0-beta.1-linux-x86_64/
+dist/laser-d-v2.113.0-beta.1-linux-x86_64.zip
+```
+
+Each distribution contains:
+
+- `bin/laser-d` (`bin/laser-d.exe` on Windows);
+- an adjacent compiler configuration that automatically adds the packaged
+  `import/` directory;
+- `import/object.d` and the supported `core.stdc` source modules; and
+- the project and standard-library documentation and licence.
+
+The current `core.stdc` modules are declarations for the platform C runtime, so
+there is no Laser-D runtime or standard-library binary to include. The native
+linker resolves those declarations against the Windows CRT, Linux libc, or
+macOS libSystem. A distribution is platform-specific and must be built on its
+target platform; CI publishes separate Windows, Linux, and macOS ZIP artifacts.
+
 ## Repository layout
 
 This repository is based on DMD and retains its overall structure.

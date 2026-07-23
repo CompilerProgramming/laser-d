@@ -11,6 +11,7 @@ log*
 /compiler/test/trace.def
 /compiler/test/trace.log
 generated/
+/dist/
 *.obj
 *.map
 -.DS_Store

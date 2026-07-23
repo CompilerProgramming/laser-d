@@ -26,14 +26,20 @@ jobs:
             os: ubuntu-24.04
             host-compiler: dmd
             compiler: generated/linux/release/64/dmd
+            distribution-platform: linux
+            distribution-compiler: laser-d
           - name: Windows x86-64
             os: windows-2025
             host-compiler: dmd
             compiler: generated/windows/release/64/dmd.exe
+            distribution-platform: windows
+            distribution-compiler: laser-d.exe
           - name: macOS x86-64
             os: macos-15-intel
             host-compiler: ldc
             compiler: generated/osx/release/64/dmd
+            distribution-platform: macos
+            distribution-compiler: laser-d
 
     defaults:
       run:
@@ -71,6 +77,23 @@ jobs:
 
       - name: Test the Laser-D standard library
         run: '"${{ matrix.compiler }}" -conf= -Ilibrary -run library/test/core_stdc.d'
+
+      - name: Build the Laser-D distribution
+        run: dub run dmd:distribution
+
+      - name: Test the staged Laser-D distribution
+        run: |
+          VERSION="$(tr -d '\r\n' < VERSION)"
+          DIST_ROOT="dist/laser-d-${VERSION}-${{ matrix.distribution-platform }}-x86_64"
+          "${DIST_ROOT}/bin/${{ matrix.distribution-compiler }}" \
+            -run library/test/core_stdc.d
+
+      - name: Upload the Laser-D distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: laser-d-${{ matrix.distribution-platform }}-x86_64
+          path: dist/*.zip
+          if-no-files-found: error
 
       - name: Install Python for documentation checks
         if: runner.os == 'Linux'

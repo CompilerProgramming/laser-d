@@ -615,3 +615,12 @@ under `library/test`. Those tests are compiled and linked directly with
 Laser-D, separately from the language-conformance suite under
 `compiler/test/laser-d`. The remaining upstream `core.stdc` modules are not
 implicitly supported merely because their source still exists under druntime.
+
+The Dub `dmd:distribution` subpackage assembles a native ZIP containing the
+already-built Laser-D compiler and these source imports. Its compiler
+configuration locates the packaged `import/` directory relative to the
+executable, so installed programs do not depend on the repository layout.
+There is no standard-library binary at this stage because `core.stdc` consists
+only of declarations resolved by the target platform's C runtime. Distribution
+archives are therefore built and tested independently on Windows, Linux, and
+macOS.
