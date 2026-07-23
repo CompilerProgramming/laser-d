@@ -1,0 +1,83 @@
+name: Laser-D CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux x86-64
+            os: ubuntu-24.04
+            compiler: generated/linux/release/64/dmd
+          - name: Windows x86-64
+            os: windows-2025
+            compiler: generated/windows/release/64/dmd.exe
+          - name: macOS x86-64
+            os: macos-15-intel
+            compiler: generated/osx/release/64/dmd
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Check out Laser-D
+        uses: actions/checkout@v6
+
+      - name: Install the host D compiler
+        uses: dlang-community/setup-dlang@v2
+        with:
+          compiler: dmd
+
+      - name: Configure MSVC
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Preserve the host compiler
+        run: |
+          echo "HOST_DMD=${DMD}" >> "${GITHUB_ENV}"
+          "${DMD}" --version
+
+      - name: Build Laser-D
+        run: rdmd compiler/src/build.d dmd
+
+      - name: Check the Laser-D executable
+        run: '"${{ matrix.compiler }}" --version'
+
+      - name: Run the Laser-D test suite
+        working-directory: compiler/test
+        run: rdmd run.d laser-d
+
+      - name: Install Python for documentation checks
+        if: runner.os == 'Linux'
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Verify generated Markdown documentation
+        if: runner.os == 'Linux'
+        run: |
+          python tools/ddoc_to_markdown.py
+          git diff --exit-code -- spec-markdown
+
+      - name: Check for whitespace errors
+        if: runner.os == 'Linux'
+        run: git diff --check

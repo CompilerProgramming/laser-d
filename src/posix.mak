@@ -4,9 +4,6 @@
 all:
 	$(QUIET)$(MAKE) -C .. $@
 
-buildkite-test:
-	$(QUIET)$(MAKE) -C .. $@
-
 toolchain-info:
 	$(QUIET)$(MAKE) -C .. $@
 

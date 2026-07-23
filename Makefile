@@ -58,7 +58,6 @@ endif
 
 .PHONY: all clean test html install \
         dmd dmd-unittest dmd-test druntime druntime-test \
-        auto-tester-build auto-tester-test buildkite-test \
         toolchain-info check-clean-git style
 
 all: dmd druntime
@@ -68,14 +67,6 @@ $(BUILD_EXE): compiler/src/build.d
 
 $(RUN_EXE): compiler/test/run.d
 	$(HOST_DMD) -of$@ -g -i -Icompiler/test -release $<
-
-auto-tester-build:
-	echo "Auto-Tester has been disabled"
-
-auto-tester-test:
-	echo "Auto-Tester has been disabled"
-
-buildkite-test: test
 
 toolchain-info: $(BUILD_EXE)
 	$(BUILD_CMD) $@

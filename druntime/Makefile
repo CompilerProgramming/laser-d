@@ -639,7 +639,4 @@ publictests: $(addsuffix .publictests, $(basename $(SRCS)))
 
 ################################################################################
 
-.PHONY : buildkite-test
-buildkite-test: unittest benchmark-compile-only
-
 .DELETE_ON_ERROR: # GNU Make directive (delete output files on error)
