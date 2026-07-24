@@ -731,3 +731,10 @@ core of `static if`, statement-form `static foreach`, and `static assert`.
 Advanced static-branch scoping and deferral, declaration or multi-binding
 `static foreach`, and transfers from static expansions are tracked as distinct
 undecided semantics.
+
+The traits specification contains the reviewed compile-time predicates,
+representation and layout queries, function and parameter inspection, symbol
+and member reflection, declaration metadata, target information, and semantic
+probes. Removed trait operations remain in the compatibility notes. The
+future-status predicate, child-symbol rebinding, and class-layout or
+virtual-member sequence queries are explicitly undecided.
