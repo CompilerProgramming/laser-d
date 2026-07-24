@@ -243,6 +243,3 @@ declared type and linkage, which must match the foreign definition.
 
 `extern(C)` is the normal interface to C libraries. ImportC may be used to
 translate reviewed C declarations from a preprocessed C source file.
-
-C++ linkage for free functions is described in the C++ interoperability
-chapter.

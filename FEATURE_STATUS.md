@@ -94,7 +94,7 @@ Each chapter should be split into individual features as it is investigated.
 | Inline assembler (`iasm.dd`) | Rejected | D-style and GCC-style inline assembly are rejected on every target. Architecture-specific implementations may be linked behind an explicit foreign-function boundary; ImportC assembly remains a separate undecided feature. |
 | Embedded documentation (`ddoc.dd`) | Undecided | Decide whether documentation generation remains a supported compiler facility. |
 | C interoperability (`interfaceToC.dd`) | Undecided | Expected to be central; verify types, calling conventions, linking, and C runtime use. |
-| C++ interoperability (`cpp_interface.dd`) | Restricted | C++ classes, interfaces, and structs are rejected. C++ free-function linkage is supported; the remaining interoperability surface is undecided. |
+| C++ interoperability (`cpp_interface.dd`) | Rejected | Laser-D source rejects every `extern(C++)` linkage form. C++ libraries must expose a C ABI boundary. |
 | Objective-C interoperability (`objc_interface.dd`) | Rejected | Objective-C linkage and its classes, protocols, methods, functions, message dispatch, metadata, and ownership conventions cannot be declared in Laser-D source. `D_ObjectiveC` is never predefined; C-callable wrappers remain possible. |
 | Portability (`portability.dd`) | Restricted | Windows, Linux, macOS, and initially x86-64 are decided; detailed guarantees remain to be written. |
 | Named character entities (`entity.dd`) | Undecided | Decide whether this documentation/compiler facility is retained unchanged. |
@@ -131,7 +131,7 @@ Each chapter should be split into individual features as it is investigated.
 | Function safety attributes | Restricted | `@safe` and `@trusted` are rejected. `@system` is mandatory and implicit, so spelling it explicitly is also rejected. | `implicit_function_attributes.d`, `explicit_safety_attributes_rejected.d` |
 | Live-function attribute | Rejected | `@live` is rejected on declarations and function types, and Laser-D never enables live ownership/borrowing analysis. | `live_attribute_rejected.d` |
 | Purity and threading attributes | Rejected | `pure`, `shared`, `__gshared`, and `synchronized` are rejected. | `threading_and_purity_rejected.d`, `gshared_rejected.d` |
-| C++ namespace-qualified linkage | Undecided | Review `extern(C++, namespace...)` and other extended C++ linkage forms separately from supported simple C++ free-function linkage. | None |
+| C++ linkage | Rejected | Every `extern(C++)` form is rejected, including simple and namespace-qualified linkage, class/struct mangling forms, functions, function types, variables, and aggregates. | `cpp_linkage_rejected.d`, C++ aggregate rejection tests |
 | General `private` and `public` visibility | Undecided | Review declaration visibility outside the settled private-import and public-import behavior, including module, aggregate, template, and local declarations. | None |
 | `protected` visibility | Undecided | Review whether `protected` has any valid Laser-D declaration context after removal of the class and interface object model. | None |
 | `export` visibility | Undecided | Review source-level export visibility and shared-library symbol publication on Windows, Linux, and macOS. | None |
@@ -196,9 +196,9 @@ Each chapter should be split into individual features as it is investigated.
 | Native D interfaces | Rejected | Plain and explicit `extern(D)` interface declarations are rejected, including forward declarations, definitions, templates, and nested interfaces. | `native_interface_rejected.d` |
 | COM classes and interfaces | Rejected | Declaration of the magic `IUnknown` interface is rejected, preventing the frontend from creating the COM root from which COM interface and class behavior is inherited. | `com_interface_rejected.d` |
 | Objective-C object model and linkage | Rejected | `extern(Objective-C)` is rejected for all declarations, excluding Objective-C classes, protocols, methods, and standalone functions. `D_ObjectiveC` is never predefined. | `objective_c_linkage_rejected.d`, `objective_c_version_absent.d` |
-| C++ classes and interfaces | Rejected | Class and interface declarations under C++ linkage are rejected, including forward declarations, definitions, templates, and explicit class/struct mangling forms. | `cpp_class_rejected.d`, `cpp_interface_rejected.d` |
-| C++ free functions | Supported | `extern(C++)` free-function declarations, function types, mangling, and overload sets remain available without enabling the C++ object model. | `cpp_free_functions_accepted.d` |
-| C++ structs | Rejected | Struct declarations under C++ linkage are rejected, including forward declarations, definitions, templates, and explicit class-mangling forms. | `cpp_struct_rejected.d` |
+| C++ classes and interfaces | Rejected | Class and interface declarations under C++ linkage are rejected with the linkage itself, including forward declarations, definitions, templates, and explicit class/struct mangling forms. | `cpp_class_rejected.d`, `cpp_interface_rejected.d` |
+| C++ free functions and function types | Rejected | Declarations, definitions, overload sets, function types, mangling, namespaces, and every other `extern(C++)` free-function form are rejected. | `cpp_linkage_rejected.d` |
+| C++ structs | Rejected | Struct declarations under C++ linkage are rejected with the linkage itself, including forward declarations, definitions, templates, and explicit class-mangling forms. | `cpp_struct_rejected.d` |
 
 ## Module decisions
 
@@ -295,7 +295,7 @@ Each chapter should be split into individual features as it is investigated.
 | Feature | Status | Decision | Tests |
 | --- | --- | --- | --- |
 | Function inlining controls | Undecided | Review source attributes, pragmas, and command-line controls which request or suppress inlining. Backend inlining without a source-visible semantic change remains an implementation optimization. | None |
-| Platform calling conventions | Undecided | Review `extern(Windows)`, `extern(System)`, and any other platform-specific calling conventions for portability across Windows, Linux, and macOS. Native, C, and reviewed C++ free-function linkage retain their existing classifications. | None |
+| Platform calling conventions | Undecided | Review `extern(Windows)`, `extern(System)`, and any other platform-specific calling conventions for portability across Windows, Linux, and macOS. Native and C linkage retain their existing classifications; C++ linkage is rejected separately. | None |
 | Ordinary functions and function pointers | Supported | Direct calls, taking function addresses, indirect calls, and non-capturing function literals converted to function pointers are supported. | `functions_and_function_pointers_accepted.d` |
 | Delegates | Supported | Non-capturing delegate literals and delegates to struct methods are supported as context-and-function-pointer values. | `delegates_accepted.d` |
 | Capturing delegates and closures | Rejected | Function and delegate literals cannot capture lexical state, regardless of whether the context is stack-scoped or would require heap allocation. Named nested functions are rejected separately. | `capturing_delegates_rejected.d` |

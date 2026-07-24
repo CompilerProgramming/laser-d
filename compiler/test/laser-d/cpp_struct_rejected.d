@@ -3,10 +3,10 @@
 /*
 TEST_OUTPUT:
 ---
-laser-d/cpp_struct_rejected.d(13): Error: C++ struct declarations are not supported in Laser-D
-laser-d/cpp_struct_rejected.d(15): Error: C++ struct declarations are not supported in Laser-D
-laser-d/cpp_struct_rejected.d(17): Error: C++ struct declarations are not supported in Laser-D
-laser-d/cpp_struct_rejected.d(19): Error: C++ struct declarations are not supported in Laser-D
+laser-d/cpp_struct_rejected.d(13): Error: C++ linkage is not supported in Laser-D; expose a C ABI instead
+laser-d/cpp_struct_rejected.d(15): Error: C++ linkage is not supported in Laser-D; expose a C ABI instead
+laser-d/cpp_struct_rejected.d(17): Error: C++ linkage is not supported in Laser-D; expose a C ABI instead
+laser-d/cpp_struct_rejected.d(19): Error: C++ linkage is not supported in Laser-D; expose a C ABI instead
 ---
 */
 

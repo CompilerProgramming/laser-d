@@ -2280,6 +2280,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             return returnLinkage(LINK.c);
 
         nextToken();
+        error("C++ linkage is not supported in Laser-D; expose a C ABI instead");
         if (token.value != TOK.comma) // , namespaces or class or struct
             return returnLinkage(LINK.cpp);
 
@@ -3364,15 +3365,6 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
 
         if (tok == TOK.interface_ && id == Id.IUnknown)
             error(loc, "COM interfaces are not supported in Laser-D");
-        else if (tok == TOK.struct_ && linkage == LINK.cpp)
-            error(loc, "C++ struct declarations are not supported in Laser-D");
-        else if (linkage == LINK.cpp)
-        {
-            if (tok == TOK.class_)
-                error(loc, "C++ class declarations are not supported in Laser-D");
-            else if (tok == TOK.interface_)
-                error(loc, "C++ interface declarations are not supported in Laser-D");
-        }
         else if (linkage == LINK.d)
         {
             if (tok == TOK.class_)

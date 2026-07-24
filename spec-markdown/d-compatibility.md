@@ -226,17 +226,19 @@ extensions may be added only through individual review; no extension family is
 currently guaranteed as a whole. ImportC input remains C and does not acquire
 D language features merely because it shares the frontend.
 
-Laser-D supports C ABI declarations and C++ linkage for reviewed free-function
-interoperability. It does not support:
+Laser-D supports interoperability through C ABI declarations. It does not
+support:
 
-- C++ structs, classes, interfaces, member functions, inheritance, or
-  construction rules;
+- any `extern(C++)` linkage form, including free functions, function types,
+  namespaces, variables, structs, classes, interfaces, templates, mangling,
+  or overload sets;
 - COM classes or interfaces;
 - Objective-C linkage, classes, protocols, methods, or message dispatch; or
 - language declarations for platform object models.
 
-Complex foreign libraries should expose a C-callable boundary. Their
-implementation may use features which are not part of Laser-D.
+Foreign C++ libraries must expose a C-callable boundary. Their implementation
+may use C++ internally, but C++ exceptions and object ownership must not cross
+that boundary.
 
 ## Platform-specific and compiler features
 

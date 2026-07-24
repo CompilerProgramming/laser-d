@@ -18,7 +18,7 @@ runtime model closer to C:
 
 - no garbage collector or D runtime dependency;
 - explicit storage, control flow, function calls, and cleanup;
-- predictable interoperability with C and supported C++ free functions;
+- predictable interoperability through the C ABI;
 - portability across Windows, Linux, and macOS, initially on x86-64;
 - powerful compile-time abstraction without hidden runtime machinery; and
 - a language boundary specified by focused positive and negative tests.
@@ -47,7 +47,7 @@ Laser-D currently retains substantial parts of D, including:
 - modern operator overloading, including fixed-storage multidimensional
   indexing;
 - `immutable` data;
-- C interoperability and C++ free-function interoperability; and
+- C interoperability; and
 - deterministic cleanup through `scope(exit)`.
 
 Laser-D rejects many of D's managed, implicit, legacy, or platform-specific

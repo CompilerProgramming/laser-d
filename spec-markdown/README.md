@@ -37,7 +37,6 @@ Markdown chapter may intentionally differ from its historical Ddoc source.
 ## Interoperability and platforms
 
 - [ImportC](importc.md)
-- [C++ free-function interoperability](cpp_interface.md)
 - [Portability](portability.md)
 
 ## Compatibility

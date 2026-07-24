@@ -82,18 +82,6 @@ It controls the calling convention and symbol naming needed to link a
 compatible C definition. C variadic functions and the executable entry point
 also use C linkage.
 
-### C++ free-function linkage
-
-`extern(C++)` selects the reviewed C++ ABI for free functions, function types,
-mangling, and overload sets:
-
-```d
-extern(C++) int cppFunction(int value);
-alias CppFunction = extern(C++) int function(int value);
-```
-
-The C++ interoperability chapter defines the supported free-function boundary.
-
 ## Import visibility
 
 ```text

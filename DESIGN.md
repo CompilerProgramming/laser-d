@@ -237,15 +237,13 @@ functions therefore cannot be introduced by Laser-D source.
 The predefined `D_ObjectiveC` version is never defined, including on targets
 whose unchanged backend has Objective-C capabilities.
 
-C++ classes and interfaces are rejected because maintaining their object-model
-ABI across platforms and C++ compiler implementations is outside Laser-D's
-scope. This includes forward declarations, definitions, templates, and the
-`extern(C++, class)` and `extern(C++, struct)` class-mangling forms.
-
-This decision does not remove C++ linkage itself. `extern(C++)` free functions
-remain supported, including overloads. C++ structs are rejected as well: their
-non-virtual value-type model still requires platform- and compiler-specific
-layout, mangling, constructor, destructor, and copying ABI support.
+C++ interoperability is rejected because maintaining C++ calling conventions,
+mangling, type mappings, object layout, lifetime, and exception behavior across
+platforms and C++ compiler implementations is outside Laser-D's scope. Every
+`extern(C++)` form is rejected, including free functions, function types,
+variables, namespaces, overloads, structs, classes, interfaces, templates, and
+explicit class/struct mangling forms. C++ libraries must expose a C ABI
+boundary.
 
 ## ImportC
 
@@ -745,3 +743,8 @@ and target ABI behavior. Copied upstream tests remain regression evidence
 rather than blanket extension guarantees. Preprocessing, the extended
 vendor/GNU surface, and C qualifiers beyond `const` stay in the feature ledger
 until separately reviewed.
+
+The remaining C++ interoperability experiment was removed after review.
+Laser-D now rejects C++ linkage at parse time and has no C++ ABI surface.
+The Markdown C++ interoperability chapter was removed; the compatibility notes
+record the difference from D.
