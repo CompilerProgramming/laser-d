@@ -34,7 +34,8 @@ review, but does not by itself decide the status.
 | Disable attribute | Rejected | Explicit `@disable` is rejected. Laser-D does not use an attribute to create unavailable declarations or nonconstructible/noncopyable value types. | `DESIGN.md`, `spec/attribute.dd`, `spec/struct.dd` | `disable_attribute_rejected.d` |
 | Function purity | Rejected | D functions remain conservatively impure; explicit `pure` and purity inference are rejected. ImportC behavior is preserved. | `DESIGN.md`, `spec/function.dd`, `spec/attribute.dd` | `threading_and_purity_rejected.d`, `implicit_function_attributes.d` |
 | Mutable static storage | Rejected | Mutable global, module, function-static, and aggregate-static storage is rejected. Manifest constants, deeply immutable static data, and ImportC globals remain supported. | `DESIGN.md`, `spec/declaration.dd`, `spec/module.dd` | `mutable_static_storage_rejected.d`, `mutable_local_static_storage_rejected.d`, `immutable_static_storage_accepted.d` |
-| Type qualifiers | Restricted | `const` is supported as an aliasable read-only type view and `immutable` retains its transitive D semantics. Postfix `const` function qualifiers, `inout`, and `shared` are rejected. Manifest `enum` values represent compile-time constants. ImportC qualifiers are preserved. | `DESIGN.md`, `spec/const3.dd`, `spec/type.dd` | `const_type_qualifier_accepted.d`, `const_function_qualifier_rejected.d`, `inout_rejected.d`, `immutable_accepted.d`, `immutable_static_storage_accepted.d`, ImportC fixtures |
+| Type qualifiers | Restricted | `const` is supported as an aliasable read-only type view and `immutable` retains its transitive D semantics. Postfix `const` function qualifiers, `inout`, and `shared` are rejected. Manifest `enum` values represent compile-time constants. ImportC `const` is preserved; other C qualifiers remain under explicit review. | `DESIGN.md`, `spec/const3.dd`, `spec/type.dd` | `const_type_qualifier_accepted.d`, `const_function_qualifier_rejected.d`, `inout_rejected.d`, `immutable_accepted.d`, `immutable_static_storage_accepted.d`, ImportC fixtures |
+| Uniqueness-based immutable reference conversion | Undecided | Review whether and when uniqueness analysis may convert a mutable pointer or slice expression to immutable referenced storage. No ownership transfer is currently promised merely from a mutable reference value. | None |
 | Native multithreading | Rejected | `shared`, `__gshared`, and `synchronized` are rejected in Laser-D source. C threading and atomics remain accessible through ImportC. | `DESIGN.md`, `spec/attribute.dd`, `spec/statement.dd` | `threading_and_purity_rejected.d`, `gshared_rejected.d` |
 | Exceptions and cleanup | Restricted | D exceptions and source `try`/`finally` are rejected. `scope(exit)` is the sole deterministic-cleanup syntax; `scope(success)` and `scope(failure)` are rejected. Internal try/finally nodes used to lower `scope(exit)` remain implementation details. | `DESIGN.md`, `spec/statement.dd`, `spec/errors.dd` | `scope_exit_accepted.d`, `exception_statements_rejected.d`, `scope_success_failure_rejected.d` |
 | Ordinary control flow | Supported | Scalar conditionals and loops, direct fixed-array/slice and numeric-range iteration, integral and enum switches, labels, control transfers, and value-type `with` statements are supported. Active `scope(exit)` guards run when control leaves their scopes. | `DESIGN.md`, `spec/statement.dd` | `structured_control_flow_accepted.d`, `control_transfers_accepted.d` |
@@ -142,9 +143,12 @@ Each chapter should be split into individual features as it is investigated.
 | Imaginary types | Rejected | `ifloat`, `idouble`, `ireal`, and imaginary literals are not part of Laser-D. | `imaginary_rejected.d` |
 | Complex types | Rejected | `cfloat`, `cdouble`, and `creal` are not part of Laser-D. | `complex_rejected.d` |
 | Explicit and inferred variables | Supported | Explicit scalar declarations, initialized `auto` declarations, multiple declarations, default initialization, and local `void` initialization are retained. An `auto` declaration without an initializer is rejected. | `basic_declarations_accepted.d`, `basic_auto_without_initializer_rejected.d` |
-| Manifest constants | Supported | Basic `enum` manifest constants are retained; enum types will be reviewed with aggregates and enums. | `basic_declarations_accepted.d` |
+| Manifest constants | Supported | Basic `enum` manifest constants are retained. Named, anonymous, based, and opaque enum types are classified separately in the aggregate decisions. | `basic_declarations_accepted.d` |
 | Basic aliases | Supported | Aliases of primitive types and variables are retained. More advanced alias behavior remains with templates and other feature categories. | `basic_declarations_accepted.d`; upstream `aliasassign.d` used as differential evidence |
 | Invalid and duplicate declarations | Rejected | Undeclared type names, `void` variables, missing inference initializers, and duplicate names are rejected. | `basic_unknown_type_rejected.d`, `basic_void_variable_rejected.d`, `basic_auto_without_initializer_rejected.d`, `basic_duplicate_declaration_rejected.d` |
+| Local `ref` variables | Undecided | Decide whether a local declaration may create a reference alias to an existing lvalue. This is distinct from supported `ref` parameters and rejected reference results. | None |
+| Compile-time alias assignment and reassignment | Undecided | Review `AliasAssign` and reassignment of an alias within a template separately from supported ordinary aliases, alias parameters, and alias templates. | None |
+| External variable declarations in Laser-D source | Undecided | Review declarations such as `extern extern(C) int value`, including linkage, storage, initialization, and cross-platform ABI behavior. ImportC globals are already supported separately. | None |
 
 ## Struct, union, and enum decisions
 
@@ -161,6 +165,8 @@ Each chapter should be split into individual features as it is investigated.
 | Invalid bit fields | Rejected | Non-integral fields, widths larger than their storage type, and named zero-width fields are rejected. | `bitfield_non_integral_rejected.d`, `bitfield_width_rejected.d`, `bitfield_named_zero_width_rejected.d` |
 | Struct copy and move constructors | Rejected | User-defined copy and move constructors are rejected. Ordinary value-copyable structs retain field-wise copying without post-copy or ownership hooks. | `copy_move_constructors_rejected.d` |
 | Nested structs | Restricted | Local structs are supported when they need no hidden context. A struct requiring an enclosing-function or aggregate context pointer is rejected. | `context_free_local_struct_accepted.d`, `hidden_context_struct_rejected.d` |
+| Native struct and union forward declarations | Undecided | Review opaque declarations such as `struct Handle;` and `union Storage;`, including whether pointers may name them and whether a later native definition is permitted. Opaque enums and incomplete ImportC types are separate settled features. | None |
+| Anonymous structs | Undecided | Review anonymous struct declarations separately from supported anonymous unions. Determine their field injection, layout, initialization, and nesting behavior. | None |
 | Constructor delegation | Rejected | A struct constructor cannot invoke another constructor with `this(...)`; constructors initialize their fields directly. | `constructor_delegation_rejected.d` |
 | Union storage and layout | Supported | Named and anonymous unions overlay their fields according to D layout rules. Union constructors and ordinary initialization are supported. | `aggregate_types_accepted.d`; upstream `union_initialization.d` used as differential evidence |
 | Union default initialization | Restricted | At most one overlapping field may have a default initializer. | `union_overlapping_initializers_rejected.d` |
@@ -192,7 +198,17 @@ Each chapter should be split into individual features as it is investigated.
 | Missing modules | Rejected | Importing a module that cannot be resolved on the configured import paths is diagnosed. | `module_missing_import_rejected.d` |
 | Module runtime metadata | Rejected | Laser-D never generates `ModuleInfo` instances and does not expose the Druntime `ModuleInfo` type. Ordinary module namespaces and separate compilation do not require this metadata. | `runtime_metadata_absent.d`, `modules_accepted.d` |
 | Module lifecycle | Rejected | `static this()`, `static ~this()`, and their shared forms are rejected, including lifecycle declarations nested in aggregates or templates. | `module_lifecycle_rejected.d`; shared forms also covered by threading rejection tests |
-| Packages and advanced module facilities | Undecided | Package modules, package visibility, module deprecation, and edition-qualified modules require separate review. Module UDAs are rejected by the cross-cutting UDA decision. | `module_user_defined_attribute_rejected.d` |
+| Package modules | Undecided | Review `package.d` modules, their required module names, and public-import facade behavior. Ordinary qualified module names and public imports are already supported. | None |
+| Package visibility | Undecided | Review the `package` protection attribute and package-specific visibility independently of qualified module namespaces. | None |
+| Module deprecation | Undecided | Review source-level deprecation on module declarations. User-defined module attributes are rejected separately. | None |
+| Edition-qualified modules | Undecided | Review edition-qualified module declarations together with the broader undecided editions feature. | None |
+
+## Conditional compilation decisions
+
+| Feature | Status | Decision | Tests |
+| --- | --- | --- | --- |
+| `version` conditions and specifications | Undecided | Review user-defined version identifiers, assignments, command-line versions, predefined target identifiers, and their scope. Settled identifiers such as mandatory `D_BetterC` and explicitly absent feature identifiers remain governed by their existing decisions. | Existing feature-specific version tests only |
+| `debug` conditions and specifications | Undecided | Review `debug`, debug identifiers and levels, command-line debug selection, scope, and release interactions independently of `static if`. | None |
 
 ## ImportC decisions
 
@@ -201,8 +217,9 @@ Each chapter should be split into individual features as it is investigated.
 | Standalone ImportC | Supported | Preprocessed C translation units can be compiled, linked, and executed directly. The reviewed C11 baseline includes functions, local and aggregate initialization, structs, unions, enums, function pointers, and static assertions. | `importc_standalone.i` |
 | Importing C modules | Supported | A Laser-D module can import declarations from a preprocessed C translation unit compiled in the same invocation and can call its functions and access its globals and value types. | `importc_module_accepted.d`, `extra-files/importc_api.i` |
 | ImportC scalar representation | Supported | C source retains the C types needed by ImportC. In particular, C `long double` remains available through the frontend's internal extended representation even though Laser-D source cannot name D `real`. | `importc_module_accepted.d` |
+| ImportC qualifiers beyond `const` | Undecided | Review C `volatile`, `restrict`, and `_Atomic` declarations and their ABI and semantic representation. This does not introduce corresponding D-source qualifiers. | None |
 | Upstream preprocessed ImportC compatibility | Restricted | The 41 upstream `.i` tests that currently pass under Laser-D are copied into the Laser-D suite. Two upstream tests requiring `__importc_builtins.di` remain blocked by its use of rejected D `real`; the generated-interface golden test requires a Laser-D-specific expected output. | `importc_upstream_*.i` |
-| ImportC preprocessing and extended surface | Undecided | Automatic preprocessing, headers, macros, conditional compilation, atomics, vector extensions, inline assembly, builtins, and GNU-compatible C extensions require separate individual review. Other vendor families and ImportC-specific access to D facilities are outside the intended C11-plus-minimal-GNU policy. | None |
+| ImportC preprocessing and extended surface | Undecided | Automatic preprocessing, headers, macros, conditional compilation, vector extensions, inline assembly, builtins, and GNU-compatible C extensions require separate individual review. C qualifiers and atomics are tracked by their own undecided entry. Other vendor families and ImportC-specific access to D facilities are outside the intended C11-plus-minimal-GNU policy. | None |
 
 ## Expression decisions
 
@@ -336,3 +353,9 @@ Update this inventory in the same change that identifies or changes a language
 feature. Once a decision is made, update the applicable `spec/` source,
 `DESIGN.md`, and tests together. Do not silently infer a language decision from
 the behavior of the current implementation.
+
+When specification cleanup encounters a feature whose Laser-D status has not
+been decided, add a distinct **Undecided** row here before removing that
+material from the normative Markdown chapter. Keep the row specific enough to
+review and decide independently; do not leave the feature implied only by a
+chapter-level or catch-all entry.

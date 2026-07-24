@@ -229,18 +229,17 @@ template Element(T)
 Template alias parameters, alias templates, and eponymous template aliases are
 defined in the templates chapter.
 
-## External declarations
+## External function declarations
 
-An external declaration introduces a symbol whose definition and storage are
-provided by another object file or library:
+An external function declaration introduces a callable symbol whose definition
+is provided by another object file or library:
 
 ```d
 extern(C) int externalFunction(int value);
-extern extern(C) int externalVariable;
 ```
 
-The declaration emits no Laser-D definition for the symbol. Calls and accesses
-use the declared type and linkage, which must match the foreign definition.
+The declaration emits no Laser-D definition for the symbol. Calls use the
+declared type and linkage, which must match the foreign definition.
 
 `extern(C)` is the normal interface to C libraries. ImportC may be used to
 translate reviewed C declarations from a preprocessed C source file.

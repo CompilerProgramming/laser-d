@@ -8,6 +8,10 @@ This chapter is for readers bringing D knowledge or D source to Laser-D. The
 other specification chapters define Laser-D directly and do not repeatedly
 describe absent D features.
 
+This chapter records settled differences. Features which have been encountered
+but not yet accepted or rejected are listed explicitly in
+[`FEATURE_STATUS.md`](../FEATURE_STATUS.md) as **Undecided** review items.
+
 ## Execution model
 
 Laser-D always uses the equivalent of D's `-betterC` compilation model. This is

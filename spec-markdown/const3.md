@@ -250,6 +250,3 @@ immutable-receiver method.
 
 ImportC preserves C `const` in translated declarations. The resulting types
 use the target C ABI and can be passed across the C boundary.
-
-Other C qualification and atomic rules are defined only where the reviewed
-ImportC surface specifies them.
