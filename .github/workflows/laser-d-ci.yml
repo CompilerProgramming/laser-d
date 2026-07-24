@@ -75,7 +75,13 @@ jobs:
             "${DMD}" -i -run run.d laser-d
 
       - name: Test the Laser-D standard library
-        run: '"./${{ matrix.compiler }}" -conf= -Ilibrary -run library/test/core_stdc.d'
+        run: |
+          platform_flags=()
+          if [[ "${RUNNER_OS}" == "Linux" ]]; then
+            platform_flags=(-fPIC)
+          fi
+          "./${{ matrix.compiler }}" -conf= "${platform_flags[@]}" \
+            -Ilibrary -run library/test/core_stdc.d
 
       - name: Configure the Laser-D standard library
         run: |

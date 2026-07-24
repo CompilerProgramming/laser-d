@@ -621,7 +621,9 @@ distinguishing it from the full upstream `dmd` compiler used to bootstrap the
 build. CMake owns standard-library C compilation, mixed C/Laser-D integration
 tests, installation, and CPack distribution assembly. The installed compiler
 configuration locates `import/` relative to the executable, so programs do not
-depend on the repository layout.
+depend on the repository layout. Linux distributions also supply `-fPIC` in
+that configuration because contemporary Linux toolchains link executables as
+PIE by default.
 
 Laser-D compiler builds and conformance tests currently target x86-64. The test
 harness therefore defaults to model 64 for the Dub-built compiler; an explicit
