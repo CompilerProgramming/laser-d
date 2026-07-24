@@ -680,3 +680,10 @@ Comma expressions, named arguments, exact evaluation and temporary-lifetime
 rules, built-in aggregate equality, membership expressions, numeric edge
 semantics, low-level reinterpretation casts, and `delete` are recorded as
 distinct undecided features in `FEATURE_STATUS.md`.
+
+The statement specification likewise contains only the reviewed executable
+subset: lexical blocks, value returns, `scope(exit)`, compile-time selection,
+ordinary loops, direct and range iteration, integral and enum switches,
+control transfers, and struct `with`. Unreviewed statement details are tracked
+separately for effect-free expression diagnostics, declaration conditions,
+extended foreach variables, non-struct `with`, and statement pragmas.

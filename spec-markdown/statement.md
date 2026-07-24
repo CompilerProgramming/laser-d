@@ -6,161 +6,82 @@ source: ../spec/statement.dd
 
 # Statements
 
-Statements control execution within a function and have no value. Laser-D
-supports blocks, expressions, declarations, returns, structured scalar control
-flow, direct fixed-array/slice and numeric-range iteration, integral and enum
-switches, explicit control transfers, imports, compile-time statements, and
-`scope(exit)` cleanup.
+Statements control execution within a function and have no value. This chapter
+specifies the reviewed Laser-D statement forms. Differences from D are
+summarized in [D compatibility notes](d-compatibility.md), while statement
+forms awaiting review are listed in [Feature status](../FEATURE_STATUS.md).
 
-## <a id="grammar"></a>Statement Grammar
+## Statement forms
 
 ```text
 Statement:
-    EmptyStatement
-    NonEmptyStatement
-    ScopeBlockStatement
-
-EmptyStatement:
     ;
-
-NoScopeNonEmptyStatement:
-    NonEmptyStatement
+    Expression ;
+    Declaration
+    return ;
+    return Expression ;
     BlockStatement
-
-NoScopeStatement:
-    EmptyStatement
-    NonEmptyStatement
-    BlockStatement
-
-NonEmptyOrScopeBlockStatement:
-    NonEmptyStatement
-    ScopeBlockStatement
-
-NonEmptyStatement:
-    ExpressionStatement
-    DeclarationStatement
-    ReturnStatement
-    ScopeGuardStatement
-    ImportDeclaration
-    ConditionalStatement
-    StaticForeachStatement
-    LabeledStatement
+    ScopeExitStatement
+    CompileTimeStatement
     IfStatement
     WhileStatement
     DoStatement
     ForStatement
     ForeachStatement
-    ForeachRangeStatement
     SwitchStatement
-    FinalSwitchStatement
-    CaseStatement
-    CaseRangeStatement
-    DefaultStatement
     ContinueStatement
     BreakStatement
-    GotoStatement
-    WithStatement
-
-NonEmptyStatementNoCaseNoDefault:
-    ExpressionStatement
-    DeclarationStatement
-    ReturnStatement
-    ScopeGuardStatement
-    ImportDeclaration
-    ConditionalStatement
-    StaticForeachStatement
     LabeledStatement
-    IfStatement
-    WhileStatement
-    DoStatement
-    ForStatement
-    ForeachStatement
-    ForeachRangeStatement
-    SwitchStatement
-    FinalSwitchStatement
-    ContinueStatement
-    BreakStatement
     GotoStatement
     WithStatement
-
-ScopeStatement:
-    NonEmptyStatement
-    BlockStatement
-
-ScopeBlockStatement:
-    BlockStatement
 
 BlockStatement:
     { }
     { StatementList }
+```
 
-StatementList:
-    statement
-    statement StatementList
+Each expression, declaration, type, and compile-time operation used by a
+statement must itself be supported by Laser-D.
 
-ExpressionStatement:
-    Expression ;
+## Blocks and declarations
 
-DeclarationStatement:
-    StorageClasses[] Declaration
+A block is a lexical sequence of statements enclosed by braces. Names declared
+within the block follow lexical scope.
 
+A declaration statement introduces a supported local declaration. Its syntax
+and meaning are specified in [Declarations](declaration.md).
+
+An expression followed by `;` is evaluated for its side effects. The empty
+statement is a single `;`.
+
+## Returning from a function
+
+```text
 ReturnStatement:
     return ;
     return Expression ;
-
-ScopeGuardStatement:
-    scope ( exit ) NonEmptyOrScopeBlockStatement
 ```
 
-Each statement alternative remains subject to its section below. Advanced
-iteration protocols and conditional-compilation forms that are still under
-review are not implied by the surrounding statement grammar.
+`return;` exits a function whose return type is `void`. `return expression;`
+converts the expression to the function's value-result type and exits the
+function.
 
-## <a id="BlockStatement"></a>Blocks and Scope
+Before control leaves, active `scope(exit)` guards execute in reverse order of
+registration.
 
-> **Laser-D normative:**
->
-> A block is a lexical sequence of statements enclosed by
-> braces. Local names follow D lexical-scope rules. Leaving a block ends the
-> lifetime of its automatic storage, but Laser-D runs no destructor or postblit
-> hook implicitly.
+## Deterministic cleanup
 
-## <a id="ExpressionStatement"></a>Expression Statements
-
-An expression statement evaluates an expression for its side effects. An
-expression with no effect is rejected unless explicitly converted to
-`void`.
-
-```d
-int value;
-++value;
-cast(void)(value + 1);
+```text
+ScopeExitStatement:
+    scope ( exit ) Statement
 ```
 
-## <a id="DeclarationStatement"></a>Declaration Statements
+A `scope(exit)` guard becomes active when execution reaches it. Its statement
+executes exactly once when control leaves the enclosing lexical scope, whether
+by fall-through, `return`, `break`, `continue`, or `goto`.
 
-A declaration statement introduces a supported local variable, alias, type, function, template, import, or compile-time declaration. It remains
-subject to the declarations chapter.
-
-## <a id="ReturnStatement"></a>Return Statements
-
-> **Laser-D normative:**
->
-> `return;` exits a function with no result.
-> `return expression;` converts the expression to the function's value result
-> type and exits. Reference returns are unavailable.
-
-Before control leaves, active `scope(exit)` guards execute in reverse
-order of registration. No exception unwinding or module lifecycle action is
-performed.
-
-## <a id="ScopeGuardStatement"></a>Deterministic Cleanup
-
-> **Laser-D normative:**
->
-> `scope(exit)` is Laser-D's sole language-level cleanup
-> syntax. Its statement executes exactly once when control leaves the enclosing
-> lexical scope after the guard has been reached, including by fall-through, `return`, or another supported control transfer.
+Multiple guards in one scope execute in last-in, first-out order. A guard body
+cannot transfer control out of itself.
 
 ```d
 extern(C) void release(int handle);
@@ -172,205 +93,127 @@ int use(int handle)
 }
 ```
 
-Multiple guards in one scope execute in last-in, first-out order. A guard
-body cannot transfer control out of itself. Cleanup must be explicit about any
-failure state because Laser-D has no exception-success distinction.
+## Compile-time statements
 
-> **Excluded from Laser-D:**
->
-> `scope(success)` and `scope(failure)` are rejected.
-> There is no exception state on which their distinction could depend.
+`static if`, `static foreach`, and `static assert` select, expand, or validate
+code during compilation. Their conditions and bodies remain subject to all
+ordinary Laser-D rules.
 
-## <a id="compile_time_statements"></a>Compile-Time Statements
+See [Templates](template.md) for compile-time selection and iteration.
 
-`static if`, `static foreach`, and `static assert` are supported
-as compile-time selection, iteration, and validation. Templates and CTFE remain
-subject to every ordinary Laser-D restriction.
-
-The shared upstream *ConditionalStatement* grammar also contains
-`version` and `debug` forms. Those forms remain under review and are not
-implied by support for `static if`.
-
-## <a id="ordinary_control_flow"></a>Ordinary Control Flow
-
-> **Laser-D normative:** Laser-D supports `if`, `while`, `do`, `for`, direct `foreach` and `foreach_reverse`, numeric range foreach, `switch`, `final switch`, `break`, `continue`, labels, `goto`, and `with` under the restrictions below.
-
-### <a id="IfStatement"></a>If Statement
+## Conditional execution
 
 ```text
 IfStatement:
-    if ( Expression ) ScopeStatement
-    if ( Expression ) ScopeStatement else ScopeStatement
-
-ThenStatement:
-    ScopeStatement
-
-ElseStatement:
-    ScopeStatement
+    if ( Expression ) Statement
+    if ( Expression ) Statement else Statement
 ```
 
-#### <a id="boolean-conditions"></a>Boolean Conditions
+The condition is converted to `bool`. Exactly one selected branch executes.
 
-A condition accepts `bool` or a supported scalar value with the Boolean
-conversion defined by the types chapter. Arrays, structs without an overload, and rejected reference types do not have an implicit truth value.
-
-### <a id="WhileStatement"></a>While Statement
+## Loops
 
 ```text
 WhileStatement:
-    while ( Expression ) ScopeStatement
-```
+    while ( Expression ) Statement
 
-### <a id="DoStatement"></a>Do Statement
-
-```text
 DoStatement:
-    do ScopeStatement while ( Expression ) ;
-```
+    do Statement while ( Expression ) ;
 
-### <a id="ForStatement"></a>For Statement
-
-```text
 ForStatement:
-    for ( NoScopeStatement Expression[] ; Expression[] ) ScopeStatement
+    for ( Initializer? ; Expression? ; Expression? ) Statement
 ```
 
-### <a id="ForeachStatement"></a>Foreach Statement
+A `while` loop tests its condition before each iteration. A `do` loop tests
+after each iteration. A `for` loop performs its initializer once, tests its
+optional condition before each iteration, and evaluates its optional increment
+expression after the loop body.
 
-#### <a id="foreach_over_arrays"></a>Foreach over Arrays and Slices
-
-#### <a id="foreach_over_tuples"></a>Foreach over Compile-Time Sequences
-
-#### <a id="foreach_over_associative_arrays"></a>Associative-Array Foreach (Excluded)
+## Direct iteration
 
 ```text
-AggregateForeach:
-    Foreach ( ForeachTypeList ; ForeachAggregate )
-
 ForeachStatement:
-    AggregateForeach NoScopeNonEmptyStatement
-
-Foreach:
-    foreach
-    foreach_reverse
-
-ForeachTypeList:
-    ForeachType
-    ForeachType , ForeachTypeList
-
-ForeachType:
-    ForeachTypeAttributes[] BasicType Declarator
-    ForeachTypeAttributes[] Identifier
-    ForeachTypeAttributes[] alias Identifier
-
-ForeachTypeAttributes:
-    ForeachTypeAttribute
-    ForeachTypeAttribute ForeachTypeAttributes
-
-ForeachTypeAttribute:
-    enum
-    ref
-    TypeCtor
-
-ForeachAggregate:
-    Expression
-
-RangeForeach:
-    Foreach ( ForeachType ; LwrExpression .. UprExpression )
-
-LwrExpression:
-    Expression
-
-UprExpression:
-    Expression
-
-ForeachRangeStatement:
-    RangeForeach scope statement
+    foreach ( ForeachVariables ; AggregateExpression ) Statement
+    foreach_reverse ( ForeachVariables ; AggregateExpression ) Statement
+    foreach ( ForeachVariable ; LowerExpression .. UpperExpression ) Statement
+    foreach_reverse ( ForeachVariable ; LowerExpression .. UpperExpression ) Statement
 ```
 
-Associative-array iteration is excluded with associative arrays. Direct
-array, slice, and numeric-range forms are supported. Both `static foreach`
-and ordinary `foreach` over compile-time tuples and sequences are supported;
-the frontend expands these forms without a runtime iteration protocol.
+`foreach` iterates forward and `foreach_reverse` iterates in reverse.
+Laser-D supports:
 
-> **Laser-D normative:**
->
-> A struct is a forward range when it provides parameterless
-> instance methods `empty()` returning `bool`, `front()` returning a
-> supported non-`ref` value, and `popFront()` returning `void`. A struct
-> is a bidirectional range when it additionally provides `back()` returning a
-> supported non-`ref` value and `popBack()` returning `void`. The
-> frontend validates these signatures and lowers range iteration to calls on a
-> private copy of the range value. These compiler-generated calls are the sole
-> exception to the general requirement that user function calls include
-> parentheses.
+- values and optional indices from fixed arrays and slices;
+- mutation of mutable array or slice elements through a `ref` value;
+- integral half-open ranges written `lower .. upper`;
+- compile-time tuples and sequences; and
+- validated value-type ranges.
 
-> **Rejected in Laser-D:**
->
-> Iteration through `opApply`, `opApplyReverse`, or a
-> delegate aggregate is not supported. These callback forms hide control flow
-> behind the loop syntax and require a compiler-generated delegate. Programs must
-> use a range, explicit loop, or explicit calls.
+Compile-time sequence iteration is expanded by the frontend and has no runtime
+iteration protocol.
 
-### <a id="SwitchStatement"></a>Switch Statements
+### Value-type ranges
 
-#### <a id="FinalSwitchStatement"></a>Final Switch Statement
+A struct is a forward range when it provides these parameterless instance
+methods:
+
+```d
+bool empty();
+Element front();
+void popFront();
+```
+
+`Element` must be a supported value type and `front()` returns it by value. A
+struct is a bidirectional range when it additionally provides:
+
+```d
+Element back();
+void popBack();
+```
+
+The frontend validates these signatures. Iteration operates on a private copy
+of the range value and invokes the range methods directly.
+
+## Switch statements
 
 ```text
 SwitchStatement:
-    switch ( Expression ) ScopeStatement
-
-FinalSwitchStatement:
-    final switch ( Expression ) ScopeStatement
+    switch ( Expression ) Statement
+    final switch ( Expression ) Statement
 
 CaseStatement:
-    case ArgumentList : ScopeStatementList
-
-CaseRangeStatement:
-    case Expression : .. case Expression : ScopeStatementList
-
-DefaultStatement:
-    default : ScopeStatementList
-
-ScopeStatementList:
-    statement list
-
-StatementListNoCaseNoDefault:
-    StatementNoCaseNoDefault
-    StatementNoCaseNoDefault StatementListNoCaseNoDefault
-
-StatementNoCaseNoDefault:
-    EmptyStatement
-    NonEmptyStatementNoCaseNoDefault
-    ScopeBlockStatement
+    case Expression : StatementList
+    case Expression : .. case Expression : StatementList
+    default : StatementList
 ```
 
-Integral and enum switches are supported, including case ranges, `final switch`, `goto case`, and `goto default`. String and character
-slice switches are rejected because they require the unavailable
-`object.__switch` runtime hook.
+The controlling expression has an integral or enum type. Case values are
+compile-time constants compatible with that type. A case range includes both
+of its endpoints.
 
-### <a id="ContinueStatement"></a>Continue Statement
+`final switch` over an enum requires every enum member to be handled and does
+not use a `default` label.
+
+## Break and continue
 
 ```text
 ContinueStatement:
     continue ;
     continue Identifier ;
-```
 
-### <a id="BreakStatement"></a>Break Statement
-
-```text
 BreakStatement:
     break ;
     break Identifier ;
 ```
 
-### <a id="LabeledStatement"></a>Labels and Goto
+`continue` starts the next iteration of its target loop. `break` exits its
+target loop or switch. An identifier selects an enclosing labeled statement.
+Any active `scope(exit)` guard in a scope being left executes first.
+
+## Labels and `goto`
 
 ```text
 LabeledStatement:
-    Identifier :
-    Identifier : statement
+    Identifier : Statement
 
 GotoStatement:
     goto Identifier ;
@@ -379,54 +222,16 @@ GotoStatement:
     goto case Expression ;
 ```
 
-Labels, ordinary `goto`, labeled `break` and `continue`, and
-switch-targeted goto forms are supported. A transfer leaving a lexical scope
-executes its active `scope(exit)` guards.
+An ordinary `goto` transfers control to a label in the same function.
+Switch-targeted forms transfer to the selected `case` or `default`. Any active
+`scope(exit)` guard in a scope being left executes before the transfer.
 
-### <a id="WithStatement"></a>With Statement
+## Struct `with`
 
 ```text
 WithStatement:
-    with ( Expression ) ScopeStatement
+    with ( Expression ) Statement
 ```
 
-`with` is supported for retained value types, enums, and namespaces. It
-does not enable classes, interfaces, or implicit function calls.
-
-## <a id="rejected_statements"></a>Rejected Statements
-
-### <a id="TryStatement"></a>Exception Statements
-
-#### <a id="TryStatement"></a>Try Statement Grammar
-
-> **Excluded from Laser-D:**
->
-> Source `try`, `catch`, `finally`, and `throw` are
-> rejected. Errors must be represented and propagated explicitly through values
-> or C APIs. Internal frontend nodes used to lower `scope(exit)` are not
-> source-language features.
-
-### <a id="SynchronizedStatement"></a>Synchronized Statements
-
-> **Excluded from Laser-D:** `synchronized` is rejected. Explicit C threading, atomics, and locking APIs remain available.
-
-### <a id="asm"></a>Inline Assembly
-
-> **Excluded from Laser-D:**
->
-> D and GCC-style inline assembly statements are rejected in
-> Laser-D source. ImportC assembly remains a separate ImportC review.
-
-### <a id="MixinStatement"></a>String Mixin Statements
-
-> **Excluded from Laser-D:**
->
-> String mixin statements are rejected. Template mixins are
-> declaration constructs and remain separately supported.
-
-### <a id="PragmaStatement"></a>Pragma Statements
-
-> **Under review:**
->
-> Pragmas remain under review except that compile-time
-> `pragma(msg)` output is explicitly rejected.
+When the expression has struct type, unqualified field and method names inside
+the statement are resolved against that value.
