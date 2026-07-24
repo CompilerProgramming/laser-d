@@ -36,7 +36,9 @@ explicit foreign API. Ownership and release are explicit.
 The following D type families are absent:
 
 - classes and interfaces, including D, COM, Objective-C, and C++ forms;
-- associative arrays;
+- built-in associative-array types, literals, operators, and hidden runtime
+  management; programs may use the explicit `laserd.hash` standard-library
+  container with a caller-owned rpmalloc heap;
 - vector types and compiler SIMD types;
 - imaginary and complex floating-point types;
 - `real`;

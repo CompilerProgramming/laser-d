@@ -357,6 +357,25 @@ management and type metadata. Programs may instead implement an explicit
 container as an ordinary struct over fixed, caller-provided, manually managed,
 or C-owned storage, optionally exposing the validated value-range protocol.
 
+The standard library provides `laserd.hash` as one such explicit container. Its
+initial API and storage algorithm are a Laser-D port of the public-domain `st`
+C hash table: keys and values are 64-bit `size_t` words, caller-supplied
+function pointers define hashing and equality, and predefined policies cover
+numeric keys, C strings, and ASCII case-insensitive C strings. Entries retain
+insertion order. Tables through entry power four have no bin array and use
+linear entry search. Larger tables append packed bins to the entry allocation;
+bin indices widen from 8 to 16, 32, and 64 bits as the entry power crosses 8,
+16, and 32. Rebuilding preserves the original compaction and growth thresholds.
+
+Every table borrows a caller-supplied `rpmalloc_heap_t*` for its entire
+lifetime. It allocates, grows, compacts, copies, and frees its own table storage
+through that heap, but never releases the heap or calls
+`rpmalloc_heap_free_all`. The caller must initialize rpmalloc, keep the heap
+alive until `st_free_table` returns, and serialize access. Creation and copying
+report allocation failure with `null`; operations that may grow the table
+report `ST_ERROR` without discarding the existing table. The table does not own
+pointer-valued keys or values, including C-string key storage.
+
 All `new` expressions are rejected, including scalar, struct, placement, class,
 and array forms. Laser-D has no source-level implicit allocation operation.
 Programs that need dynamic storage must obtain and release it explicitly, for

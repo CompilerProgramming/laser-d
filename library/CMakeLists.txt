@@ -27,6 +27,7 @@ include(LaserD)
 
 add_subdirectory(checksum)
 add_subdirectory(rpmalloc)
+add_subdirectory(hash)
 
 install(PROGRAMS "${LASERD_COMPILER}"
     TYPE BIN

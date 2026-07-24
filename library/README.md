@@ -52,5 +52,17 @@ allocator, and enables both its general allocation API and its explicit,
 single-thread-owned heap API. Laser-D programs import declarations from
 `laserd.rpmalloc`. The CTest integration program exercises both API families.
 
+The `hash` component provides the Laser-D module `laserd.hash`. It is an
+insertion-ordered port of the public-domain `st` C hash table with machine-word
+keys and values. It retains the original binless linear-search representation
+for small tables, the packed 8/16/32/64-bit bin indices for larger tables, the
+combined entries-and-bins allocation, probing sequence, and rebuild thresholds.
+A caller supplies and retains ownership of an `rpmalloc_heap_t`; a table uses
+that heap for its own allocation and growth but never clears or releases it.
+Numeric, C-string, and ASCII case-insensitive C-string policies are predefined,
+and callers may supply compatible hash and comparison function pointers.
+Allocation failure is returned as `null` from creation/copying and as
+`ST_ERROR` from operations that may grow the table.
+
 The `core.stdc` modules do not produce a library archive because they contain
 declarations only; programs link those APIs directly to the platform C runtime.
