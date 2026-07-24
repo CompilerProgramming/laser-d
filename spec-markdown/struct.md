@@ -1,37 +1,39 @@
----
-title: Structs and unions
-status: restricted
-source: ../spec/struct.dd
----
+# Structs and unions
 
-# Structs and Unions
+Structs and unions are fixed-layout value types. They provide inline storage,
+fields, methods, direct construction, and compile-time layout information.
 
-## <a id="intro"></a>Overview
+A struct stores each instance field. A union overlays its instance fields at
+the same address.
 
-Laser-D supports D structs and unions as runtime-free value types. They
-provide named inline storage, explicit methods, ordinary construction, and
-layout suitable for systems programming without a class hierarchy, garbage
-collector, or D runtime.
-
-> **Laser-D normative:**
->
-> The rules in this chapter apply to native D structs and
-> unions. ImportC retains C struct and union declarations under the ImportC
-> specification. Struct declarations under C++ linkage are rejected.
-
-### <a id="structs"></a>Structs
+## Declarations
 
 ```text
 StructDeclaration:
-    struct Identifier { DeclDefs }
-    struct Identifier ;
+    struct Identifier { AggregateMembers }
+
+UnionDeclaration:
+    union Identifier { AggregateMembers }
+
+AggregateMembers:
+    AggregateMember*
+
+AggregateMember:
+    FieldDeclaration
+    MethodDeclaration
+    Constructor
+    StructDeclaration
+    UnionDeclaration
+    EnumDeclaration
+    TemplateDeclaration
+    TemplateMixin
+    StaticAssertDeclaration
+    ManifestConstantDeclaration
 ```
 
-A struct value contains each non-static instance field. Structs do not
-inherit, implement interfaces, or contain a hidden virtual-function table.
+A struct declaration introduces a value type:
 
 ```d
-d
 struct Point
 {
     int x;
@@ -42,360 +44,360 @@ struct Point
         return x + y;
     }
 }
-
 ```
 
-### <a id="storage"></a>Storage
-
-Struct and union storage may be local, embedded in another supported value, placed in a fixed array, or obtained explicitly through pointer or C allocation
-facilities. The general Laser-D restrictions on mutable static storage apply.
-
-A pointer to a forward-declared opaque struct or union is supported. A value
-of an opaque aggregate cannot be instantiated until its definition is
-available.
-
-### <a id="unions"></a>Unions
-
-```text
-UnionDeclaration:
-    union Identifier { DeclDefs }
-    union Identifier ;
-```
-
-A union overlays its instance fields at the same address. Its size and
-alignment accommodate every field. The language does not track which field is
-currently active.
-
-## <a id="struct-members"></a>Members
-
-Struct and union bodies may contain fields, supported methods, ordinary
-constructors, nested type declarations, manifest constants, templates, and
-other declarations permitted by their individual Laser-D rules.
-
-> **Rejected in Laser-D:**
->
-> A member cannot restore a rejected language feature. In
-> particular, aggregate bodies cannot contain destructors, postblits, invariants, `alias this`, mutable static fields, user-defined attributes, rejected
-> function annotations, or native class/interface declarations.
-
-### <a id="unions_and_special_memb_funct"></a>Union Member Restrictions
-
-At most one overlapping union field may have a default initializer. A union
-may have an ordinary constructor that explicitly initializes the intended
-field. Laser-D does not implicitly destroy a previously active field.
-
-### <a id="recursive-types"></a>Recursive Aggregates
-
-A struct or union cannot contain itself recursively by value because its
-size would be infinite. Recursion through a pointer is supported.
+A union declaration introduces overlapping value storage:
 
 ```d
-d
+union Word
+{
+    uint whole;
+    ushort half;
+}
+```
+
+The language does not record which union field was most recently written. The
+program maintains any active-field convention required by its data model.
+
+ImportC structs and unions use the C declarations and layout rules defined by
+the ImportC chapter.
+
+## Fields and storage
+
+Each non-static struct field occupies distinct storage in its containing
+object. Every union field begins at the union's address.
+
+An aggregate value contains its instance fields and ABI padding. Methods,
+templates, manifest constants, and other compile-time members add no per-value
+storage or hidden dispatch table.
+
+Aggregate values may be:
+
+- local variables;
+- fields of another value aggregate;
+- elements of fixed-size arrays;
+- function parameters or results;
+- deeply immutable static values; or
+- values addressed through explicitly managed foreign storage.
+
+The lifetime of an aggregate is the lifetime of its containing storage.
+
+### Recursive aggregates
+
+An aggregate can refer to its own type through a pointer:
+
+```d
 struct Node
 {
     int value;
     Node* next;
 }
-
 ```
 
-## <a id="struct_layout"></a>Layout
+Every field stored directly by value has a complete, finite size.
 
-Fields are laid out in declaration order subject to target alignment and
-padding rules. `.sizeof`, `.alignof`, field `.offsetof`, and
-`.tupleof` expose the resulting compile-time information.
+## Layout
 
-Struct layout is not a promise of cross-target binary identity. Portable
-code must not assume padding, alignment, or endianness beyond the target ABI.
-Interoperability code must verify the layout required by each external ABI.
+Struct fields are laid out in declaration order, with padding inserted
+according to the target ABI. A union's size and alignment accommodate every
+field.
 
-## <a id="bitfields"></a>Bit Fields
+The following compile-time properties expose layout:
 
-```text
-BitFieldDeclaration:
-    BasicType Identifier : Expression ;
-    BasicType Identifier : Expression = Expression ;
-    BasicType : 0 ;
-```
-
-Signed and unsigned integral bit fields are supported in structs and
-unions. Their widths are compile-time values no larger than their storage type.
-An anonymous zero-width field forces the next field to a new allocation unit;
-a named zero-width field is rejected.
-
-Bit fields support ordinary access, assignment, permitted default
-initializers, and the corresponding compile-time traits. Bit-field packing and
-ordering are implementation-defined. External layouts must be verified for
-every supported target.
-
-## <a id="POD"></a>Plain Value Aggregates
-
-A struct composed of ordinary value-copyable fields and without special
-copy, move, or destruction behavior has direct value semantics. The
-`__traits(isPOD)` and related supported traits may inspect this property.
-
-## <a id="opaque_struct_unions"></a>Opaque Structs and Unions
-
-A declaration ending in `;` introduces an opaque aggregate. Only
-pointers and declarations that do not require its size are valid before a
-matching definition is available.
-
-## <a id="initialization"></a>Initialization
-
-### <a id="default_struct_init"></a>Default Struct Initialization
-
-Default initialization initializes each field using its permitted field
-initializer or the field type's default initialization. Struct `.init`
-denotes that compile-time default value when all required field initialization
-is available.
-
-### <a id="static_struct_init"></a>Static Struct Initialization
-
-Struct values in permitted immutable static storage require an initializer
-that is valid for static initialization. The general rejection of mutable
-global and static storage applies independently.
-
-### <a id="default_union_init"></a>Default Union Initialization
-
-A union's default initialization is determined by its permitted default
-field initializer or ordinary D union initialization rules. More than one
-overlapping default field initializer is rejected.
-
-### <a id="static_union_init"></a>Static Union Initialization
-
-A union in permitted immutable static storage must have a statically valid
-initial value. No runtime registration or lifecycle function is generated.
-
-### <a id="dynamic_struct_init"></a>Runtime Struct Initialization
-
-Local struct values may be initialized with field values, a struct literal, or an ordinary constructor. This performs no implicit allocation.
-
-### <a id="dynamic_union_init"></a>Runtime Union Initialization
-
-Local union values may be initialized according to the selected field or an
-ordinary union constructor. The program is responsible for maintaining any
-active-field convention.
-
-## <a id="StructLiteral"></a>Struct Literals
-
-A struct literal names the struct type and supplies compatible field values
-in declaration order. Omitted fields receive their supported default
-initialization.
+- type `.sizeof`;
+- type `.alignof`;
+- field `.offsetof`; and
+- aggregate `.tupleof`.
 
 ```d
-d
-struct Point
+struct Pair
 {
-    int x;
+    int first;
+    int second;
+}
+
+static assert(Pair.first.offsetof == 0);
+static assert(Pair.second.offsetof >= int.sizeof);
+static assert(Pair.sizeof >= 2 * int.sizeof);
+```
+
+Padding, alignment, byte order, and bit-field packing follow the target ABI.
+Foreign interfaces verify the layout required on each supported target rather
+than assuming binary identity between targets.
+
+## Initialization
+
+Default initialization initializes each struct field from its field initializer
+or the field type's `.init` value:
+
+```d
+struct Position
+{
+    int x = 1;
     int y;
 }
 
-Point origin = Point(0, 0);
-
+Position position;
+static assert(Position.init.x == 1);
+static assert(Position.init.y == 0);
 ```
 
-## <a id="union-literal"></a>Union Literals
+A struct literal names the type and supplies field values in declaration order:
 
-Union initialization must select a representation permitted by the union's
-fields and constructors. It does not attach a hidden runtime tag.
+```d
+Point origin = Point(0, 0);
+```
 
-## <a id="anonymous"></a>Anonymous Structs and Unions
+Omitted trailing fields use their declared default initialization.
 
-Anonymous unions are supported for directly overlaying fields in a
-containing aggregate. Anonymous structs and unions obey the same layout, initialization, and rejected-member rules as named aggregates.
+Local aggregates may be initialized at runtime. Deeply immutable static
+aggregates use compile-time initializers, as defined by the declarations and
+qualifiers chapters.
 
-## <a id="struct_instance_properties"></a>Struct Properties
+### Union initialization
 
-Supported compile-time struct properties include `.sizeof`, `.alignof`, `.tupleof`, `.stringof`, and other properties classified
-by the properties chapter. Properties cannot introduce TypeInfo, allocation, or another rejected runtime facility.
+At most one overlapping union field has a default initializer. A union without
+one uses its ordinary default representation.
 
-### <a id="struct_field_properties"></a>Field Properties
+```d
+union Number
+{
+    uint unsignedValue = 0;
+    int signedValue;
+}
+```
 
-Fields expose supported properties such as `.offsetof`. Bit fields also
-expose the supported bit-field traits and numeric bounds.
+A union constructor may explicitly select and initialize a representation.
+Changing fields later writes the same overlapping storage.
 
-## <a id="ConstStruct"></a>Immutable Structs
+## Constructors
 
-Transitively `immutable` struct and union values are supported. The
-rejected `const`, `inout`, and `shared` qualifiers remain unavailable
-for aggregate types, fields, receivers, and methods.
+A constructor is named `this` and initializes an aggregate in existing
+destination storage:
 
-## <a id="UnionConstructor"></a>Union Constructors
+```d
+struct ResourceId
+{
+    uint value;
 
-An ordinary union constructor may explicitly initialize one representation.
-It obeys every ordinary Laser-D function restriction.
+    this(uint initialValue)
+    {
+        value = initialValue;
+    }
+}
 
-## <a id="Struct-Constructor"></a>Struct Constructors
+ResourceId id = ResourceId(42);
+```
 
-Ordinary struct constructors are supported as a convenience for initializing
-small value types. A constructor is named `this`, returns no source-level
-value, and initializes the existing destination storage.
+A constructor has no source-level result value. It initializes fields directly
+and follows the ordinary Laser-D parameter, calling-convention, template, and
+function-body rules.
 
-> **Rejected in Laser-D:**
->
-> A constructor cannot be declared with a source-level `ref`
-> return annotation. Constructor contracts, attributes rejected by Laser-D, allocation through `new`, and lifecycle behavior through a destructor or
-> postblit are also rejected.
+Templated constructors are available:
 
-### <a id="delegating-constructor"></a>Constructor Delegation
+```d
+struct Cell
+{
+    int value;
 
-> **Rejected in Laser-D:**
->
-> A struct constructor cannot delegate to another constructor
-> with `this(...)`. Constructors initialize their fields directly.
+    this(T)(T initialValue)
+    {
+        value = cast(int) initialValue;
+    }
+}
+```
 
-### <a id="struct-instantiation"></a>Struct Instantiation
+Union constructors use the same syntax:
 
-A struct is instantiated in existing storage by declaration, literal, assignment, parameter passing, return, or placement performed through explicit
-pointer/C storage management. Every `new` expression is rejected.
+```d
+union Word
+{
+    uint whole;
+    ushort half;
 
-### <a id="constructor-attributes"></a>Constructor Function Rules
+    this(uint value)
+    {
+        whole = value;
+    }
+}
+```
 
-Constructors inherit Laser-D's implicit function attributes and may not
-spell rejected attributes or parameter/return annotations. Templated
-constructors are supported when their bodies and inferred instances use only
-supported features.
+Construction initializes storage already provided by a declaration, enclosing
+aggregate, caller, or foreign allocation API.
 
-#### <a id="pure-constructors"></a>Purity
+## Value copying and assignment
 
-Laser-D does not expose D's explicit or inferred `pure` function
-attribute. Constructors follow the same conservative function model as every
-other function.
+An aggregate whose fields are value-copyable has ordinary field-wise value
+semantics:
 
-### <a id="disable_default_construction"></a>Disabled Default Construction
+```d
+Point first = Point(2, 3);
+Point second = first;
+second = Point(4, 5);
+```
 
-> **Rejected in Laser-D:**
->
-> `@disable this()` and every other explicit use of
-> `@disable` are rejected. Laser-D structs cannot opt out of ordinary default
-> initialization through an attribute.
+Copying a pointer or slice field copies its non-owning address or view; it does
+not copy the referenced storage or extend its lifetime.
 
-### <a id="field-init"></a>Constructor Field Initialization
+Modern assignment and compound-assignment hooks may customize assignment as
+defined by the operator-overloading chapter.
 
-A constructor may assign or initialize its fields explicitly. All fields
-must have a valid state before they are read. Union constructors must respect
-the program's selected active-field convention.
+The supported `__traits` predicates can inspect properties such as POD,
+copyability, zero initialization, construction, and destruction.
 
-## <a id="StructCopyConstructor"></a>Copy Constructors
+## Methods and `this`
 
-> **Rejected in Laser-D:**
->
-> User-defined struct copy constructors are rejected. Laser-D
-> supports ordinary field-wise value copying for aggregates whose fields are
-> value-copyable and which require no postblit or destructor.
+Struct and union methods are ordinary functions associated with an aggregate
+type. They are called with explicit parentheses:
 
-### <a id="disable-copy"></a>Disabled Copying
+```d
+struct Counter
+{
+    int value;
 
-> **Rejected in Laser-D:**
->
-> Attribute-driven disabled copying is rejected together with
-> `@disable` and user-defined copy constructors.
+    void increment()
+    {
+        ++value;
+    }
 
-### <a id="copy-constructor-attributes"></a>Copy Constructor Attributes
+    int read()
+    {
+        return value;
+    }
+}
+```
 
-No copy-constructor-specific attribute surface is currently guaranteed.
+Inside an instance method or constructor, `this` denotes the current aggregate.
+It may:
 
-### <a id="implicit-copy-constructors"></a>Implicit Copying
+- qualify a field or method;
+- be passed or returned by value;
+- have its address taken as a non-owning pointer;
+- form a delegate to one of its methods; and
+- participate in `typeof` and template inference.
 
-The frontend may generate ordinary field-wise copying required to implement
-value semantics. It must not invoke a rejected source postblit.
+An immutable receiver method places `immutable` after its parameter list and
+may be called on an immutable aggregate:
 
-## <a id="StructMoveConstructor"></a>Move Constructors
+```d
+struct Value
+{
+    int number;
 
-> **Rejected in Laser-D:**
->
-> User-defined struct move constructors are rejected. Laser-D
-> provides no general ownership transfer or moved-from-state model.
+    int read() immutable
+    {
+        return number;
+    }
+}
+```
 
-### <a id="disable-move"></a>Disabled Moving
+## Named and anonymous unions
 
-> **Rejected in Laser-D:**
->
-> Attribute-driven disabled moving is rejected together with
-> `@disable` and user-defined move constructors.
+A named union declares a reusable type. An anonymous union directly overlays
+fields in its containing aggregate:
 
-### <a id="move-constructor-attributes"></a>Move Constructor Attributes
+```d
+struct TaggedValue
+{
+    int tag;
 
-No move-constructor-specific attribute surface is currently guaranteed.
+    union
+    {
+        int integer;
+        float floating;
+    }
+}
+```
 
-### <a id="implicit-move-constructors"></a>Implicit Moving
+The anonymous union contributes `integer` and `floating` as fields of
+`TaggedValue`. They share storage and follow the same initialization and layout
+rules as fields of a named union.
 
-Frontend/backend transfer optimizations do not create a source-visible
-ownership feature or permit the rejected `__rvalue` expression.
+## Bit fields
 
-## <a id="StructPostblit"></a>Struct Postblits
+Integral bit fields pack values into implementation-defined allocation units:
 
-> **Rejected in Laser-D:**
->
-> A source declaration `this(this)` is rejected. Copying a
-> Laser-D struct does not invoke a user-defined post-copy hook.
+```text
+BitFieldDeclaration:
+    IntegralType Identifier : Width ;
+    IntegralType Identifier : Width = Initializer ;
+    IntegralType : 0 ;
+```
 
-## <a id="member-functions"></a>Member Functions
+```d
+struct Flags
+{
+    uint low : 3 = 1;
+    uint high : 5 = 2;
+    uint : 0;
+    int signedValue : 4;
+}
+```
 
-Struct and union methods are supported ordinary functions with an explicit
-call in source. They receive their aggregate context without a class object
-model or virtual dispatch. Immutable receiver methods are supported; rejected
-qualifiers and function annotations remain unavailable.
+A named bit field:
 
-## <a id="StructDestructor"></a>Struct Destructors
+- has an integral storage type;
+- has a positive compile-time width no greater than that type's bit width;
+- may have a representable default initializer; and
+- supports ordinary access and assignment.
 
-> **Rejected in Laser-D:**
->
-> A source struct or union destructor `~this()` is rejected.
-> Laser-D does not schedule hidden user-defined work when an aggregate leaves
-> scope, is overwritten, or is copied.
+An anonymous zero-width field ends the current allocation unit. Bit-field
+packing order and allocation-unit layout are implementation-defined.
 
-## <a id="union-field-destruction"></a>Union Field Destruction
+Bit fields are also available in unions:
 
-Laser-D performs no implicit destruction of a union field. Programs needing
-resource release use explicit functions or the supported `scope(exit)`
-statement around an explicitly managed resource.
+```d
+union Overlay
+{
+    uint whole;
+    uint low : 4;
+}
+```
 
-## <a id="Invariant"></a>Struct Invariants
+The field properties `.min` and `.max` reflect the bit width and signedness.
+The supported bit-field traits expose whether a field is a bit field and its
+declared width.
 
-> **Rejected in Laser-D:**
->
-> Aggregate `invariant` declarations are rejected. Validation
-> must be expressed as an ordinary explicitly called method or function.
+## Nested and local structs
 
-## <a id="AssignOverload"></a>Assignment Overloading
+A struct may be declared in a module, aggregate, template, or function.
 
-Modern `opAssign` and related operator hooks are supported only as
-specified by the operator-overloading chapter. They are ordinary explicit
-method calls after frontend lowering and remain subject to all aggregate and
-function restrictions. Legacy D1 hooks are rejected.
+A function-local struct is a context-free value type. Its methods use its own
+fields, parameters, manifest constants, and names available without an outer
+runtime object:
 
-## <a id="AliasThis"></a>Alias This
+```d
+int calculate()
+{
+    struct LocalValue
+    {
+        int value;
 
-> **Rejected in Laser-D:**
->
-> Both `alias member this` and `alias this = member` are
-> rejected. Member lookup and conversions never implicitly forward through an
-> aggregate field.
+        int doubled()
+        {
+            return value * 2;
+        }
+    }
 
-## <a id="nested"></a>Nested Structs
+    LocalValue local = LocalValue(21);
+    return local.doubled();
+}
+```
 
-A struct declared inside another aggregate or namespace is supported when
-it has ordinary value semantics. A function-local struct containing only
-context-free value storage is also supported.
+Values needed by the local type are represented explicitly as fields or passed
+as function parameters.
 
-> **Rejected in Laser-D:**
->
-> A nested struct that requires a hidden pointer to an enclosing
-> function or aggregate context is rejected. Outer values must instead be passed
-> explicitly as fields or function parameters.
+## Aggregate properties
 
-## <a id="cpp-structs"></a>C++ Structs
+Struct and union types and values provide the compiler properties defined in
+the properties chapter. The principal aggregate properties are:
 
-> **Rejected in Laser-D:**
->
-> Struct declarations under `extern(C++)` linkage are rejected, including forward declarations, definitions, templates, and explicit C++
-> class/struct mangling forms. C++ free-function linkage is specified separately
-> and remains available.
+- `.init`;
+- `.sizeof`;
+- `.alignof`;
+- `.tupleof`;
+- `.stringof`; and
+- field `.offsetof`.
 
-## <a id="conformance"></a>Conformance Boundary
-
-The guaranteed aggregate subset consists of ordinary value storage, layout, fields, default and explicit initialization, literals, methods, direct
-constructors, named and anonymous unions, and integral bit fields. Destructors, postblits, invariants, `alias this`, and C++ structs are rejected. Advanced
-copy and move constructors, constructor delegation, `@disable`, and
-hidden-context nested structs are rejected.
+These properties are compile-time information and do not add storage to an
+aggregate.
