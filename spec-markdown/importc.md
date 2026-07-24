@@ -6,89 +6,60 @@ source: ../spec/importc.dd
 
 # ImportC
 
-> **Laser-D normative:**
->
-> ImportC is retained as a distinct C-language frontend mode.
-> Laser-D guarantees a reviewed baseline for already-preprocessed C translation
-> units and for importing their declarations into Laser-D modules.
+ImportC is Laser-D's C-language frontend mode. It compiles reviewed,
+already-preprocessed C translation units and makes their declarations
+available to Laser-D modules.
 
-ImportC source is C, not Laser-D. A restriction on Laser-D syntax does not
-automatically remove the corresponding C construct when that construct is part
-of the reviewed ImportC baseline. Conversely, acceptance by the upstream
-ImportC implementation does not make an unaudited C extension a Laser-D
-guarantee.
+ImportC source follows C rules rather than Laser-D syntax. Features awaiting
+ImportC review are listed in [Feature status](../FEATURE_STATUS.md).
 
-> **Laser-D normative:**
->
-> ImportC does not admit D declarations, expressions, statements, templates, attributes, or type syntax into C source. The shared
-> frontend representation and semantic machinery are implementation details, not
-> a mechanism for mixing the two source languages within one translation unit.
+## Translation units
 
-## <a id="relationship"></a>Relationship to Laser-D
+A file with the `.i` extension is treated as an already-preprocessed C
+translation unit. Its module identity is derived from its filename.
 
-Laser-D and ImportC share the compiler frontend, optimizer, backend, object
-format, and linker interface, but use different parsers and source-language
-rules.
+The translation unit may:
 
-- Laser-D source follows the reduced language specified by these chapters.
-- ImportC source follows the reviewed C rules in this chapter.
-- Declarations crossing the boundary use their compiled ABI and representation; they are not translated into unrestricted D declarations.
+- define a standalone C program;
+- compile to an object for normal linking; or
+- be compiled alongside a Laser-D module that imports its declarations.
 
-BetterC and ImportC are different concepts. BetterC is permanently active
-for Laser-D source. ImportC parses C translation units. Both avoid depending on
-the D runtime, and both may call the available C runtime through explicit
-declarations.
+The reviewed input begins after C preprocessing has produced the `.i` file.
 
-## <a id="input"></a>Input and Translation Units
+## Reviewed C baseline
 
-> **Laser-D normative:**
->
-> A file with the `.i` extension is treated as an
-> already-preprocessed C translation unit. The reviewed baseline does not depend
-> on the compiler invoking an external preprocessor.
+The tested C baseline includes:
 
-A translation unit receives a module identity derived from its filename.
-It may be compiled as a standalone C program or supplied alongside a Laser-D
-module that imports it.
+- function declarations, definitions, calls, parameters, and returns;
+- local variables and file-scope C storage;
+- the C `int main(void)` entry point;
+- structs, unions, enums, typedefs, and function pointers;
+- scalar, aggregate, and local initialization;
+- member access, arithmetic, comparisons, conditional expressions, and
+  ordinary control flow;
+- `sizeof`; and
+- C11 `_Static_assert`.
 
-Source inclusion, macro expansion, conditional preprocessing, and
-preprocessor command-line selection occur before the reviewed `.i` input
-reaches ImportC. Those facilities are not specified by the baseline.
+These constructs retain C semantics, storage duration, namespaces, and target
+representation.
 
-## <a id="baseline"></a>Reviewed C Baseline
+## C types and representation
 
-> **Laser-D normative:** The tested standalone baseline includes:
+C declarations use the C spelling and target ABI for their types, layout, and
+calling convention. ImportC retains the scalar types required to represent the
+reviewed declarations.
 
-- C function declarations, definitions, calls, parameters, local variables, and returns,
-- the ordinary C `int main(void)` entry point,
-- file-scope variables and C static storage,
-- C structs, unions, enums, typedefs, and function pointers,
-- scalar, aggregate, and local initialization,
-- member access, arithmetic, comparisons, conditional expressions, and ordinary control flow,
-- C11 `_Static_assert` and `sizeof`.
+C `long double` remains represented through the frontend's internal extended
+floating-point type. A Laser-D module may import a C declaration containing
+that type and inspect or pass its ABI representation.
 
-These constructs use C semantics in an ImportC translation unit. For
-example, C file-scope mutable storage remains available even though
-Laser-D-owned mutable global or static storage is rejected.
+C struct and union layout, enum representation, function types, pointers, and
+file-scope storage likewise retain their C meaning.
 
-## <a id="types"></a>C Types and Representation
+## Standalone programs
 
-ImportC retains the C types required to represent reviewed C declarations.
-The C spelling and target ABI govern their layout.
-
-In particular, C `long double` remains representable through the
-frontend's internal extended floating-point type even though Laser-D source
-cannot name D `real`. Importing such a declaration permits compile-time
-layout inspection and ABI-compatible access; it does not add `real` to the
-Laser-D type grammar.
-
-The same separation applies generally to C qualifiers, storage duration, tag namespaces, declarations, and initializers. ImportC acceptance does not
-authorize the corresponding rejected D syntax in a `.d` file.
-
-## <a id="standalone"></a>Standalone ImportC Programs
-
-A preprocessed translation unit may define `main`, compile to an object, link through the normal compiler driver, and execute without a Laser-D root
-module.
+A preprocessed translation unit may define `main`, compile, link, and execute
+without a Laser-D root module.
 
 ```c
 struct Pair
@@ -102,23 +73,17 @@ _Static_assert(sizeof(struct Pair) == 2 * sizeof(int),
 
 int main(void)
 {
-    struct Pair pair = { 20
-22 };
+    struct Pair pair = { 20, 22 };
     return pair.first + pair.second == 42 ? 0 : 1;
 }
 ```
 
-The program uses the C entry-point and C linkage rules. Laser-D's explicit
-`extern(C) int main(...)` requirement applies to a Laser-D root module, not
-to an ImportC translation unit.
+The program uses C entry-point and linkage rules.
 
-## <a id="importing"></a>Importing C into Laser-D
+## Importing C declarations
 
-> **Laser-D normative:**
->
-> A Laser-D module may import an ImportC module compiled in the
-> same invocation. Its visible C functions, globals, structs, unions, enums, typedefs, and function-pointer declarations may be used when their resulting
-> interface is representable by supported frontend/backend types.
+A Laser-D module may import an ImportC translation unit compiled in the same
+invocation:
 
 ```d
 import c_api;
@@ -130,107 +95,65 @@ extern(C) int main()
 }
 ```
 
-Imported C function declarations retain C linkage. C struct and union
-layout follows the target C ABI. Access to a C global refers to storage owned
-under the C translation unit's rules and does not create a Laser-D global
-declaration.
+The imported interface may contain C functions, globals, structs, unions,
+enums, typedefs, and function pointers.
 
-Separate compilation and linking remain subject to ordinary symbol
-visibility, object format, and ABI compatibility. Importing a module provides
-declarations; it does not automatically provide a separately omitted object
-definition.
+- Functions retain C linkage and their C calling convention.
+- Structs and unions retain target C layout.
+- Enum constants and typedef names are visible through the imported module.
+- A C global denotes storage defined under the C translation unit's rules.
 
-## <a id="static-assertions"></a>Static Assertions
+Importing declarations does not replace the need to compile and link the
+translation unit that supplies their definitions.
 
-ImportC `_Static_assert` is retained and evaluated by the compiler.
-This is distinct from Laser-D's `static assert` syntax. Neither form
-requires a runtime assertion hook.
+## Static assertions
 
-## <a id="source-boundary"></a>Source-Language Boundary
+`_Static_assert` evaluates its condition during compilation and emits no
+runtime code:
 
-Laser-D-only rejection diagnostics are gated away from ImportC when the C
-construct is part of the retained C model. Important examples include C
-file-scope variables, C qualifiers, and C `long double`.
+```c
+_Static_assert(sizeof(unsigned long) >= sizeof(unsigned int),
+               "unexpected integer representation");
+```
 
-This boundary is deliberate but not unlimited. A C construct belongs to
-the Laser-D ImportC contract only when this specification and conformance tests
-classify it. Sharing an internal AST representation with D is an implementation
-detail, not a source-language promise.
+## Source-language boundary
 
-The frontend may internally evaluate C declarations or expressions while
-performing semantic analysis. Reuse of CTFE machinery does not expose D CTFE
-syntax, `__ctfe`, templates, traits, static control flow, or other D
-compile-time features to ImportC source.
+Laser-D and ImportC share semantic and backend infrastructure but retain
+separate parsers and source-language rules.
 
-## <a id="upstream-tests"></a>Upstream Compatibility Evidence
+- A `.d` file follows the Laser-D specification.
+- A `.i` file follows the reviewed C baseline.
+- Declarations cross the boundary through their compiled type representation
+  and ABI.
 
-The Laser-D suite contains copies of 41 upstream preprocessed ImportC tests
-that currently pass: compilable, runnable, and expected-failure cases. They
-provide differential regression evidence for the frontend behavior exercised
-by those files.
+Frontend reuse does not combine both source languages within a translation
+unit.
 
-Their presence is not a blanket guarantee for every extension appearing in
-upstream ImportC. A copied test guarantees the behavior it checks only to the
-extent that behavior is consistent with the decisions recorded in the
-Laser-D feature inventory.
+## Regression evidence
 
-Two upstream tests that import `__importc_builtins.di` remain blocked
-because that D interface uses the rejected `real` type. The generated
-interface golden test also requires a Laser-D-specific expected result. These
-known gaps are not silently treated as passing conformance.
+The Laser-D conformance suite includes copies of 41 upstream preprocessed
+ImportC tests that currently pass. They include compilable, runnable, and
+expected-failure cases.
 
-## <a id="preprocessing"></a>Preprocessing (Under Review)
+Each copied test guarantees only the behavior it exercises that is consistent
+with the decisions in [Feature status](../FEATURE_STATUS.md). The focused
+`importc_standalone.i` and mixed `importc_module_accepted.d` tests define the
+reviewed baseline more directly.
 
-> **Under review:**
->
-> Automatic preprocessing of `.c` and `.h` input is
-> not yet a Laser-D guarantee. This includes external preprocessor discovery, command-line forwarding, include search, predefined macros, macro-to-D
-> translation, and platform-specific driver behavior.
+## Portability and ABI
 
-Projects requiring the current reviewed baseline should provide
-preprocessed `.i` files explicitly.
+ImportC uses the selected target's C ABI. Type sizes, alignment, calling
+conventions, enum representation, and `long double` representation may differ
+between Windows, Linux, and macOS.
 
-## <a id="extensions"></a>C Extensions (Under Review)
+Cross-platform interfaces should use C declarations whose representation and
+calling convention are defined for every intended target.
 
-The intended extension policy is C11 plus a small set of individually
-reviewed GNU-compatible C extensions needed for practical interoperability.
-No GNU, Clang, Microsoft, Digital Mars, or ImportC-specific extension family is
-accepted wholesale.
+## Conformance testing
 
-> **Under review:** The following C and toolchain areas require separate, feature-specific review before any individual extension becomes normative:
+A baseline test supplies preprocessed `.i` input. A mixed-language test
+compiles its Laser-D and ImportC sources together and links and runs the result
+when behavior depends on calls, storage, or layout.
 
-- headers, macros, conditional preprocessing, and preprocessing pragmas,
-- C atomics and memory-ordering facilities,
-- vector types and compiler vector extensions,
-- basic or extended inline assembly,
-- GNU-compatible attributes, declarations, builtins, and calling-convention extensions beyond individually reviewed cases,
-- Clang, Microsoft, and Digital Mars vendor extensions,
-- implementation-specific builtins and the generated ImportC builtin interface.
-
-Current acceptance of an item in this list is implementation behavior, not
-normative Laser-D support. Current rejection likewise does not settle the final
-decision until the feature is audited.
-
-ImportC-specific syntax for importing D modules, generating D interfaces, or otherwise exposing D language facilities to C source is outside the C11 and
-GNU-compatible extension policy and is not part of the reviewed baseline.
-
-## <a id="portability"></a>Portability and ABI
-
-Reviewed ImportC code uses the selected target's C ABI. Sizes, alignment, calling conventions, enum representation, and `long double` representation
-may differ between Windows, Linux, and macOS.
-
-Portable source should use C types and interfaces whose intended ABI is
-available on every target in scope. The shared backend does not make
-target-specific C extensions portable.
-
-## <a id="diagnostics"></a>Diagnostics and Conformance
-
-A positive conformance test should use `.i` input when preprocessing is
-not the feature under review. A mixed-language test should compile the
-Laser-D and ImportC sources together and, where behavior depends on linkage or
-layout, link and run the result.
-
-Expected-failure tests should demonstrate that ImportC diagnoses the
-intended C error or that a cross-language declaration is unavailable for the
-intended reason. Tests must not rely on an unrelated Laser-D restriction being
-incorrectly applied to C source.
+An expected-failure test must demonstrate the intended C or cross-language
+diagnostic rather than an incidental restriction from the Laser-D parser.

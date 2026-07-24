@@ -738,3 +738,10 @@ and member reflection, declaration metadata, target information, and semantic
 probes. Removed trait operations remain in the compatibility notes. The
 future-status predicate, child-symbol rebinding, and class-layout or
 virtual-member sequence queries are explicitly undecided.
+
+The ImportC specification defines the tested preprocessed-C baseline,
+standalone C programs, mixed Laser-D/C compilation, source-language boundary,
+and target ABI behavior. Copied upstream tests remain regression evidence
+rather than blanket extension guarantees. Preprocessing, the extended
+vendor/GNU surface, and C qualifiers beyond `const` stay in the feature ledger
+until separately reviewed.

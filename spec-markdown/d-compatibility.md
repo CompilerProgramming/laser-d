@@ -221,9 +221,10 @@ information.
 
 ## Interoperability differences
 
-ImportC accepts reviewed C11 source and selected GNU-compatible C extensions.
-ImportC input remains C; it does not acquire D language features merely because
-it shares the frontend.
+ImportC accepts the reviewed, preprocessed C11 baseline. GNU-compatible
+extensions may be added only through individual review; no extension family is
+currently guaranteed as a whole. ImportC input remains C and does not acquire
+D language features merely because it shares the frontend.
 
 Laser-D supports C ABI declarations and C++ linkage for reviewed free-function
 interoperability. It does not support:
