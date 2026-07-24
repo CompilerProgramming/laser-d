@@ -724,3 +724,10 @@ declarations and their tested named and unnamed insertion forms at module,
 aggregate, template, and function scope. Ordinary templates used as mixin
 sources and the extended qualified or alias-style mixin naming grammar remain
 separate undecided features rather than implicit guarantees.
+
+The conditional-compilation specification currently defines the verified
+core of `static if`, statement-form `static foreach`, and `static assert`.
+`version` and `debug` remain outside the normative chapter pending review.
+Advanced static-branch scoping and deferral, declaration or multi-binding
+`static foreach`, and transfers from static expansions are tracked as distinct
+undecided semantics.

@@ -222,6 +222,9 @@ Each chapter should be split into individual features as it is investigated.
 | --- | --- | --- | --- |
 | `version` conditions and specifications | Undecided | Review user-defined version identifiers, assignments, command-line versions, predefined target identifiers, and their scope. Settled identifiers such as mandatory `D_BetterC` and explicitly absent feature identifiers remain governed by their existing decisions. | Existing feature-specific version tests only |
 | `debug` conditions and specifications | Undecided | Review `debug`, debug identifiers and levels, command-line debug selection, scope, and release interactions independently of `static if`. | None |
+| `static if` branch scope and semantic deferral | Undecided | Review whether braces around a selected branch introduce a scope and precisely which syntax and semantic errors may remain in an unselected branch. Basic compile-time branch selection is supported. | `ctfe_accepted.d` covers basic selection only |
+| Declaration and extended-binding `static foreach` | Undecided | Review declaration expansion, multiple iterator variables, index/value binding, symbol alias binding, and the scope introduced by each expansion. Basic statement expansion over numeric ranges and compile-time sequences is supported. | Existing `static foreach` tests cover single-value statement expansion only |
+| Transfers within `static foreach` | Undecided | Define the behavior of unlabeled and labeled `break` and `continue` within a statically expanded body, including transfers targeting an enclosing runtime statement. | None |
 
 ## ImportC decisions
 
