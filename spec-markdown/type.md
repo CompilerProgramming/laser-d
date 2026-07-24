@@ -1,26 +1,18 @@
----
-title: Types
-status: restricted
-source: ../spec/type.dd
----
-
 # Types
 
-> **Laser-D normative:**
->
-> Laser-D is statically typed. Every expression has a type, and every type has a compile-time-known size and representation except
-> `void`, opaque enums awaiting definition, and incomplete ImportC types.
-> The language has no runtime type-information requirement.
+Laser-D is statically typed. Every expression has a compile-time type. Every
+complete object type has a compile-time-known size, alignment, and
+representation.
 
-## <a id="grammar"></a>Grammar
+`void` represents the absence of a value. An opaque enum has no complete
+representation until its definition is available. ImportC may also introduce
+an incomplete C type which can be named and pointed to but not instantiated.
+
+## Type grammar
 
 ```text
 Type:
-    TypeCtors[] BasicType TypeSuffixes[]
-
-TypeCtors:
-    TypeCtor
-    TypeCtor TypeCtors
+    TypeCtor* BasicType TypeSuffix*
 
 TypeCtor:
     const
@@ -28,18 +20,15 @@ TypeCtor:
 
 BasicType:
     FundamentalType
-    . QualifiedIdentifier
     QualifiedIdentifier
-    Typeof
-    Typeof . QualifiedIdentifier
+    . QualifiedIdentifier
+    typeof ( Expression )
+    typeof ( return )
     TypeCtor ( Type )
     TraitsExpression
 
 FundamentalType:
     void
-    ArithmeticType
-
-ArithmeticType:
     bool
     byte
     ubyte
@@ -55,44 +44,35 @@ ArithmeticType:
     float
     double
 
-TypeSuffixes:
-    TypeSuffix TypeSuffixes[]
-
 TypeSuffix:
     *
     [ ]
     [ AssignExpression ]
     [ AssignExpression .. AssignExpression ]
-    delegate Parameters
     function Parameters
+    delegate Parameters
 
 QualifiedIdentifier:
     Identifier
     Identifier . QualifiedIdentifier
     TemplateInstance
     TemplateInstance . QualifiedIdentifier
-    Identifier [ AssignExpression ]
-    Identifier [ AssignExpression ] QualifiedIdentifier
 ```
 
-A bracket suffix with no expression forms a non-owning slice. A suffix
-with one compile-time expression forms a fixed-size array, or indexes a
-compile-time type sequence where that interpretation applies. The range form
-slices a compile-time type sequence.
+A `*` suffix forms a pointer. An empty bracket suffix forms a non-owning
+slice. A bracket suffix containing one compile-time expression forms a
+fixed-size array. In template type-sequence contexts, bracket expressions may
+instead index or slice the sequence.
 
-> **Excluded from Laser-D:**
->
-> A bracket suffix containing a type would form a D associative
-> array and is not in the grammar. Vector and string-mixin types are also omitted.
-> Function and delegate attributes are implicit or are specified on parameters as
-> defined by the functions chapter.
+Function and delegate suffixes form callable types as defined in the functions
+chapter.
 
-## <a id="Basic Data Types"></a>Fundamental Types
+## <a id="basic-data-types"></a>Fundamental types
 
 | Type | `.init` | Meaning |
 | --- | --- | --- |
-| [`void`](#void) | no value | function with no result |
-| [`bool`](#bool) | `false` | Boolean |
+| `void` | no value | absence of a function result |
+| `bool` | `false` | Boolean |
 | `byte` | `0` | signed 8-bit integer |
 | `ubyte` | `0u` | unsigned 8-bit integer |
 | `short` | `0` | signed 16-bit integer |
@@ -106,54 +86,71 @@ slices a compile-time type sequence.
 | `char` | `'\xFF'` | UTF-8 code unit |
 | `wchar` | `'\uFFFF'` | UTF-16 code unit |
 | `dchar` | `'\U0000FFFF'` | UTF-32 code unit |
-| `typeof(null)` | `null` | null-literal type |
-| [`noreturn`](#noreturn) | no value | bottom type |
 
-Integer representation, alignment, and byte order follow the target ABI.
-The supported initial targets use two's-complement integers. Character types
-are distinct unsigned integral types; their values are code units and are not
-automatically validated as complete Unicode scalar values.
+Integer size and signedness are fixed by the table. Alignment and byte order
+follow the target ABI. The supported x86-64 targets use two's-complement
+integers.
 
-> **Excluded from Laser-D:**
->
-> `real`, `cent`, `ucent`, `ifloat`, `idouble`, `ireal`, `cfloat`, `cdouble`, and `creal` are not
-> Laser-D types. ImportC may retain internal representations required for C
-> `long double` and other C declarations.
+Character types are distinct unsigned integral types. Their values are code
+units; storing a value does not by itself validate a complete Unicode scalar
+value or encoded sequence.
 
-### <a id="void"></a>`void`
+### `void`
 
-`void` denotes the absence of a value. It is valid as a function result
-and as the target of a pointer, but an object or parameter cannot have type
-`void`. A `void*` may point to storage of any object type.
+`void` is valid as a function result and as the pointed-to type of `void*`. A
+variable, field, or parameter does not have type `void`.
 
-### <a id="bool"></a>`bool`
+A `void*` can hold the address of any object. Its value carries no type,
+alignment, size, ownership, or lifetime guarantee for the referenced storage.
 
-`bool` has the values `false` and `true`. Converting zero or a null
-pointer to `bool` yields `false`; converting any other supported scalar
-value yields `true`. Converting `bool` to an integer yields zero or one.
+### `bool`
 
-## <a id="Derived Data Types"></a>Derived Types
+`bool` has the values `false` and `true`.
 
-- [Pointers](#pointers)
-- [Fixed-size arrays](arrays.md#static-arrays)
-- [Non-owning slices](arrays.md#dynamic-arrays)
-- [Function pointers](#function-pointers)
-- [Restricted delegates](#delegates)
-- [Immutable types](const3.md)
-- Compile-time type sequences produced by templates
+Converting zero or a null pointer to `bool` produces `false`. Converting another
+scalar value to `bool` produces `true`. Converting a `bool` to an integer
+produces zero or one.
 
-### <a id="component-types"></a>Component Types
+### Null type
 
-A pointer, fixed array, or slice has an element or pointed-to component
-type. A function type has a result type and parameter types. A delegate has the
-same function signature plus a context pointer. Applying `immutable` to a
-compound value is transitive through all of its stored components.
+The `null` literal has the distinct compile-time type `typeof(null)`. It can
+initialize a pointer, slice, function pointer, or delegate:
 
-### <a id="pointers"></a>Pointers
+```d
+int* pointer = null;
+int[] view = null;
+int function(int) operation = null;
+int delegate(int) callback = null;
+```
 
-A value of type `T*` is either `null` or an address interpreted as
-pointing to a `T`. Pointer validity, alignment, provenance, object lifetime, and bounds are programmer responsibilities. Dereferencing an invalid pointer
-has undefined behavior.
+## Derived types
+
+Laser-D derives:
+
+- pointers;
+- fixed-size arrays;
+- non-owning slices;
+- function pointers;
+- delegates;
+- `const` and `immutable` qualified types; and
+- compile-time type sequences produced by templates.
+
+The arrays, qualifiers, functions, and templates chapters define their detailed
+rules.
+
+### Component types
+
+A pointer, fixed array, or slice has a component type. A function pointer has a
+result type, parameter types, and calling convention. A delegate has the same
+callable signature plus a context pointer.
+
+Applying `immutable` to a compound value is transitive through all stored
+components. `const` provides a read-only view according to the qualifier rules.
+
+### Pointers
+
+A value of type `T*` is either `null` or an address interpreted as pointing to
+a `T` object.
 
 ```d
 int value = 3;
@@ -161,74 +158,87 @@ int* pointer = &value;
 *pointer = 4;
 ```
 
-Pointers provide explicit access to external allocation and C APIs. Laser-D
-does not associate ownership or garbage collection with a pointer.
+Pointer validity, alignment, provenance, object lifetime, and bounds are
+programmer responsibilities. Dereferencing a pointer is valid only while it
+addresses a suitably aligned live object of a compatible type.
 
-## <a id="User Defined Types"></a>User-Defined Types
+A pointer has no implicit ownership. Explicit foreign allocation APIs may
+return pointers whose release requirements are defined by that API.
 
-Laser-D user-defined runtime value types are structs, unions, and enums.
-Templates may generate or transform any supported type. Aliases introduce
-another name for a type but do not create a distinct type.
+## User-defined value types
 
-> **Excluded from Laser-D:**
->
-> Native D classes and interfaces, C++ structs and classes, COM
-> interfaces, and Objective-C object types cannot be declared by Laser-D source.
-> ImportC retains C struct, union, enum, and incomplete types.
+Laser-D user-defined runtime types are:
 
-## <a id="type-conversions"></a>Type Conversions
+- structs;
+- unions; and
+- enums.
 
-A conversion is permitted only when both source and destination types are
-supported. No conversion may introduce allocation, runtime type information, class dispatch, or a rejected qualifier.
+Structs and unions define fixed-layout value storage. Enums define a named
+integral value domain. Their detailed declaration, initialization, and
+conversion rules appear in their respective chapters.
 
-### <a id="Implicit Conversions"></a>Implicit Conversions
+Templates may generate supported types. An alias gives a type another name
+without creating a distinct type.
 
-- Integral values may widen to a type that represents their complete value range.
-- Compile-time constants may convert to an integral type when the value is representable.
+ImportC may introduce C structs, unions, enums, and incomplete C types.
+
+## Type conversions
+
+A conversion preserves the source value according to the following rules or is
+written explicitly with `cast`.
+
+### Implicit conversions
+
+- An integral value may widen to a type which represents its complete value
+  range.
+- A compile-time integral constant may convert when its value is representable
+  in the destination type.
 - `float` may convert to `double`.
-- A pointer may convert to `void*` while preserving qualification.
+- A pointer to an object type may convert to a compatibly qualified `void*`.
 - `null` may convert to a pointer, slice, function pointer, or delegate.
-- Fixed arrays, slices, function pointers, and delegates use the conversion rules in their dedicated chapters.
+- Fixed arrays, slices, function pointers, delegates, enums, and qualified
+  values use the rules in their dedicated chapters.
 
-Other numeric narrowing and reinterpretation requires an explicit cast.
-An explicit cast still cannot name or produce an excluded Laser-D type.
+Other numeric narrowing and pointer reinterpretation use an explicit cast.
 
-### <a id="Pointer Conversions"></a>Pointer Conversions
+### Pointer conversions
 
-A pointer to an object type implicitly converts to `void*`. Converting a
-`void*` back to another pointer type requires an explicit cast. Conversion
-does not adjust alignment, extend lifetime, or establish that the destination
-object exists.
+A pointer to an object type implicitly converts to a compatibly qualified
+`void*`:
 
-### <a id="Integer Promotions"></a>Integer Promotions
+```d
+int value;
+int* integerPointer = &value;
+void* untypedPointer = integerPointer;
+```
 
-Integer promotions used by arithmetic convert `bool`, `byte`, `ubyte`, `short`, `ushort`, `char`, and `wchar` to `int`.
-`dchar` promotes to `uint`. Larger integer types retain their rank.
+Converting `void*` to another object pointer type requires an explicit cast:
 
-### <a id="Usual Arithmetic Conversions"></a>Arithmetic Conversions
+```d
+int* restored = cast(int*) untypedPointer;
+```
 
-Binary arithmetic first applies integer promotion. If either operand is
-`double`, the other numeric operand converts to `double`; otherwise if
-either operand is `float`, the other converts to `float`. Integral
-operands then convert to the common signed or unsigned type determined by their
-rank and representable range.
+The conversion does not change the address, adjust alignment, extend the
+storage lifetime, or prove that an object of the destination type exists there.
 
-Arithmetic never promotes to `real`, imaginary, complex, or vector
-types. Enum arithmetic is limited by the enum rules.
+### Integer promotions
 
-### <a id="enum-ops"></a>Enum Operations
+Arithmetic promotes `bool`, `byte`, `ubyte`, `short`, `ushort`, `char`, and
+`wchar` to `int`. It promotes `dchar` to `uint`. Larger integer types retain
+their rank.
 
-Enum values retain their enum type except where the enum chapter permits
-conversion to or from the base type. Unsupported automatic numbering or
-arithmetic is diagnosed at compile time.
+### Usual arithmetic conversions
 
-### <a id="covariance"></a>Function Type Compatibility
+Binary arithmetic first applies integral promotion. If either operand is
+`double`, the other numeric operand converts to `double`. Otherwise, if either
+operand is `float`, the other numeric operand converts to `float`.
 
-Function pointers and delegates are compatible only when their calling
-convention, parameter passing, and result types satisfy the functions chapter.
-Laser-D has no class covariance and rejects reference results.
+Integral operands convert to a common signed or unsigned type determined by
+their rank and representable range.
 
-## <a id="functions"></a>Function Types
+Enum operations and conversions follow the enums chapter.
+
+## Function types
 
 ```text
 FunctionType:
@@ -236,35 +246,54 @@ FunctionType:
     Type delegate Parameters
 ```
 
-Every function type is implicitly `nothrow`, `@nogc`, and
-`@system`. These attributes cannot be written explicitly. Function types
-are conservatively impure. Parameters may use only the annotations allowed by
-the functions chapter, and results are returned by value.
+Every Laser-D function type is `nothrow`, `@nogc`, and `@system`, and is
+conservatively impure. Its parameters use the passing modes defined by the
+functions chapter. Results are values.
 
-### <a id="function-pointers"></a>Function Pointers
+Two function types are compatible only when their calling convention,
+parameter passing, and result types are compatible.
 
-A function pointer contains a code address and no context. A null function
-pointer cannot be called.
+### Function pointers
+
+A function pointer contains a code address and no context:
 
 ```d
-int addOne(int value) { return value + 1; }
+int addOne(int value)
+{
+    return value + 1;
+}
+
 int function(int) operation = &addOne;
 ```
 
-### <a id="delegates"></a>Delegates
+A null function pointer has no callable target.
 
-A delegate contains a function pointer and a context pointer. Laser-D
-supports delegates bound to struct methods and delegate values whose context
-does not capture an enclosing local variable. The value itself is fixed-size
-and does not allocate.
+### Delegates
 
-> **Excluded from Laser-D:**
->
-> A delegate literal or nested function that captures an
-> enclosing local variable is rejected, regardless of whether D could place its
-> closure on the stack or heap.
+A delegate contains a function pointer and a context pointer. Laser-D forms
+delegate values from non-capturing delegate literals and from struct methods:
 
-## <a id="typeof"></a>`typeof`
+```d
+struct Offset
+{
+    int amount;
+
+    int add(int value)
+    {
+        return amount + value;
+    }
+}
+
+Offset offset = Offset(4);
+int delegate(int) operation = &offset.add;
+```
+
+The delegate value has fixed size and does not own or extend the lifetime of
+the object addressed by its context.
+
+## Compile-time type inspection
+
+### `typeof`
 
 ```text
 Typeof:
@@ -272,52 +301,45 @@ Typeof:
     typeof ( return )
 ```
 
-`typeof(expression)` yields the compile-time type of an expression
-without evaluating it. `typeof(return)` yields the current function's result
-type. The resulting type remains subject to all Laser-D restrictions.
+`typeof(expression)` produces the compile-time type of an expression without
+evaluating the expression:
 
-### <a id="typeof-this"></a>`typeof(this)`
+```d
+int inspectWithoutEvaluation()
+{
+    int value;
+    typeof(++value) anotherValue;
+    static assert(is(typeof(anotherValue) == int));
+    return value;
+}
 
-Inside a struct or union, `typeof(this)` denotes the containing aggregate
-type. Laser-D has no class inheritance, and `typeof(super)` is rejected.
+static assert(inspectWithoutEvaluation() == 0);
+```
 
-## <a id="runtime_type_information"></a>No Runtime Type Information
+Within a function, `typeof(return)` denotes its result type:
 
-> **Excluded from Laser-D:**
->
-> Laser-D does not generate or expose `TypeInfo`, class
-> metadata, or runtime type identifiers. Compile-time operations such as
-> `typeof`, `is`, templates, and supported `__traits` queries inspect
-> frontend types without requiring runtime metadata.
+```d
+int answer()
+{
+    typeof(return) value = 42;
+    return value;
+}
+```
 
-## <a id="mixin_types"></a>String Mixin Types
+Inside a struct or union constructor or instance method, `typeof(this)` denotes
+the containing aggregate type.
 
-> **Excluded from Laser-D:**
->
-> String mixin types are not part of Laser-D. Template mixins
-> operate on parsed declarations and remain available under their own chapter.
+The `is` expression, templates, and supported `__traits` operations provide
+additional compile-time inspection and are described in their own chapters.
 
-## <a id="aliased-types"></a>Conventional Type Aliases
+## Bottom type
 
-### <a id="size_t"></a>`size_t`
+The expression `typeof(*null)` denotes the bottom type: no value of this type is
+produced. A program may give it an alias when needed:
 
-`size_t` is the unsigned integer type capable of representing the size
-of any addressable object. Its concrete fundamental type is target-dependent.
+```d
+alias noreturn = typeof(*null);
+```
 
-### <a id="ptrdiff_t"></a>`ptrdiff_t`
-
-`ptrdiff_t` is the signed integer type corresponding in width to
-`size_t`. Its concrete fundamental type is target-dependent.
-
-### <a id="string"></a>Character Slice Aliases
-
-`string`, `wstring`, and `dstring` are
-conventional aliases for immutable character slices normally supplied by
-`object.d`. They are not owning string types.
-
-### <a id="noreturn"></a>`noreturn`
-
-`noreturn`, defined as `typeof(*null)`, is the bottom type. No value
-of this type is produced, and it implicitly converts to any result type. A
-function inferred never to return may have this result type without requiring
-exception support.
+The bottom type converts to any result type. It can describe a function or
+expression which does not return control to its caller.
