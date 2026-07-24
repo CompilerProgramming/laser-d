@@ -4,46 +4,135 @@ status: restricted
 source: ../spec/property.dd
 ---
 
-# Compiler-Provided Properties
+# Compiler-provided properties
 
-> **Laser-D normative:**
->
-> Compiler-provided properties are supported when they expose
-> compile-time metadata or an allocation-free view of a supported value. A
-> property cannot introduce a rejected type, allocate storage, resize a value, or
-> invoke user-defined behavior.
+Compiler-provided properties expose compile-time metadata or an
+allocation-free view of a supported value. Property access does not invoke
+source-defined behavior.
 
-> **Excluded from Laser-D:**
->
-> User-defined `@property` functions are not part of Laser-D.
-> All ordinary functions, methods, UFCS calls, and templates require explicit
-> call parentheses. Source-defined behavior therefore cannot masquerade as field
-> access.
+Differences from D properties are summarized in
+[D compatibility notes](d-compatibility.md).
 
-## <a id="common"></a>Common Properties
+## Property summary
 
-| Property | Result |
+| Property | Applies to | Result |
+| --- | --- | --- |
+| `.init` | supported types and expressions | default initializer |
+| `.sizeof` | supported types, expressions, and fields | size in bytes |
+| `.alignof` | supported types and expressions | required alignment in bytes |
+| `.stringof` | supported syntax and symbols | compile-time source representation |
+| `.mangleof` | supported types and symbols | compile-time mangled representation |
+| `.tupleof` | structs, unions, and their values | field symbol sequence |
+| `.offsetof` | struct and union fields | byte offset within the aggregate |
+| `.length` | fixed arrays and slices | element count |
+| `.ptr` | fixed arrays, slices, and delegates | data or context pointer |
+| `.funcptr` | delegates | function pointer |
+| `.min`, `.max` | integral, floating-point, and enum types | numeric or enum limits |
+
+Layout and mangling results follow the target ABI and can differ between
+supported targets.
+
+## Default initialization
+
+`T.init` is the compile-time default initializer for `T`. Applying `.init` to
+an expression, variable, or field yields the initializer for its type without
+evaluating the expression.
+
+| Type category | Default |
 | --- | --- |
-| [`.stringof`](#stringof) | compile-time source representation |
-| [`.mangleof`](#mangleof) | compile-time mangled representation |
+| `bool` | `false` |
+| integer types | zero |
+| `float` and `double` | not-a-number |
+| character types | the specified invalid code-unit sentinel |
+| pointers | `null` |
+| slices | `null` |
+| function pointers | `null` |
+| delegates | `null` |
+| fixed arrays | each element's default |
+| structs | each field's declared or type default |
+| unions | the default selected by the union initialization rules |
+| enums | the initializer defined by the enum |
 
-## <a id="type"></a>Type and Layout Properties
+`.init` produces the structural default value and does not invoke a struct
+constructor.
 
-| Property | Result |
-| --- | --- |
-| [`.init`](#init) | default initializer |
-| [`.sizeof`](#sizeof) | size in bytes |
-| [`.alignof`](#alignof) | required alignment in bytes |
-| [`.tupleof`](#tupleof) | aggregate field symbol sequence |
-| [`.offsetof`](#offsetof) | byte offset of an aggregate field |
+```d
+struct Point
+{
+    int x;
+    int y = 2;
+}
 
-These properties are compile-time values. Layout results are target ABI
-properties and may differ between supported targets.
+static assert(Point.init.x == 0);
+static assert(Point.init.y == 2);
+```
 
-## <a id="numeric"></a>Numeric Properties
+## Source representation
 
-Supported integral types provide `.min` and `.max`. Supported
-floating-point types `float` and `double` provide:
+`prefix.stringof` is a compile-time string containing the frontend's source
+representation of its prefix. The prefix is not evaluated. Formatting is
+implementation-defined and is intended for inspection and diagnostics.
+
+```d
+static assert(int.stringof == "int");
+static assert((1 + 2).stringof == "1 + 2");
+```
+
+## Size and alignment
+
+`T.sizeof` is the number of bytes occupied by a value of type `T`. For an
+expression or field, it is the size of that expression's type. Reading the
+property does not evaluate an expression or require an aggregate instance.
+
+`T.alignof` is the byte alignment required by `T` under the target ABI. It
+reports layout and does not request or change alignment.
+
+```d
+struct Pair
+{
+    int first;
+    int second;
+}
+
+static assert(int.sizeof == 4);
+static assert(Pair.first.sizeof == int.sizeof);
+```
+
+## Field offsets and sequences
+
+`Aggregate.field.offsetof` is the byte offset of a non-static struct or union
+field from the beginning of its containing value.
+
+`Aggregate.tupleof` and `value.tupleof` are compile-time symbol sequences
+containing the non-static fields of a struct or union in declaration order.
+The value form provides the fields of that value and can be used by
+compile-time-expanded iteration.
+
+```d
+struct Vector2
+{
+    int x;
+    int y;
+}
+
+static assert(Vector2.x.offsetof == 0);
+static assert(Vector2.tupleof.length == 2);
+```
+
+## Mangled representation
+
+`symbol.mangleof` or `T.mangleof` is a compile-time string containing the
+object-file name or type encoding selected by the applicable linkage and ABI.
+
+```d
+static assert(int.mangleof == "i");
+```
+
+## Numeric properties
+
+Integral types provide `.min` and `.max`.
+
+`float` and `double` provide:
 
 | Property | Meaning |
 | --- | --- |
@@ -60,135 +149,27 @@ floating-point types `float` and `double` provide:
 | `.min_normal` | smallest positive normalized value |
 | `.re` | the value itself |
 
-> **Excluded from Laser-D:**
->
-> Numeric properties on `real`, imaginary, complex, 128-bit
-> integer, or vector types are unavailable because those types are rejected.
+These values describe the target representation selected for the type.
 
-> **Excluded from Laser-D:**
->
-> The legacy floating-point `.im` property is not part of
-> Laser-D. It belongs to D's imaginary and complex number model, whose types are
-> rejected. An aggregate may still declare an ordinary field named `im`.
+## Arrays and slices
 
-## <a id="init"></a>`.init` Property
+Fixed arrays and slices provide read-only `.length` and `.ptr`.
 
-`T.init` is the compile-time default initializer for `T`. Applying
-`.init` to a variable, field, or expression yields the default initializer
-of its type; it does not read or evaluate the value.
+- For a fixed array, `.length` is the element count encoded in its type and
+  `.ptr` points to its first element.
+- For a slice, `.length` and `.ptr` expose the two components of the non-owning
+  view.
 
-| Type category | Default |  |  |  |
-| --- | --- | --- | --- | --- |
-| `bool` | `false` |  |  |  |
-| integer types | zero |  |  |  |
-| `float` and `double` | not-a-number |  |  |  |
-| character types | their specified invalid code-unit sentinel |  |  |  |
-| pointers | slices | function pointers | and delegates | `null` |
-| fixed arrays | each element's default |  |  |  |
-| structs | each field's declared or type default |  |  |  |
-| unions | the selected default field described by the union rules |  |  |  |
-| enums | the enum initializer described by the enum rules |  |  |  |
+The pointer does not own or extend the lifetime of the backing storage. See
+[Arrays](arrays.md) for the slice lifetime and mutation rules.
 
-### <a id="init-vs-construction"></a>`.init` and Construction
+## Delegates
 
-`.init` does not call a constructor. It produces the structural default
-value. A struct constructor is an explicitly invoked function-like operation
-and may produce a different value.
+A delegate provides `.ptr`, its context pointer, and `.funcptr`, its function
+pointer. These properties expose the delegate representation and do not
+allocate. A non-capturing delegate has a null context pointer.
 
-```d
-struct Point
-{
-    int x;
-    int y = 2;
-}
+## Enums
 
-static assert(Point.init.x == 0);
-static assert(Point.init.y == 2);
-```
-
-## <a id="stringof"></a>`.stringof` Property
-
-`value.stringof` is a compile-time string containing the frontend's
-source representation of its prefix. The prefix is not evaluated. Formatting
-is implementation-defined and must not be used to generate source code.
-
-```d
-static assert(int.stringof == "int");
-static assert((1 + 2).stringof == "1 + 2");
-```
-
-## <a id="sizeof"></a>`.sizeof` Property
-
-`T.sizeof` is the number of bytes occupied by a value of type `T`.
-For an expression or field it is the size of that expression's type. It does
-not evaluate an expression or require an aggregate instance.
-
-```d
-struct Pair { int first; int second; }
-static assert(int.sizeof == 4);
-static assert(Pair.first.sizeof == int.sizeof);
-```
-
-## <a id="alignof"></a>`.alignof` Property
-
-`T.alignof` is the byte alignment required by type `T` on the target
-ABI. It describes type layout and does not request or change alignment.
-
-## <a id="offsetof"></a>`.offsetof` Property
-
-`Aggregate.field.offsetof` is the byte offset of a non-static struct or
-union field from the beginning of its containing value. It is a compile-time
-ABI value.
-
-## <a id="mangleof"></a>`.mangleof` Property
-
-`symbol.mangleof` or `T.mangleof` is a compile-time string containing
-the object-file name or type encoding selected by the applicable linkage and
-ABI. Non-D linkage follows the target interoperability rules.
-
-## <a id="tupleof"></a>`.tupleof` Property
-
-`Aggregate.tupleof` or `value.tupleof` is a compile-time symbol
-sequence containing the non-static fields of a supported struct or union in
-declaration order. Iterating it does not allocate runtime storage.
-
-```d
-struct Vector2 { int x; int y; }
-static assert(Vector2.tupleof.length == 2);
-```
-
-## <a id="arrays"></a>Array and Slice Properties
-
-Fixed arrays and non-owning slices provide read-only `.length` and
-`.ptr`. Fixed-array length is part of the type. Slice length and pointer are
-the two components of the view. Assigning to slice `.length` is rejected.
-
-> **Excluded from Laser-D:** `.dup`, `.idup`, `.capacity`, reservation, resizing, and other GC-backed array properties are unavailable.
-
-## <a id="delegates"></a>Delegate Properties
-
-A supported delegate provides `.ptr`, its context pointer, and
-`.funcptr`, its function pointer. These properties expose the fixed-size
-delegate representation and do not allocate. A non-capturing delegate has a
-null context pointer.
-
-## <a id="enums"></a>Enum Properties
-
-Supported enums provide `.init`, `.min`, `.max`, and layout
-properties as defined by the enum chapter. Opaque enums have no usable default
-initializer until defined.
-
-## <a id="classinfo"></a>Excluded Runtime Properties
-
-> **Excluded from Laser-D:**
->
-> `.classinfo`, runtime `TypeInfo`, class layout
-> properties, associative-array properties, and vector properties are not part
-> of Laser-D. Their underlying type or runtime facility is absent.
-
-## <a id="classproperties"></a>User-Defined Properties (Excluded)
-
-> **Excluded from Laser-D:**
->
-> The `@property` attribute is rejected on free functions, methods, templates, getters, setters, immutable receivers, and UFCS functions.
-> Calling a function without parentheses is also rejected independently.
+An enum provides `.init`, `.min`, `.max`, `.sizeof`, and `.alignof` according
+to its declaration and base type. See [Enums](enum.md).

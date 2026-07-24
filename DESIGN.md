@@ -695,3 +695,10 @@ Callers propagate failure through ordinary conditions and returns, while
 `scope(exit)` provides deterministic lexical cleanup. The upstream discussion
 of exception objects, unwinding, default handlers, and runtime assertions is
 not part of the active Laser-D specification.
+
+The properties specification is limited to reviewed compiler-provided
+metadata and representation views: initialization, size and alignment, source
+and mangled strings, aggregate fields and offsets, numeric metadata, array and
+slice components, delegate components, and enum limits. Absent D property
+families remain consolidated in the compatibility notes rather than appearing
+as exclusions in the active chapter.
