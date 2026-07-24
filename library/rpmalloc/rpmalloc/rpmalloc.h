@@ -70,7 +70,7 @@ extern "C" {
 
 //! Define RPMALLOC_FIRST_CLASS_HEAPS to non-zero to enable heap based API (rpmalloc_heap_* functions).
 #ifndef RPMALLOC_FIRST_CLASS_HEAPS
-#define RPMALLOC_FIRST_CLASS_HEAPS 0
+#define RPMALLOC_FIRST_CLASS_HEAPS 1
 #endif
 
 //! Define RPMALLOC_HEAP_STATISTICS to non-zero to enable first class heap statistics gathering.

@@ -3418,4 +3418,6 @@ rpmalloc_get_heap_for_ptr(void* ptr) {
 
 #endif
 
+#if ENABLE_OVERRIDE
 #include "malloc.c"
+#endif

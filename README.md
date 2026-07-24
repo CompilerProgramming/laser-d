@@ -276,13 +276,17 @@ Each distribution contains:
 - `import/object.d` and the supported `core.stdc` source modules; and
 - `lib/liblaserd_checksum.a` (`lib/laserd_checksum.lib` on Windows), its
   `laserd.checksum` import module, C header, and rebuildable example sources;
+- `lib/liblaserd_rpmalloc.a` (`lib/laserd_rpmalloc.lib` on Windows), the
+  `laserd.rpmalloc` import module, rpmalloc C header, and rpmalloc licence;
 - the project and standard-library documentation and licence.
 
 The `core.stdc` modules remain declarations for the platform C runtime. The
 checksum example is a genuine native C static library built by CMake and called
-through a reviewed Laser-D `extern(C)` binding. A distribution is
-platform-specific and must be built on its target platform; CI publishes
-separate Windows, Linux, and macOS ZIP artifacts.
+through a reviewed Laser-D `extern(C)` binding. The rpmalloc component is built
+without process-wide `malloc` replacement and exposes both its general
+allocator and first-class heap APIs. A distribution is platform-specific and
+must be built on its target platform; CI publishes separate Windows, Linux,
+and macOS ZIP artifacts.
 
 As an additional check beyond the current CI workflow, an extracted
 distribution's installed example can be rebuilt without the Laser-D source

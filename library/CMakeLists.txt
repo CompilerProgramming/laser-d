@@ -26,6 +26,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(LaserD)
 
 add_subdirectory(checksum)
+add_subdirectory(rpmalloc)
 
 install(PROGRAMS "${LASERD_COMPILER}"
     TYPE BIN

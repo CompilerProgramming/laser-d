@@ -642,6 +642,19 @@ Laser-D consumer that calls both the raw `extern(C)` declaration and a
 slice-based Laser-D wrapper. Its source is included in the distribution as the
 template for future C libraries.
 
+The first production C-backed component is rpmalloc 2.0.1. CMake compiles the
+vendored C11 source as `laserd_rpmalloc`, explicitly disables process-wide C
+allocator replacement (`ENABLE_OVERRIDE=0`), and enables first-class heaps
+(`RPMALLOC_FIRST_CLASS_HEAPS=1`). The reviewed `laserd.rpmalloc` import module
+exposes both the general allocator and explicit heap APIs. Its configuration
+structure retains rpmalloc's Linux/Android-only field so its layout matches the
+native header on every supported platform. Integration testing covers ordinary
+allocation, reallocation, aligned allocation, heap ownership, heap
+reallocation, zeroed heap allocation, bulk heap cleanup, and finalization.
+The vendored source omits rpmalloc's separate `malloc.c` override
+implementation; its include is therefore conditional on `ENABLE_OVERRIDE`, as
+is the override functionality itself.
+
 No archive is produced for `core.stdc` because those modules consist only of
 declarations resolved by the platform C runtime. Other standard-library
 components may contribute native archives explicitly. Distribution archives

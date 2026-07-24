@@ -20,9 +20,11 @@ function(laserd_add_executable target)
     endforeach()
 
     set(link_inputs)
+    set(link_dependencies)
     foreach(library IN LISTS LASERD_LINK_LIBRARIES)
         if(TARGET "${library}")
             list(APPEND link_inputs "$<TARGET_FILE:${library}>")
+            list(APPEND link_dependencies "${library}")
         else()
             list(APPEND link_inputs "${library}")
         endif()
@@ -47,7 +49,7 @@ function(laserd_add_executable target)
         DEPENDS
             "${LASERD_COMPILER}"
             ${LASERD_SOURCES}
-            ${LASERD_LINK_LIBRARIES}
+            ${link_dependencies}
         COMMAND_EXPAND_LISTS
         VERBATIM)
 

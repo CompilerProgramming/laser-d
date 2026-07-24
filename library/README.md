@@ -46,5 +46,11 @@ it through `laserd.checksum`, and CTest runs a program that calls both the raw
 archive, C header, `.d` import, CMake helper, and a standalone rebuildable
 example under `share/laserd/examples/checksum`.
 
+The `rpmalloc` component is the first production C-backed library. It builds
+rpmalloc 2.0.1 as `laserd_rpmalloc`, without replacing the process-wide C
+allocator, and enables both its general allocation API and its explicit,
+single-thread-owned heap API. Laser-D programs import declarations from
+`laserd.rpmalloc`. The CTest integration program exercises both API families.
+
 The `core.stdc` modules do not produce a library archive because they contain
 declarations only; programs link those APIs directly to the platform C runtime.
