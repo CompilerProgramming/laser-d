@@ -669,6 +669,11 @@ specification once their decisions have been preserved in that compatibility
 document. The historical Ddoc sources remain under `spec/` during the
 transition.
 
+The Markdown specification is authoritative and is not regenerated from the
+historical Ddoc files. CI runs `tools/check_markdown_docs.py` without modifying
+the tree; it verifies chapter metadata, historical-source references, local
+links, and index coverage.
+
 The expression specification follows that organization by documenting only
 the reviewed Laser-D core: scalar operators, assignment, explicit calls,
 indexing and slicing, supported primary expressions, non-capturing function

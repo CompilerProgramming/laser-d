@@ -171,8 +171,7 @@ ctest --test-dir generated/cmake-library \
 cmake --build generated/cmake-library \
     --config Release --target package
 
-python tools/ddoc_to_markdown.py
-git diff --exit-code -- spec-markdown
+python tools/check_markdown_docs.py
 git diff --check
 ```
 

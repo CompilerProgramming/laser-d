@@ -29,7 +29,8 @@ negative test must include `TEST_OUTPUT` that demonstrates rejection for the
 intended reason.
 
 Keep each test focused on one feature or one closely related boundary. Update
-the applicable source under `spec/`, `DESIGN.md`, and `FEATURE_STATUS.md` when
+the applicable source under `spec-markdown/`, `DESIGN.md`, and
+`FEATURE_STATUS.md` when
 a test records a new or changed language decision.
 
 Files named `importc_upstream_*` are passing preprocessed ImportC tests copied

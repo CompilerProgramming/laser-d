@@ -117,11 +117,9 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Verify generated Markdown documentation
+      - name: Validate Markdown documentation
         if: runner.os == 'Linux'
-        run: |
-          python tools/ddoc_to_markdown.py
-          git diff --exit-code -- spec-markdown
+        run: python tools/check_markdown_docs.py
 
       - name: Check for whitespace errors
         if: runner.os == 'Linux'
