@@ -245,6 +245,7 @@ that boundary.
 Laser-D currently targets x86-64 Windows, Linux, and macOS. The source language
 does not provide:
 
+- 32-bit compilation through `-m32` or `-m32mscoff`;
 - D-style or GCC-style inline assembly;
 - `__vector` or compiler SIMD intrinsics;
 - Objective-C target features; or

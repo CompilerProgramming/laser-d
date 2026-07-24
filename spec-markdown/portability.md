@@ -6,6 +6,9 @@ source: ../spec/portability.dd
 
 # Portability Guide
 
+Laser-D currently targets x86-64. The compiler accepts `-m64` and rejects
+`-m32` and `-m32mscoff`; 32-bit code generation is not supported.
+
 It's good software engineering practice to minimize gratuitous
         portability problems in the code.
         Techniques to minimize potential portability problems are:

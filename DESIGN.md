@@ -629,9 +629,9 @@ that configuration because contemporary Linux toolchains link executables as
 PIE by default.
 
 Laser-D compiler builds and conformance tests currently target x86-64. The test
-harness therefore defaults to model 64 for the Dub-built compiler; an explicit
-`DMD_MODEL` environment setting may override this when another architecture is
-supported and intentionally tested.
+harness therefore uses model 64 for the Dub-built compiler. A `DMD_MODEL`
+override does not expand the supported target set, and selecting model 32 is
+rejected by the compiler.
 
 The `checksum` component is the reference C-backed library. CMake builds a
 native static archive from its C implementation and installs the C header
@@ -748,3 +748,7 @@ The remaining C++ interoperability experiment was removed after review.
 Laser-D now rejects C++ linkage at parse time and has no C++ ABI surface.
 The Markdown C++ interoperability chapter was removed; the compatibility notes
 record the difference from D.
+
+Laser-D rejects 32-bit targets during option processing. Both `-m32` and the
+deprecated `-m32mscoff` alias fail on every host; `-m64` remains the supported
+x86-64 target selection.

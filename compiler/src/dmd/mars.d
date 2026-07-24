@@ -293,8 +293,9 @@ void getenv_setargv(const(char)* envvalue, Strings* args)
 }
 
 /**
- * Parse command line arguments for the last instance of -m32, -m64, -m32mscoff
- * to detect the desired architecture.
+ * Parse command line arguments for -m64 to detect the desired architecture.
+ * Laser-D rejects the 32-bit switches during full option processing, so they
+ * must not select a 32-bit configuration section here.
  *
  * Params:
  *   args = Command line arguments
@@ -302,8 +303,7 @@ void getenv_setargv(const(char)* envvalue, Strings* args)
  *          Should be "32" or "64"
  *
  * Returns:
- *   "32", or "64" if the "-m32", "-m64" flags were passed,
- *   respectively. If they weren't, return `arch`.
+ *   "64" if `-m64` was passed. Otherwise return `arch`.
  */
 const(char)[] parse_arch_arg(Strings* args, const(char)[] arch)
 {
@@ -313,9 +313,7 @@ const(char)[] parse_arch_arg(Strings* args, const(char)[] arch)
 
         switch (arg)
         {
-            case "-m32":
             case "-m64":
-            case "-m32mscoff":
                 arch = arg[2 .. 4];
                 continue;
             case "-run":   // end of args to dmd
@@ -987,9 +985,8 @@ bool parseCommandLine(const ref Strings arguments, const size_t argc, out Param 
         }
         else if (arg == "-m32") // https://dlang.org/dmd.html#switch-m32
         {
-            target.isAArch64 = false;
-            target.isX86    = true;
-            target.isX86_64 = false;
+            error("`-m32` is not supported in Laser-D; target x86-64 with `-m64`");
+            return false;
         }
         else if (arg == "-m64") // https://dlang.org/dmd.html#switch-m64
         {
@@ -999,9 +996,8 @@ bool parseCommandLine(const ref Strings arguments, const size_t argc, out Param 
         }
         else if (arg == "-m32mscoff") // https://dlang.org/dmd.html#switch-m32mscoff
         {
-            target.isAArch64 = false;
-            target.isX86    = true;
-            target.isX86_64 = false;
+            error("`-m32mscoff` is not supported in Laser-D; target x86-64 with `-m64`");
+            return false;
         }
         else if (startsWith(p + 1, "mscrtlib="))
         {

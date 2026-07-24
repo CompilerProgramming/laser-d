@@ -52,6 +52,7 @@ review, but does not by itself decide the status.
 | Target operating systems | Supported | Windows, Linux, and macOS are required targets. | `AGENTS.md`; `spec/portability.dd` needs review | Cross-platform CI needed |
 | x86-64 | Supported | x86-64 is the initial supported architecture. | `AGENTS.md`; `spec/portability.dd` needs review | Cross-platform CI needed |
 | ARM64 | Undecided | Planned when upstream support is suitable; not yet a current language/platform guarantee. | `AGENTS.md` | None |
+| 32-bit targets | Rejected | Laser-D targets x86-64 only. `-m32` and the deprecated `-m32mscoff` alias are rejected before compilation on every host. | `spec/portability.dd` | `m32_option_rejected.d`, `m32mscoff_option_rejected.d` |
 
 ## Feature inventory by specification chapter
 
