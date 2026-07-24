@@ -1,74 +1,13 @@
----
-title: Modules
-status: restricted
-source: ../spec/module.dd
----
-
 # Modules
 
-> **Laser-D normative:**
->
-> Core modules and imports are supported. This includes explicit and
-> file-name-derived module names; ordinary, aliased, selective, renamed, static, private, and public imports; cyclic imports; and separate compilation.
-> `ModuleInfo` runtime descriptors are not generated or exposed. Module lifecycle
-> constructors and destructors are rejected. Package-specific facilities and
-> edition-qualified modules are not yet classified; user-defined module
-> attributes are rejected separately.
+A Laser-D source file is a module. A module supplies a namespace, controls
+which declarations are visible to another module, and is the unit of separate
+compilation.
 
-```text
-Module:
-    ModuleDeclaration
-    ModuleDeclaration DeclDefs
-    DeclDefs
+A module is not a runtime object. Importing a module does not construct an
+instance or execute initialization code.
 
-DeclDefs:
-    DeclDef
-    DeclDef DeclDefs
-
-DeclDef:
-    AttributeSpecifier
-    Declaration
-    Constructor
-    EmptyDeclaration
-
-EmptyDeclaration:
-    ;
-```
-
-Modules have a one-to-one correspondence with source files. When not
-explicitly set via a ModuleDeclaration, a module's name defaults
-to the name of the file stripped of its path and extension.
-
-A module's name automatically acts as a namespace scope for its contents. Modules
-superficially resemble classes, but differ in that:
-
-- Only one instance of a module exists, and it is statically allocated.
-- Modules do not have virtual tables.
-- Modules do not inherit, do not have super modules, etc.
-- A source file may contain only one module.
-- Symbols in a module can be imported.
-- Modules are always compiled at global scope and are unaffected by surrounding attributes or other modifiers.
-
-Modules can be grouped into hierarchies called *packages*.
-
-Modules offer several guarantees:
-
-- The order in which modules are imported does not affect their semantics.
-- The semantics of a module are not affected by the scope in which it is imported.
-- If a module `C` imports modules `A` and `B`, any modifications to `B` will not silently change code in `C` that is dependent on `A`.
-
-## <a id="module_declaration"></a>Module Declaration
-
-> **Laser-D normative:**
->
-> A module declaration consists of `module`, its qualified
-> name, and a semicolon. If it is omitted, the module name is derived from the
-> source file name. Attributes and edition qualifiers are not part of the
-> normative module-declaration grammar.
-
-The *ModuleDeclaration* sets the name of the module and what package it
-belongs to. If absent, the module name is taken to be the same name (stripped of
-path and extension) of the source file name.
+## Module declaration
 
 ```text
 ModuleDeclaration:
@@ -78,75 +17,41 @@ ModuleFullyQualifiedName:
     ModuleName
     Packages . ModuleName
 
-ModuleName:
-    Identifier
-```
-
-> **Excluded from Laser-D:**
->
-> User-defined attributes on module declarations are not
-> supported. Module deprecation and edition-qualified declarations remain under
-> review and are therefore not included in the normative grammar.
-
-```text
 Packages:
     PackageName
     Packages . PackageName
+
+ModuleName:
+    Identifier
 
 PackageName:
     Identifier
 ```
 
-The *Identifier*s preceding the rightmost *Identifier* are the *Packages* that the
-module is in. The packages correspond to directory names in the source file
-path. Package and module names cannot be Keywords.
-
-If present, the *ModuleDeclaration* must be the first and only such declaration
-in the source file, and may be preceded only by comments and `#line` directives.
-
-Example:
+A module declaration sets the fully qualified name of the module:
 
 ```d
-module c.stdio; // module stdio in the c package
+module geometry.matrix;
 ```
 
-By convention, package and module names are all lower case. This is because
-these names have a one-to-one correspondence with the operating system's
-directory and file names, and many file systems are not case sensitive. Using all
-lower case package and module names will avoid or minimize problems when moving projects
-between dissimilar file systems.
+The declaration, when present, must be the first declaration in the source
+file. It may be preceded only by comments and `#line` directives. A source file
+may contain at most one module declaration.
 
-If the file name of a module is an invalid module name (e.g.
-`foo-bar.d`), use a module declaration to set a valid module name:
+When the declaration is omitted, the module name is the source filename with
+its directory and extension removed. A file whose name is not a valid
+identifier uses an explicit declaration:
 
 ```d
-module foo_bar;
+module geometry_matrix;
 ```
 
-> **Implementation-defined:** 1. The mapping of package and module identifiers to directory and file names.
+The identifiers before the final identifier form the package path. The mapping
+from a qualified module name to directories and source files is
+implementation-defined. Lowercase ASCII names containing letters, digits, and
+underscores are portable across the supported filesystems.
 
-> **Best practice:**
->
-> 1. PackageNames and ModuleNames should be composed of the ASCII characters lower case letters, digits or `_` to ensure maximum portability and compatibility with various file systems.
-> 2. The file names for packages and modules should be composed only of the ASCII lower case letters, digits, and `_`s, and should not be a Keyword.
-
-### <a id="advanced_module_declarations"></a>Advanced Module Declarations
-
-> **Under review:**
->
-> Module deprecation, edition-qualified module
-> declarations, package modules, and package visibility have not yet been
-> classified. They are not portability guarantees in Laser-D.
-
-## <a id="ImportDeclaration"></a>Import Declaration
-
-> **Laser-D normative:**
->
-> Import declarations are supported, including module aliases, selective and renamed bindings, static imports, visibility-controlled imports, public re-exports, duplicate imports, and cyclic module graphs. A private import
-> does not re-export symbols.
-
-Symbols from one module are made available in another module by using the
-*ImportDeclaration*:
+## Import declarations
 
 ```text
 ImportDeclaration:
@@ -177,423 +82,243 @@ ModuleAliasIdentifier:
     Identifier
 ```
 
-There are several forms of the *ImportDeclaration*, from generalized to
-fine-grained importing.
+An import makes declarations from another module available in the importing
+scope. Module names in imports are fully qualified; they are not resolved
+relative to the importing module.
 
-The order in which *ImportDeclaration*s occur has no significance.
+The order of import declarations does not affect their meaning. Importing the
+same module more than once is permitted. The compiler determines how a
+qualified name is located on its module search paths.
 
-*ModuleFullyQualifiedName*s in the *ImportDeclaration* must be fully
-qualified with whatever packages they are in. They are not considered to be
-relative to the module that imports them.
+### Ordinary imports
 
-> **Implementation-defined:** 1. How the compiler resolves the package and module identifiers in an import declaration to its corresponding source files.
-
-### <a id="name_lookup"></a>Symbol Name Lookup
-
-The simplest form of importing is to just list the modules being imported:
+An ordinary import makes both the module name and its declarations available:
 
 ```d
-module myapp.main;
+module application;
 
-import std.stdio; // import module stdio from package std
-
-void run()
-{
-    import myapp.foo;  // visible in run and its nested scopes
-    void nested()
-    {
-        import myapp.bar;  // import module myapp.bar in this function' scope
-        writeln("hello!");  // calls std.stdio.writeln
-    }
-}
-```
-
-When a symbol name is used unqualified, a two-phase lookup is used.
-First, the module scope is searched, starting from the innermost scope.
-For example, in the previous example, while looking for `writeln`, the order will be:
-
-- Declarations inside `nested`.
-- Declarations inside `run`.
-- Declarations at module scope.
-
-If the first lookup isn't successful, a second one is performed on imports.
-Imports in unrelated scopes are ignored, while imports introduced by a mixed-in
-`template` participate according to the template-mixin rules.
-
-Symbol lookup stops as soon as a matching symbol is found. If two symbols with the
-same name are found at the same lookup phase, this ambiguity will result in a
-compilation error.
-
-```d
-module A;
-void foo();
-void bar();
-```
-
-```d
-module B;
-void foo();
-void bar();
-```
-
-```d
-module C;
-import A;
-void foo();
-void test()
-{
-    foo(); // C.foo() is called
-it is found before imports are searched
-    bar(); // A.bar() is called
-since imports are searched
-}
-```
-
-```d
-module D;
-import A;
-import B;
-void test()
-{
-    foo();   // error
-A.foo() or B.foo() ?
-    A.foo(); // ok
-call A.foo()
-    B.foo(); // ok
-call B.foo()
-}
-```
-
-```d
-module E;
-import A;
-import B;
-alias foo = B.foo;
-void test()
-{
-    foo();   // call B.foo()
-    A.foo(); // call A.foo()
-    B.foo(); // call B.foo()
-}
-```
-
-### <a id="public_imports"></a>Public Imports
-
-By default, imports are *private*. This means that if module A imports
-module B, and module B imports module C, then names inside C are visible only inside
-B and not inside A.
-
-An import can be explicitly declared *public*, which will cause
-names from the imported module to be visible to further imports. So in the above
-example where module A imports module B, if module B *publicly* imports
-module C, names from C will be visible in A as well.
-
-All symbols from a publicly imported module are also aliased in the
-importing module. Thus in the above example if C contains the name foo, it will
-be accessible in A as `foo`, `B.foo` and `C.foo`.
-
-For another example:
-
-```d
-module W;
-void foo() { }
-```
-
-```d
-module X;
-void bar() { }
-```
-
-```d
-module Y;
-import W;
-public import X;
-...
-foo();  // calls W.foo()
-bar();  // calls X.bar()
-```
-
-```d
-module Z;
-import Y;
-...
-foo();   // error
-foo() is undefined
-bar();   // ok
-calls X.bar()
-X.bar(); // ditto
-Y.bar(); // ok
-Y.bar() is an alias to X.bar()
-```
-
-### <a id="static_imports"></a>Static Imports
-
-A static import requires the use of a fully qualified name
-to reference the module's names:
-
-```d
-static import std.stdio;
-
-void main()
-{
-    writeln("hello!");           // error
-writeln is undefined
-    std.stdio.writeln("hello!"); // ok
-writeln is fully qualified
-}
-```
-
-### <a id="renamed_imports"></a>Renamed Imports
-
-A local name for an import can be given, through which all references to the
-module's symbols must be qualified with:
-
-```d
-d
-import io = std.stdio;
-
-void main()
-{
-    io.writeln("hello!");        // ok
-calls std.stdio.writeln
-    std.stdio.writeln("hello!"); // error
-std is undefined
-    writeln("hello!");           // error
-writeln is undefined
-}
-
-```
-
-> **Best practice:** Renamed imports are handy when dealing with very long import names.
-
-### <a id="selective_imports"></a>Selective Imports
-
-Specific symbols can be exclusively imported from a module and bound into
-the current namespace:
-
-```d
-d
-import std.stdio : writeln
-foo = write;
-
-void main()
-{
-    std.stdio.writeln("hello!"); // error
-std is undefined
-    writeln("hello!");           // ok
-writeln bound into current namespace
-    write("world");              // error
-write is undefined
-    foo("world");                // ok
-calls std.stdio.write()
-    fwritefln(stdout, "abc");    // error
-fwritefln undefined
-}
-
-```
-
-`static` cannot be used with selective imports.
-
-### <a id="renamed_selective_imports"></a>Renamed and Selective Imports
-
-When renaming and selective importing are combined:
-
-```d
-d
-import io = std.stdio : foo = writeln;
-
-void main()
-{
-    writeln("bar");           // error
-writeln is undefined
-    std.stdio.foo("bar");     // error
-foo is bound into current namespace
-    std.stdio.writeln("bar"); // error
-std is undefined
-    foo("bar");               // ok
-foo is bound into current namespace
-// FQN not required
-    io.writeln("bar");        // ok
-io=std.stdio bound the name io in
-                              // the current namespace to refer to the entire
-                              //   module
-    io.foo("bar");            // error
-foo is bound into current namespace
-// foo is not a member of io
-}
-
-```
-
-### <a id="scoped_imports"></a>Scoped Imports
-
-Import declarations may be used at any scope. For example:
-
-```d
-d
-void main()
-{
-    import std.stdio;
-    writeln("bar");
-}
-
-```
-
-The imports are looked up to satisfy any unresolved symbols at that scope.
-Imported symbols may hide symbols from outer scopes.
-
-In function scopes, imported symbols only become visible after the import
-declaration lexically appears in the function body. In other words, imported
-symbols at function scope cannot be forward referenced.
-
-```d
-d
-void main()
-{
-    void writeln(string) {}
-    void foo()
-    {
-        writeln("bar"); // calls main.writeln
-        import std.stdio;
-        writeln("bar"); // calls std.stdio.writeln
-        void writeln(string) {}
-        writeln("bar"); // calls main.foo.writeln
-    }
-    writeln("bar"); // calls main.writeln
-    std.stdio.writeln("bar");  // error
-std is undefined
-}
-
-```
-
-## <a id="module_scope_operators"></a>Module Scope Operator
-
-A leading dot (`.`) causes the
-    identifier to be looked up in the module scope.
-
-```d
-d
-enum x = 1;
+import geometry.matrix;
 
 extern(C) int main()
 {
-    int x = 5;
-    return x == 5 && .x == 1 ? 0 : 1;
+    Matrix value;
+    geometry.matrix.reset(value);
+    return 0;
 }
-
 ```
 
-## <a id="staticorder"></a>No Module Lifecycle
+Declarations in the current lexical scope are considered before declarations
+introduced by imports. If the import lookup finds equally applicable
+declarations with the same name, the reference is ambiguous and must be
+qualified or explicitly aliased.
 
-> **Excluded from Laser-D:**
->
-> Laser-D has no module or thread lifecycle execution. It rejects
-> `static this()`, `static ~this()`, their `shared` forms, and the same
-> declarations nested in aggregates or templates. Import order therefore never
-> establishes a runtime construction or destruction order. Ordinary instance
-> struct constructors are unaffected.
-
-Mutable module storage, `shared`, and `__gshared` are also rejected.
-Manifest constants and deeply immutable static data require no lifecycle hook.
-ImportC globals remain available under the ImportC rules.
-
-## <a id="order_of_unittests"></a>Order of Unit tests
-
-> **Under review:**
->
-> Language-level unit-test declarations have not yet been
-> classified. Laser-D therefore does not currently specify module-level unit-test
-> discovery or execution order.
-
-## <a id="MixinDeclaration"></a>String Mixin Declarations (Excluded)
-
-> **Excluded from Laser-D:**
->
-> String mixin declarations are not part of Laser-D and the
-> *MixinDeclaration* production is omitted from DeclDef. Template
-> mixin declarations and instantiations are separate constructs described in the
-> template-mixin chapter.
-
-## <a id="PackageModule"></a>Package Modules (Under Review)
-
-> **Under review:**
->
-> Package modules and package-specific visibility have not
-> yet been classified. The following material describes the upstream D facility
-> for review and is not currently normative Laser-D text.
-
-A package module can be used to publicly import other modules, while
-providing a simpler import syntax. This enables the conversion of a module into a package
-of modules, without breaking existing code which uses that module. Example of a
-set of library modules:
-
-**libweb/client.d:**
+Given:
 
 ```d
-module libweb.client;
-
-void runClient() { }
+module first;
+int value();
 ```
 
-**libweb/server.d:**
+and:
 
 ```d
-module libweb.server;
-
-void runServer() { }
+module second;
+int value();
 ```
 
-**libweb/package.d:**
+the importing module qualifies the desired declaration:
 
 ```d
-module libweb;
+module application;
 
-public import libweb.client;
-public import libweb.server;
-```
+import first;
+import second;
 
-The package module's file name must be `package.d`. The module name
-is declared to be the fully qualified name of the package. Package modules can
-be imported just like any other modules:
-
-**test.d:**
-
-```d
-module test;
-
-// import the package module
-import libweb;
-
-void main()
+int selected()
 {
-    runClient();
-    runServer();
+    return first.value();
 }
 ```
 
-A package module can be nested inside of a sub-package:
+### Static imports
 
-**libweb/utils/package.d:**
-
-```d
-// must be declared as the fully qualified name of the package
-not just 'utils'
-module libweb.utils;
-
-// publicly import modules from within the 'libweb.utils' package.
-public import libweb.utils.conv;
-public import libweb.utils.text;
-```
-
-The package module can then be imported with the standard module import
-declaration:
-
-**test.d:**
+A static import requires references to use the fully qualified module name:
 
 ```d
-module test;
+static import geometry.matrix;
 
-// import the package module
-import libweb.utils;
-
-void main() { }
+void clear(geometry.matrix.Matrix* value)
+{
+    geometry.matrix.reset(*value);
+}
 ```
+
+The unqualified name `reset` is not introduced by this import.
+
+### Renamed imports
+
+A module alias supplies a local name for the imported module:
+
+```d
+import matrix = geometry.matrix;
+
+void clear(matrix.Matrix* value)
+{
+    matrix.reset(*value);
+}
+```
+
+References use the alias rather than the original qualified module name in that
+scope.
+
+### Selective imports
+
+A selective import introduces only the listed declarations:
+
+```d
+import geometry.matrix : Matrix, reset;
+
+void clear(Matrix* value)
+{
+    reset(*value);
+}
+```
+
+An imported declaration may be renamed:
+
+```d
+import geometry.matrix : Matrix, clear = reset;
+
+void clearMatrix(Matrix* value)
+{
+    clear(*value);
+}
+```
+
+A module alias and selective bindings may be combined:
+
+```d
+import matrix = geometry.matrix : Matrix, clear = reset;
+```
+
+Here `matrix` names the module, `Matrix` is introduced in the current scope,
+and `clear` names `geometry.matrix.reset`.
+
+`static import` is not combined with a selective import.
+
+### Scoped imports
+
+An import declaration may appear in a local scope. Its names are visible from
+the declaration to the end of that scope:
+
+```d
+int calculate()
+{
+    import arithmetic.checked : add;
+    return add(20, 22);
+}
+```
+
+A local import cannot be forward referenced. Imports in an unrelated scope do
+not participate in lookup.
+
+## Import visibility
+
+An import is private unless declared `public`.
+
+A private import is usable by the importing module but is not re-exported:
+
+```d
+module facade;
+
+private import implementation;
+```
+
+A module which imports `facade` does not thereby gain unqualified access to
+declarations from `implementation`.
+
+A public import re-exports the imported module's visible declarations:
+
+```d
+module geometry;
+
+public import geometry.matrix;
+public import geometry.vector;
+```
+
+A module importing `geometry` may use the re-exported declarations. Public
+imports can therefore provide a stable facade over a collection of modules.
+
+Visibility affects re-export, not the initialization or compilation order of a
+module.
+
+## Name lookup
+
+For an unqualified name, lookup first searches lexical declarations from the
+innermost scope outward. If no declaration is found, it searches imports which
+are visible in those scopes.
+
+Lookup stops at the first phase which produces a match. Multiple matches in the
+same phase are ambiguous. A qualified name or an explicit alias resolves the
+ambiguity.
+
+A leading dot starts lookup at module scope:
+
+```d
+enum defaultCode = 1;
+
+extern(C) int main()
+{
+    int defaultCode = 5;
+    return defaultCode == 5 && .defaultCode == 1 ? 0 : 1;
+}
+```
+
+## Cyclic imports
+
+Modules may import each other. A cycle in the import graph does not establish a
+runtime execution order.
+
+For example, `node` may import a declaration from `visitor` while `visitor`
+imports the `Node` type:
+
+```d
+module node;
+
+import visitor : visit;
+
+struct Node
+{
+    int value;
+}
+
+int accept(Node* node)
+{
+    return visit(node);
+}
+```
+
+```d
+module visitor;
+
+import node : Node;
+
+int visit(Node* node)
+{
+    return node.value;
+}
+```
+
+Each declaration must still be semantically valid when the modules are
+compiled.
+
+## Separate compilation
+
+Each module may be compiled independently. Imported declarations provide the
+types and symbol identities needed by the importing module; definitions needed
+at link time are supplied by the separately compiled module or a foreign
+library.
+
+The order in which modules are passed to the compiler does not change their
+language semantics. Linker behavior, library search paths, and the physical
+mapping of module names to files are toolchain concerns.
