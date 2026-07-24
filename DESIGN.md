@@ -710,3 +710,11 @@ casts and calls, assignment, indexing, slicing, multidimensional lowering,
 other absent language facilities remain compatibility concerns. Automatic
 field-wise equality and membership dispatch are omitted from the normative
 chapter while their expression-level behavior remains explicitly undecided.
+
+The templates specification positively defines the retained general-purpose
+compile-time machinery: all ordinary parameter kinds, explicit and inferred
+instantiation, specialization, constraints, eponymous results, aggregate and
+function templates, templated constructors, recursive templates, emission,
+and CTFE composition. Template bodies remain ordinary parsed Laser-D code;
+the compatibility notes carry the cross-cutting rule that instantiation cannot
+restore an absent language facility.

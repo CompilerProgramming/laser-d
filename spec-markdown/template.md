@@ -6,33 +6,33 @@ source: ../spec/template.dd
 
 # Templates
 
-> **Laser-D normative:**
->
-> Templates are part of Laser-D's compile-time programming
-> model. Type, value, alias, and sequence parameters; overload selection;
-> specialization; constraints; explicit and inferred instantiation; recursion;
-> and cross-module instance emission are supported.
+Templates are Laser-D's compile-time parameterization mechanism. They support
+type, value, alias, and sequence parameters; overloads; specialization;
+constraints; explicit and inferred instantiation; recursion; and cross-module
+instance emission.
 
-A template operates on already parsed declarations and expressions. It
-does not create an exception to any Laser-D language rule: every declaration, type, expression, and statement produced by an instance must itself be valid
-Laser-D.
+A template body consists of normal parsed Laser-D declarations and
+expressions. Differences from D template use are summarized in
+[D compatibility notes](d-compatibility.md).
 
-## <a id="declarations"></a>Template Declarations
+## Template declarations
 
 ```text
 TemplateDeclaration:
-    template Identifier TemplateParameters Constraint[] { DeclDefs[] }
+    template Identifier TemplateParameters Constraint? { Declarations }
 
 TemplateParameters:
-    ( TemplateParameterList[] )
+    ( )
+    ( TemplateParameterList )
 
 TemplateParameterList:
     TemplateParameter
     TemplateParameter , TemplateParameterList
 ```
 
-A named template introduces a scope containing its parameters and body.
-The body may contain supported aliases, manifest constants, functions, structs, unions, enums, and further templates.
+A named template introduces a scope containing its parameters and body. The
+body may contain aliases, manifest constants, functions, structs, unions,
+enums, and further templates.
 
 ```d
 template Pointer(T)
@@ -43,48 +43,30 @@ template Pointer(T)
 static assert(is(Pointer!int == int*));
 ```
 
-Multiple templates may share a name and form an overload set when their
-parameters, specializations, or constraints distinguish them.
+Templates with the same name form an overload set when their parameters,
+specializations, or constraints distinguish them.
 
-## <a id="template_instantiation"></a>Template Instantiation
-
-### <a id="explicit_tmp_instantiation"></a>Explicit Instantiation
+## Instantiation
 
 ```text
 TemplateInstance:
     Identifier ! TemplateArguments
 
 TemplateArguments:
-    ( TemplateArgumentList[] )
+    ( )
+    ( TemplateArgumentList )
     TemplateSingleArgument
-
-TemplateArgumentList:
-    TemplateArgument
-    TemplateArgument , TemplateArgumentList
 ```
 
-`Name!(arguments)` explicitly selects and instantiates a matching
-template. The short `Name!argument` form is available where the D grammar
-accepts a single unambiguous argument.
+`Name!(arguments)` explicitly selects and instantiates a matching template.
+The short `Name!argument` form is available for a single unambiguous argument.
+A unique best matching declaration must exist.
 
-Arguments are resolved at compile time. A failure to find one uniquely
-best matching declaration is a compile-time error.
+Equivalent arguments to the same template declaration denote the same
+semantic instance. Names in the declaration resolve in its lexical scope, and
+symbols supplied as arguments preserve their identity.
 
-### <a id="common_instantiation"></a>Instance Identity
-
-Instantiating the same template declaration with equivalent arguments
-denotes the same semantic instance. The compiler may share generated code and
-data according to the normal linkage and emission rules.
-
-### <a id="instantiation_scope"></a>Scope
-
-Names in the template declaration are resolved in their lexical scope.
-Names supplied as template arguments retain their symbol identity. An
-instantiation does not gain access to an enclosing runtime value unless the
-instantiated declaration is otherwise permitted to carry that context;
-Laser-D rejects hidden-context structs and named nested functions.
-
-## <a id="parameters"></a>Template Parameters
+## Parameters
 
 ```text
 TemplateParameter:
@@ -95,14 +77,13 @@ TemplateParameter:
     TemplateSequenceParameter
 ```
 
-A parameter may have a specialization, a default argument, or both where
-allowed by its parameter kind. Defaults are evaluated in the declaration's
-scope.
+A parameter may have a specialization, a default argument, or both where its
+kind permits them. A default may depend on an earlier parameter.
 
-### <a id="template_type_parameters"></a>Type Parameters
+### Type parameters
 
-A type parameter accepts a supported Laser-D type. It may be specialized
-to another type or pattern and may have a supported default type.
+A type parameter accepts a supported type. It may specialize another type or
+type pattern and may have a default.
 
 ```d
 template Element(T : T*)
@@ -113,25 +94,17 @@ template Element(T : T*)
 static assert(is(Element!(int*) == int));
 ```
 
-Pattern deduction may bind additional identifiers appearing in the
-specialization. A rejected type cannot be introduced merely because a template
-could describe its pattern.
+Pattern deduction may bind identifiers appearing in the specialization.
 
-### <a id="template_this_parameter"></a>Template `this` Parameters
+### Template `this` parameters
 
-> **Supported in Laser-D:**
->
-> A template `this` parameter on a struct or union member
-> may infer the receiver type. It can distinguish mutable and immutable
-> receivers using the supported type system.
+A template `this` parameter on a struct or union member infers the receiver
+type. It can distinguish mutable and immutable receivers.
 
-It does not add an outer object reference, inheritance, a hidden context, or class/interface behavior. The instantiated member remains subject to the
-ordinary receiver and function rules.
+### Value parameters
 
-### <a id="template_value_parameter"></a>Value Parameters
-
-A value parameter has a declared supported type and receives a value that
-is known at compile time. It may have a value specialization and default.
+A value parameter has a declared type and receives a compile-time-known value.
+It may have a value specialization and a default.
 
 ```d
 template PowerOfTwo(uint exponent)
@@ -142,15 +115,10 @@ template PowerOfTwo(uint exponent)
 static assert(PowerOfTwo!5 == 32);
 ```
 
-Values used as template arguments must be representable and valid for
-compile-time evaluation. Runtime addresses or values with unsupported types do
-not become valid template arguments.
+### Alias parameters
 
-### <a id="aliasparameters"></a>Alias Parameters
-
-An alias parameter accepts a symbol, type, template, or compile-time value
-that is valid for alias binding. It preserves the identity of a symbol rather
-than copying its runtime value.
+An alias parameter accepts a type, symbol, template, or compile-time value. It
+preserves symbol identity.
 
 ```d
 int increment(int value)
@@ -166,13 +134,12 @@ template Apply(alias operation, int value)
 static assert(Apply!(increment, 4) == 5);
 ```
 
-Alias parameters may be specialized, constrained, or given defaults.
-Binding a rejected declaration does not make that declaration usable.
+Alias parameters may have specializations, constraints, and defaults.
 
-### <a id="variadic-templates"></a>Sequence Parameters
+### Sequence parameters
 
-A final parameter written `Name...` accepts a compile-time sequence of
-zero or more types, values, aliases, or mixtures accepted by the declaration.
+A final parameter written `Name...` accepts a compile-time sequence of zero or
+more types, values, aliases, or mixtures accepted by the declaration.
 
 ```d
 template Count(Items...)
@@ -184,37 +151,28 @@ static assert(Count!(int, long, 7) == 3);
 ```
 
 A sequence supports compile-time length, indexing, slicing, expansion, and
-iteration by supported compile-time constructs. It is not a runtime dynamic
-array, does not allocate, and does not enable D runtime variadic functions.
+iteration. Function-template deduction may collect remaining matching
+arguments into a final sequence parameter.
 
-A sequence parameter must be last. Function-template deduction may collect
-remaining matching arguments into it.
+## Selection and specialization
 
-### <a id="template_parameter_def_values"></a>Default Arguments
-
-Omitted template arguments use their declared defaults after earlier
-parameters have been bound. A default may depend on an earlier parameter but
-must itself produce a supported argument.
-
-## <a id="selection"></a>Selection and Specialization
-
-Template selection considers parameter kinds, explicit specializations, deduced patterns, constraints, and overload ordering. The uniquely most
+Template selection considers parameter kinds, explicit specializations,
+deduced patterns, constraints, and overload ordering. The uniquely most
 specialized viable declaration is selected.
 
-Specializations may distinguish supported type structure, compile-time
-values, aliases, and sequence shapes. Class inheritance and interface
-conversion do not participate because those type families are unavailable.
+Specializations may distinguish type structure, compile-time values, aliases,
+and sequence shapes.
 
-## <a id="template_constraints"></a>Template Constraints
+## Constraints
 
 ```text
 Constraint:
     if ( Expression )
 ```
 
-A constraint is evaluated at compile time after enough parameters have
-been bound to evaluate it. A true constraint makes that candidate viable; a
-false constraint removes it from the overload set.
+A constraint is evaluated at compile time after enough parameters have been
+bound. A true constraint makes the candidate viable; a false constraint
+removes it from the overload set.
 
 ```d
 T larger(T)(T left, T right)
@@ -226,14 +184,13 @@ T larger(T)(T left, T right)
 static assert(larger(10, 20) == 20);
 ```
 
-Constraints may use supported `is`, `typeof`, `__traits`, CTFE, and template facilities. They cannot perform compile-time file I/O, inject
-source text, or rely on a rejected runtime service.
+Constraints may use `is`, `typeof`, supported `__traits`, CTFE, and other
+templates.
 
-## <a id="implicit_template_properties"></a>Eponymous Templates
+## Eponymous templates
 
-When a template contains a member with the same name, selecting the
-template may directly denote that member. This supports type aliases, manifest
-values, and other compile-time results.
+When a template contains a member with the same name, selecting the template
+directly denotes that member.
 
 ```d
 template Identity(T)
@@ -244,10 +201,13 @@ template Identity(T)
 static assert(is(Identity!int == int));
 ```
 
-## <a id="aggregate_templates"></a>Aggregate Templates
+Eponymous members may provide types, aliases, manifest values, or other
+compile-time results.
 
-Struct and union templates are supported. Their fields, methods, constructors, operators, storage, and nesting must satisfy the corresponding
-Laser-D aggregate rules.
+## Aggregate templates
+
+Struct and union declarations may have template parameters. Their fields,
+methods, constructors, and operators follow the ordinary aggregate rules.
 
 ```d
 struct Pair(First, Second = First)
@@ -259,51 +219,44 @@ struct Pair(First, Second = First)
 static assert(is(typeof(Pair!(int, long).second) == long));
 ```
 
-> **Excluded from Laser-D:**
->
-> Class and interface templates are rejected because class and
-> interface declarations are not part of Laser-D. An aggregate template cannot
-> restore destructors, postblits, copy or move constructors, invariants, `alias this`, hidden contexts, or C++ struct linkage.
+A template may also produce an enum declaration.
 
-## <a id="function-templates"></a>Function Templates
+## Function templates
 
-A function template places template parameters before its ordinary
-function parameters. It may be instantiated explicitly or inferred from the
-call arguments.
+A function template places template parameters before its ordinary function
+parameters. It may be instantiated explicitly or inferred from a call.
 
-### <a id="ifti"></a>Implicit Function Template Instantiation
+Implicit function template instantiation deduces parameters from explicit
+arguments, applies defaults, evaluates constraints, and selects one viable
+instance. Normal argument conversions occur after deduction where the matching
+rules permit them.
 
-IFTI deduces template parameters from the types and values of explicit
-function arguments, applies defaults, checks constraints, and selects a unique
-viable instance. Normal supported conversions occur only after deduction where
-the D matching rules allow them.
+An omitted function result type is inferred from its return expressions.
 
-### <a id="return-deduction"></a>Return-Type Deduction
+## Templated constructors
 
-An omitted function result type may be inferred from supported return
-expressions. Deduction cannot produce a rejected type or a reference result.
+A struct may declare a templated constructor, and a struct template may
+declare an ordinary constructor.
 
-> **Excluded from Laser-D:**
->
-> Template functions cannot use `auto ref` parameters or
-> returns. Parameters are limited to the separately supported Laser-D parameter
-> forms, and reference return values are rejected.
+```d
+struct Converted
+{
+    int value;
 
-## <a id="template_ctors"></a>Template Constructors
+    this(T)(T initial)
+    {
+        value = cast(int) initial;
+    }
+}
 
-A supported struct may declare a templated constructor, and a struct
-template may declare an ordinary constructor. Construction initializes the
-destination in place through compiler-internal lowering; it does not expose a
-source-level reference return.
+static assert(Converted(cast(short) 9).value == 9);
+```
 
-Constructor delegation, class construction, destructors, postblits, and
-copy or move constructors remain rejected.
+Construction initializes the destination value in place.
 
-## <a id="variable-template"></a>Enum and Variable Templates
+## Enum, variable, and alias templates
 
-Manifest enum templates and supported variable templates may depend on
-template parameters. Any instantiated storage must follow the Laser-D global
-and static-storage rules; a template does not permit mutable global state.
+An enum template computes a manifest value:
 
 ```d
 enum doubled(int value) = value * 2;
@@ -311,10 +264,10 @@ enum doubled(int value) = value * 2;
 static assert(doubled!21 == 42);
 ```
 
-## <a id="alias-template"></a>Alias Templates
+A variable template produces storage according to the ordinary declaration and
+storage-duration rules.
 
-An alias template computes a type, symbol, template, or supported
-compile-time value without introducing runtime storage.
+An alias template computes a type, symbol, template, or compile-time value:
 
 ```d
 alias Pointer(T) = T*;
@@ -322,18 +275,14 @@ alias Pointer(T) = T*;
 static assert(is(Pointer!int == int*));
 ```
 
-## <a id="nested-templates"></a>Nested Templates
+## Nested and recursive templates
 
-Templates may be nested in supported modules, templates, structs, unions, and functions where their instantiated declarations require no rejected hidden
-runtime context. Lexical nesting affects name lookup but does not by itself
-create a closure or outer aggregate pointer.
+Templates may be nested in modules, templates, structs, unions, and functions.
+Lexical nesting controls name lookup.
 
-## <a id="recursive_templates"></a>Recursive Templates
-
-A template may instantiate itself directly or indirectly when each
-instantiation makes finite progress toward a terminating specialization or
-constraint. Non-terminating or excessively deep instantiation is diagnosed by
-the compiler's implementation limits.
+A template may instantiate itself directly or indirectly. Recursive
+instantiation must reach a terminating specialization or constraint within the
+compiler's implementation limits.
 
 ```d
 template Factorial(uint value)
@@ -349,41 +298,17 @@ template Factorial(uint value : 0)
 static assert(Factorial!5 == 120);
 ```
 
-## <a id="emission"></a>Instance Emission
+## Instance emission
 
-> **Laser-D normative:**
->
-> Template instances required by a root module are emitted
-> without relying on the D runtime. Instances used across separately compiled
-> modules retain the normal symbol identity, linkage, and duplicate-elimination
-> rules of the unchanged frontend/backend interface.
+Template instances required by a root module are emitted without a D runtime.
+Instances used across separately compiled modules preserve semantic identity,
+linkage, and the duplicate-elimination behavior of the compiler toolchain.
 
-Emission does not make an otherwise rejected declaration linkable.
-Instantiated code must use supported functions, storage, types, and foreign
-interfaces.
+## Compile-time execution
 
-## <a id="compile-time"></a>Compile-Time Evaluation
+Templates compose with CTFE, `static if`, `static foreach`, `static assert`,
+`typeof`, `is`, and supported `__traits` operations. Arguments, constraints,
+initializers, and manifest values may call CTFE functions.
 
-Templates compose with CTFE, `static if`, `static foreach`, `static assert`, `typeof`, `is`, and the supported `__traits`
-operations. Template arguments, constraints, initializers, and manifest values
-may invoke supported CTFE functions.
-
-`__ctfe` remains available to distinguish compile-time execution inside
-a function. Compile-time execution does not grant additional language
-capabilities.
-
-## <a id="restrictions"></a>Cross-Cutting Restrictions
-
-> **Excluded from Laser-D:** A template, constraint, or CTFE evaluation cannot restore:
-
-- string mixin declarations, statements, expressions, or types,
-- compile-time import expressions or other compile-time file I/O,
-- classes, interfaces, associative arrays, vectors, or rejected scalar types,
-- GC-backed allocation, array growth, or capturing delegates,
-- exceptions, runtime assertions, contracts, or unit-test blocks,
-- user-defined attributes, rejected qualifiers, or rejected parameter and return annotations,
-- runtime type metadata, module lifecycle, global mutable state, threading features, or inline assembly.
-
-`__traits(compiles)` may probe whether code follows these rules, but a
-successful enclosing template declaration does not defer or suppress a
-diagnostic for an actually instantiated rejected construct.
+Within a function, `__ctfe` is true during compile-time execution and false
+during runtime execution.
