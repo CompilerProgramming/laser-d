@@ -687,3 +687,11 @@ ordinary loops, direct and range iteration, integral and enum switches,
 control transfers, and struct `with`. Unreviewed statement details are tracked
 separately for effect-free expression diagnostics, declaration conditions,
 extended foreach variables, non-struct `with`, and statement pragmas.
+
+The error-handling specification defines failure as ordinary program data.
+Laser-D APIs use visible status values, output parameters, or result
+aggregates; foreign functions retain their documented C error conventions.
+Callers propagate failure through ordinary conditions and returns, while
+`scope(exit)` provides deterministic lexical cleanup. The upstream discussion
+of exception objects, unwinding, default handlers, and runtime assertions is
+not part of the active Laser-D specification.

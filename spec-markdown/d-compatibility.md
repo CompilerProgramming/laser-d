@@ -177,6 +177,8 @@ The following D statements and protocols are absent:
 
 `scope(exit)` is the single deterministic-cleanup syntax. Failures are
 represented explicitly, normally with return values or foreign API conventions.
+There is no throwable object hierarchy, stack unwinding, catch dispatch, or
+default D exception handler.
 
 Laser-D has no language-level multithreading model. `shared`, `__gshared`, and
 `synchronized` are absent. Programs may call C threading and atomic APIs
