@@ -60,7 +60,8 @@ slice, not a GC-managed container. The following D array facilities are absent:
 
 Array literals are available only where they initialize fixed storage without
 allocation. String literals are immutable static storage and string slices are
-non-owning views.
+non-owning views. Ordered comparisons (`<`, `<=`, `>`, and `>=`) are absent for
+arrays and slices.
 
 When a named enum uses another enum as its base, every member after the first
 has an explicit initializer; Laser-D does not synthesize the next value by
