@@ -120,8 +120,8 @@ bootstrap compiler.
 
 The compiler build and test harness are themselves full-D programs and use
 features intentionally excluded from Laser-D. In particular, `HOST_DMD` must
-refer to the upstream host compiler, not the Laser-D executable under
-`generated`.
+refer to the upstream host compiler, not the Dub-built `laserd` executable in
+the repository root.
 
 The following tools are required:
 
@@ -130,6 +130,7 @@ The following tools are required:
 - Dub for building the compiler;
 - CMake 3.24 or later for standard-library compilation, testing, installation,
   and packaging;
+- Python 3.13 or later for the generated-documentation check;
 - a native C++ toolchain;
 - Visual Studio or Microsoft C++ Build Tools on Windows; or
 - GCC/Clang and the usual development tools on Linux and macOS.
@@ -137,83 +138,131 @@ The following tools are required:
 The upstream compiler build documentation currently requires a host D compiler
 version 2.079.1 or later.
 
-### Build the compiler
+### CI-equivalent build and test
 
-From the repository root:
+The following commands mirror the CI workflow. Run them from the repository
+root.
 
-```console
-dub build dmd:compiler --build=release
-```
+On Linux with upstream DMD:
 
-Dub writes `laserd` (`laserd.exe` on Windows) to the repository root. It is
-deliberately not named `dmd`, so it cannot be mistaken for the full upstream
-compiler used to bootstrap the build.
+```bash
+HOST_DMD="$(command -v dmd)"
+export HOST_DMD
+REPOSITORY_ROOT="$PWD"
 
-The build uses the full D compiler selected by Dub. To choose it explicitly:
+"${HOST_DMD}" --version
+dub build dmd:compiler --build=release --compiler="${HOST_DMD}"
+./laserd --version
 
-```console
-dub build dmd:compiler --build=release --compiler=/path/to/dmd
-```
+(
+    cd compiler/test
+    LASERD_COMPILER="${REPOSITORY_ROOT}/laserd" \
+        "${HOST_DMD}" -i -run run.d laser-d
+)
 
-### Run the Laser-D tests
+./laserd -conf= -fPIC -Ilibrary -run library/test/core_stdc.d
 
-The test driver must also be compiled by the full host D compiler. From
-`compiler/test`, run the complete Laser-D language suite:
-
-```console
-HOST_DMD="$(command -v dmd)" ./run.d laser-d
-```
-
-On Windows PowerShell:
-
-```powershell
-cd compiler\test
-$env:HOST_DMD = (Get-Command dmd).Source
-rdmd run.d laser-d
-```
-
-To run one test, pass its path relative to `compiler/test`:
-
-```console
-./run.d laser-d/templates_accepted.d
-```
-
-```powershell
-rdmd run.d laser-d/templates_accepted.d
-```
-
-The test driver automatically selects the Dub-built `laserd` in the repository
-root as the compiler under test. `HOST_DMD` is used only to build the full-D
-test infrastructure. Set `LASERD_COMPILER` to override the compiler under test.
-
-### Build a distribution
-
-After building the compiler, configure and build the standard library with
-CMake:
-
-```console
 cmake -S library -B generated/cmake-library \
     -DCMAKE_BUILD_TYPE=Release \
-    -DLASERD_COMPILER="$PWD/laserd"
+    -DLASERD_COMPILER="${REPOSITORY_ROOT}/laserd"
 cmake --build generated/cmake-library --config Release
 ctest --test-dir generated/cmake-library \
     --build-config Release --output-on-failure
-cmake --build generated/cmake-library --config Release --target package
+cmake --build generated/cmake-library \
+    --config Release --target package
+
+python tools/ddoc_to_markdown.py
+git diff --exit-code -- spec-markdown
+git diff --check
 ```
 
-On Windows PowerShell, pass the executable explicitly:
+On macOS, CI uses the DMD-compatible LDC driver because the upstream DMD binary
+has proved unreliable on the hosted Intel runner. Use `ldmd2` in place of
+`dmd`; omit `-fPIC` from the direct `core_stdc` command, matching CI:
+
+```bash
+HOST_DMD="$(command -v ldmd2)"
+export HOST_DMD
+REPOSITORY_ROOT="$PWD"
+
+"${HOST_DMD}" --version
+dub build dmd:compiler --build=release --compiler="${HOST_DMD}"
+./laserd --version
+
+(
+    cd compiler/test
+    LASERD_COMPILER="${REPOSITORY_ROOT}/laserd" \
+        "${HOST_DMD}" -i -run run.d laser-d
+)
+
+./laserd -conf= -Ilibrary -run library/test/core_stdc.d
+
+cmake -S library -B generated/cmake-library \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLASERD_COMPILER="${REPOSITORY_ROOT}/laserd"
+cmake --build generated/cmake-library --config Release
+ctest --test-dir generated/cmake-library \
+    --build-config Release --output-on-failure
+cmake --build generated/cmake-library \
+    --config Release --target package
+```
+
+On Windows, first run from a shell with the Visual Studio x64 build environment
+configured. CI performs the equivalent setup before these PowerShell commands:
 
 ```powershell
+$HostDmd = (Get-Command dmd).Source
+$env:HOST_DMD = $HostDmd
+$RepositoryRoot = $PWD.Path
+
+& $HostDmd --version
+dub build dmd:compiler --build=release --compiler="$HostDmd"
+.\laserd.exe --version
+
+Push-Location compiler\test
+$env:LASERD_COMPILER = Join-Path $RepositoryRoot "laserd.exe"
+& $HostDmd -i -run run.d laser-d
+Pop-Location
+
+.\laserd.exe -conf= -Ilibrary -run library\test\core_stdc.d
+
 cmake -S library -B generated\cmake-library `
-    -DLASERD_COMPILER="$PWD\laserd.exe"
+    -DCMAKE_BUILD_TYPE=Release `
+    -DLASERD_COMPILER="$RepositoryRoot\laserd.exe"
 cmake --build generated\cmake-library --config Release
 ctest --test-dir generated\cmake-library `
     --build-config Release --output-on-failure
-cmake --build generated\cmake-library --config Release --target package
+cmake --build generated\cmake-library `
+    --config Release --target package
 ```
 
-CMake and CPack create a ZIP archive under `dist/`, named for the Laser-D
-version, host platform, and `x86_64` architecture. For example:
+Dub writes `laserd` (`laserd.exe` on Windows) to the repository root. CPack
+writes the native `x86_64` ZIP distribution under `dist/`.
+
+### Run one language test
+
+Pass the test path relative to `compiler/test`, preserving the same separation
+between the full host compiler and the compiler under test:
+
+```bash
+(
+    cd compiler/test
+    LASERD_COMPILER="$PWD/../../laserd" \
+        "${HOST_DMD}" -i -run run.d laser-d/templates_accepted.d
+)
+```
+
+```powershell
+Push-Location compiler\test
+$env:LASERD_COMPILER = Join-Path $RepositoryRoot "laserd.exe"
+& $HostDmd -i -run run.d laser-d/templates_accepted.d
+Pop-Location
+```
+
+### Distribution contents
+
+CMake and CPack name the ZIP for the Laser-D version, native platform, and
+`x86_64` architecture. For example:
 
 ```text
 dist/laser-d-v2.113.0-beta.1-linux-x86_64.zip
@@ -235,8 +284,9 @@ through a reviewed Laser-D `extern(C)` binding. A distribution is
 platform-specific and must be built on its target platform; CI publishes
 separate Windows, Linux, and macOS ZIP artifacts.
 
-After extracting a distribution, its installed example can be rebuilt without
-the Laser-D source repository:
+As an additional check beyond the current CI workflow, an extracted
+distribution's installed example can be rebuilt without the Laser-D source
+repository:
 
 ```console
 cmake -S share/laserd/examples/checksum -B build/checksum

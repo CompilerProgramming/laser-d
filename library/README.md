@@ -12,21 +12,31 @@ to use only Laser-D language features.
 
 `object.d` is the minimal implicit module distributed with the compiler.
 Standard-library integration tests live under `library/test` and are compiled
-directly with Laser-D:
+directly with Laser-D. Linux requires position-independent code because its
+toolchain links executables as PIE by default:
 
-```console
-./laserd -conf= -Ilibrary -run library/test/core_stdc.d
+```bash
+platform_flags=()
+if [[ "$(uname -s)" == "Linux" ]]; then
+    platform_flags=(-fPIC)
+fi
+./laserd -conf= "${platform_flags[@]}" \
+    -Ilibrary -run library/test/core_stdc.d
 ```
 
 CMake builds, tests, installs, and packages the standard library. Configure it
-after building the compiler with Dub:
+after building the compiler with Dub, using the same release configuration as
+CI:
 
-```console
+```bash
 cmake -S library -B generated/cmake-library \
-    -DLASERD_COMPILER=/absolute/path/to/laserd
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLASERD_COMPILER="$PWD/laserd"
 cmake --build generated/cmake-library --config Release
 ctest --test-dir generated/cmake-library \
     --build-config Release --output-on-failure
+cmake --build generated/cmake-library \
+    --config Release --target package
 ```
 
 The `checksum` component demonstrates the intended model for C-backed Laser-D
