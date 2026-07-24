@@ -311,21 +311,21 @@ Several environmental version identifiers and identifier
 | `ELFv1` | Elf version 1 |
 | `ELFv2` | Elf version 2 |
 | *Miscellaneous* |  |
-| `D_BetterC` | [D as Better C](betterc.md) code (command line switch [`-betterC`](https://dlang.org/dmd.html#switch-betterC)) is being generated |
+| `D_BetterC` | Always predefined. Laser-D's runtime-free compilation model cannot be disabled. |
 | `D_Exceptions` | Exception handling is supported. Evaluates to `false` when compiling with command line switch [`-betterC`](https://dlang.org/dmd.html#switch-betterC) |
 | `D_ModuleInfo` | [`ModuleInfo`](../spec/abi.dd) is supported. Evaluates to `false` when compiling with command line switch [`-betterC`](https://dlang.org/dmd.html#switch-betterC) |
 | `D_TypeInfo` | Runtime type information (a.k.a `TypeInfo`) is supported. Evaluates to `false` when compiling with command line switch [`-betterC`](https://dlang.org/dmd.html#switch-betterC) |
 | `D_Coverage` | [Code coverage analysis](https://dlang.org/articles/code_coverage.html) instrumentation (command line switch [`-cov`](https://dlang.org/dmd.html#switch-cov)) is being generated |
 | `D_Ddoc` | [Ddoc](../spec/ddoc.dd) documentation (command line switch [`-D`](https://dlang.org/dmd.html#switch-D)) is being generated |
-| `D_InlineAsm_X86` | [Inline assembler](iasm.md) for X86 is implemented |
-| `D_InlineAsm_X86_64` | [Inline assembler](iasm.md) for X86-64 is implemented |
+| `D_InlineAsm_X86` | Never predefined. |
+| `D_InlineAsm_X86_64` | Never predefined. |
 | `D_LP64` | **Pointers** are 64 bits (command line switch [`-m64`](https://dlang.org/dmd.html#switch-m64)). (Do not confuse this with C's LP64 model) |
 | `D_X32` | Pointers are 32 bits, but words are still 64 bits (x32 ABI) (This can be defined in parallel to `X86_64`) |
 | `D_HardFloat` | The target hardware has a floating-point unit |
 | `D_SoftFloat` | The target hardware does not have a floating-point unit |
 | `D_PIC` | Position Independent Code (command line switch [`-fPIC`](https://dlang.org/dmd-linux.html#switch-fPIC)) is being generated |
 | `D_PIE` | Position Independent Executable (command line switch [`-fPIE`](https://dlang.org/dmd-linux.html#switch-fPIE)) is being generated |
-| `D_SIMD` | [Vector extensions](simd.md) (via `__simd`) are supported |
+| `D_SIMD` | Never predefined. |
 | `D_AVX` | AVX Vector instructions are supported |
 | `D_AVX2` | AVX2 Vector instructions are supported |
 | `D_Version2` | This is a D version 2 compiler |
@@ -335,11 +335,11 @@ Several environmental version identifiers and identifier
 | `D_Optimized` | Compiling with enabled optimizations (command line switch [`-O`](https://dlang.org/dmd.html#switch-O)) |
 | `Core` | Defined when building the standard runtime |
 | `Std` | Defined when building the standard library |
-| `unittest` | [Unit tests](unittest.md) are enabled (command line switch [`-unittest`](https://dlang.org/dmd.html#switch-unittest)) |
+| `unittest` | Never predefined. |
 | `assert` | Checks are being emitted for AssertExpressions |
 | `D_PreConditions` | Checks are being emitted for [in contracts](function.md#contracts) |
 | `D_PostConditions` | Checks are being emitted for [out contracts](function.md#contracts) |
-| `D_Invariants` | Checks are being emitted for [class invariants](class.md#invariants) and [struct invariants](struct.md#Invariant) |
+| `D_Invariants` | Never predefined. |
 | *Special Cases* |  |
 | `none` | Never defined; used to just disable a section of code |
 | `all` | Always defined; used as the opposite of `none` |

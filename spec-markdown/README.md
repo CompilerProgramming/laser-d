@@ -43,7 +43,3 @@ Markdown chapter may intentionally differ from its historical Ddoc source.
 ## Compatibility
 
 - [D compatibility notes](d-compatibility.md)
-
-Chapters devoted entirely to features which do not exist in Laser-D are
-temporary migration material and will be removed after their decisions have
-been checked against the compatibility notes.
