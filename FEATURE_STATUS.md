@@ -264,6 +264,8 @@ Each chapter should be split into individual features as it is investigated.
 | String mixin declarations and statements | Rejected | Compile-time source-text injection in declaration and statement positions is rejected. | `string_mixin_declaration_rejected.d`, `string_mixin_statement_rejected.d` |
 | String mixin expressions and types | Rejected | Source text cannot be reparsed as an expression or type. | `string_mixin_expression_rejected.d`, `string_mixin_type_rejected.d` |
 | Template mixins | Supported | Parameterized and constrained mixin-template declarations and named or unnamed instances may inject supported declarations at module, struct, union, template, and function-local scope. | `template_mixins_accepted.d` |
+| Ordinary templates as mixin sources | Undecided | Review whether an ordinary template declaration, rather than a declaration introduced with `mixin template`, may be selected as the source of a template-mixin insertion. | None |
+| Extended template-mixin names and aliases | Undecided | Review root-qualified, multiply qualified, template-instance-qualified, and `typeof`-qualified mixin-template names together with the `mixin instance = Source!args;` naming form. The tested direct named and unnamed forms remain supported. | None |
 
 ## Array decisions
 

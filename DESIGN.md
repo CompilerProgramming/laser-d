@@ -718,3 +718,9 @@ function templates, templated constructors, recursive templates, emission,
 and CTFE composition. Template bodies remain ordinary parsed Laser-D code;
 the compatibility notes carry the cross-cutting rule that instantiation cannot
 restore an absent language facility.
+
+The template-mixin specification covers parsed `mixin template`
+declarations and their tested named and unnamed insertion forms at module,
+aggregate, template, and function scope. Ordinary templates used as mixin
+sources and the extended qualified or alias-style mixin naming grammar remain
+separate undecided features rather than implicit guarantees.
