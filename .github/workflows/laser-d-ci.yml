@@ -72,7 +72,7 @@ jobs:
         working-directory: compiler/test
         run: |
           LASERD_COMPILER="${GITHUB_WORKSPACE}/${{ matrix.compiler }}" \
-            "${DMD}" -i -run run.d -j=1 laser-d
+            "${DMD}" -i -run run.d laser-d
 
       - name: Test the Laser-D standard library
         run: '"./${{ matrix.compiler }}" -conf= -Ilibrary -run library/test/core_stdc.d'

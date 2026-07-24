@@ -623,6 +623,11 @@ tests, installation, and CPack distribution assembly. The installed compiler
 configuration locates `import/` relative to the executable, so programs do not
 depend on the repository layout.
 
+Laser-D compiler builds and conformance tests currently target x86-64. The test
+harness therefore defaults to model 64 for the Dub-built compiler; an explicit
+`DMD_MODEL` environment setting may override this when another architecture is
+supported and intentionally tested.
+
 The `checksum` component is the reference C-backed library. CMake builds a
 native static archive from its C implementation and installs the C header
 beside a reviewed `laserd.checksum` import module. CTest compiles and runs a

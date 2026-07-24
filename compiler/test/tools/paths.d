@@ -50,8 +50,9 @@ string buildOutputPath()
     return buildOutputPath ? buildOutputPath : (buildOutputPath = generatedDir.buildPath(os, build, dmdModel));
 }
 
-// auto-tester might run the test suite with a different $(MODEL) than DMD
-// has been compiled with. Hence we manually check which binary exists.
+// Laser-D currently supports x86-64 only. The compiler is built by Dub in the
+// repository root, so there is no generated/32 or generated/64 path from which
+// the test harness can infer its model.
 string dmdModel()
 {
     static string dmdModel;
@@ -59,9 +60,7 @@ string dmdModel()
     if (dmdModel)
         return dmdModel;
 
-    const prefix = generatedDir.buildPath(os, build);
-    return dmdModel = environment.get("DMD_MODEL",
-        prefix.buildPath("64", laserDFilename).exists ? "64" : "32");
+    return dmdModel = environment.get("DMD_MODEL", "64");
 }
 
 string model()
