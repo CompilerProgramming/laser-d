@@ -659,3 +659,14 @@ No archive is produced for `core.stdc` because those modules consist only of
 declarations resolved by the platform C runtime. Other standard-library
 components may contribute native archives explicitly. Distribution archives
 are built and tested independently on Windows, Linux, and macOS.
+
+### Specification organization
+
+The Markdown specification describes Laser-D directly. Retained language
+chapters define only constructs which exist in Laser-D and avoid repeatedly
+annotating the broader D language. Differences relevant to readers and source
+migration are consolidated in `spec-markdown/d-compatibility.md`. Chapters
+devoted entirely to absent D features are removed from the Markdown
+specification once their decisions have been preserved in that compatibility
+document. The historical Ddoc sources remain under `spec/` during the
+transition.
