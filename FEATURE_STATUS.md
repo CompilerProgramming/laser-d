@@ -126,7 +126,15 @@ Each chapter should be split into individual features as it is investigated.
 | Function safety attributes | Restricted | `@safe` and `@trusted` are rejected. `@system` is mandatory and implicit, so spelling it explicitly is also rejected. | `implicit_function_attributes.d`, `explicit_safety_attributes_rejected.d` |
 | Live-function attribute | Rejected | `@live` is rejected on declarations and function types, and Laser-D never enables live ownership/borrowing analysis. | `live_attribute_rejected.d` |
 | Purity and threading attributes | Rejected | `pure`, `shared`, `__gshared`, and `synchronized` are rejected. | `threading_and_purity_rejected.d`, `gshared_rejected.d` |
-| Remaining built-in attributes | Undecided | Built-in attributes other than the decided function-safety, `nothrow`, `@nogc`, and `@live` groups retain their individual classifications. | Existing attribute-specific tests |
+| C++ namespace-qualified linkage | Undecided | Review `extern(C++, namespace...)` and other extended C++ linkage forms separately from supported simple C++ free-function linkage. | None |
+| General `private` and `public` visibility | Undecided | Review declaration visibility outside the settled private-import and public-import behavior, including module, aggregate, template, and local declarations. | None |
+| `protected` visibility | Undecided | Review whether `protected` has any valid Laser-D declaration context after removal of the class and interface object model. | None |
+| `export` visibility | Undecided | Review source-level export visibility and shared-library symbol publication on Windows, Linux, and macOS. | None |
+| Explicit alignment attribute | Undecided | Review `align` declaration and aggregate layout control independently of the supported read-only `.alignof` property. | None |
+| General deprecation attributes | Undecided | Review `deprecated` on declarations other than the separately tracked module-deprecation case, including diagnostic and message behavior. | None |
+| `@__future` | Undecided | Review the implementation-reserved future attribute and whether it has any portable Laser-D source meaning. | None |
+| Compiler-recognized special attributes | Undecided | Inventory and review any built-in special attributes not represented by an ordinary named language feature before documenting or accepting them. | None |
+| Static aggregate members beyond immutable data | Undecided | Review `static` aggregate methods and other static members separately from supported manifest constants and deeply immutable static data. | None |
 | ImportC implementation attributes | Restricted | C and GNU attributes parsed from ImportC input are not D UDAs and remain part of the ImportC audit. | `importc_upstream_compilable_cattributes.i` |
 
 ## Basic declaration and primitive-type decisions

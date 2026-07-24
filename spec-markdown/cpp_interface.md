@@ -150,7 +150,7 @@ k = 8
 ## <a id="cpp-namespaces"></a>C++ Namespaces
 
 C++ symbols that reside in namespaces can be
-        accessed from D. A [namespace](attribute.md#namespace)
+        accessed from D. Namespace qualification
         can be added to the `extern (C++)`
         [LinkageAttribute](attribute.md#linkage):
 

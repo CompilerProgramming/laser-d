@@ -1,305 +1,210 @@
----
-title: Attributes
-status: restricted
-source: ../spec/attribute.dd
----
+# Attributes and declaration modifiers
 
-# Attributes
+Laser-D declaration modifiers specify linkage, import visibility, type
+qualification, inference, storage, and parameter passing.
 
-Attributes and declaration modifiers alter linkage, visibility, storage, or function semantics. Laser-D supports only attributes classified by this
-chapter or another normative chapter. Lexical recognition of another D
-attribute does not make it available.
+Each modifier is valid only on the declaration forms defined in this chapter or
+its dedicated language chapter.
 
-## <a id="grammar"></a>Settled Grammar
+## Syntax
 
 ```text
 AttributeSpecifier:
-    Attribute :
-    Attribute DeclarationBlock
-
-Attribute:
-    LinkageAttribute
-    VisibilityAttribute
-    auto
-    immutable
-    ref
-    static
+    LinkageAttribute :
+    LinkageAttribute DeclarationBlock
 
 DeclarationBlock:
-    DeclDef
-    { DeclDefs[] }
+    Declaration
+    { Declarations }
+
+DeclarationModifier:
+    ImportVisibility
+    const
+    immutable
+    auto
+    static
+    in
+    out
+    ref
 ```
 
-This grammar lists settled attribute-specifier forms. Each modifier is
-still limited to the declaration kinds allowed by its defining chapter. In
-particular, `static` does not permit mutable static storage, `ref` does
-not permit reference results, and visibility is currently guaranteed only for
-module imports.
+A linkage attribute followed by `:` applies to the declarations which follow
+in the same declaration list:
 
-## <a id="linkage"></a>Linkage Attributes
+```d
+extern(C):
+
+int first(int value);
+int second(int value);
+```
+
+A linkage attribute followed by a declaration block applies within that block:
+
+```d
+extern(C)
+{
+    int first(int value);
+    int second(int value);
+}
+```
+
+The attribute forms do not create a runtime object or hidden initialization.
+
+## <a id="linkage"></a>Linkage
 
 ```text
 LinkageAttribute:
-    extern ( LinkageType )
-
-LinkageType:
-    D
-    C
-    C ++
+    extern ( D )
+    extern ( C )
+    extern ( C ++ )
 ```
 
-`extern(D)` selects the native D ABI. `extern(C)` selects the target
-C ABI and is the primary foreign-function interface. `extern(C++)` is
-supported for free functions, function pointers, mangling, and overload sets.
+### Native linkage
+
+`extern(D)` selects the native D-compatible ABI used by ordinary Laser-D
+functions:
 
 ```d
-extern(C) int c_function(int value);
-extern(C++) int cpp_function(int value);
+extern(D) int nativeFunction(int value);
 ```
 
-> **Excluded from Laser-D:**
->
-> C++ linkage does not enable C++ structs, classes, interfaces, or member functions. `extern(Objective-C)` and the Objective-C object model
-> are rejected.
+The attribute may be omitted for an ordinary function using native linkage.
 
-### <a id="namespace"></a>C++ Namespaces
+### C linkage
 
-> **Under review:**
->
-> C++ namespace-qualified linkage and the extended
-> `extern(C++, ...)` forms have not yet been classified. Simple C++
-> free-function linkage does not imply support for these forms.
+`extern(C)` selects the target C ABI:
 
-> **Under review:**
->
-> `extern(Windows)` and `extern(System)` remain to be
-> reviewed for their portable Laser-D boundary. ImportC applies the calling
-> convention rules required by its C input.
+```d
+extern(C) int cFunction(int value);
+```
 
-## <a id="visibility_attributes"></a>Visibility Attributes
+It controls the calling convention and symbol naming needed to link a
+compatible C definition. C variadic functions and the executable entry point
+also use C linkage.
+
+### C++ free-function linkage
+
+`extern(C++)` selects the reviewed C++ ABI for free functions, function types,
+mangling, and overload sets:
+
+```d
+extern(C++) int cppFunction(int value);
+alias CppFunction = extern(C++) int function(int value);
+```
+
+The C++ interoperability chapter defines the supported free-function boundary.
+
+## Import visibility
 
 ```text
-VisibilityAttribute:
+ImportVisibility:
     private
     public
 ```
 
-`private import` keeps imported symbols from being re-exported.
-`public import` re-exports imported symbols. An unqualified import has the
-default visibility specified by the modules chapter.
+Import visibility controls re-export from a module.
 
-> **Under review:**
->
-> General declaration visibility, `package`, `protected`, and `export` have not yet been classified. Native classes
-> and interfaces are absent, so their protected-member model cannot apply.
+A private import is available within the importing module:
 
-### <a id="private"></a>`private`
+```d
+private import implementation;
+```
 
-On an import, `private` limits the binding to the importing module.
+A public import also exposes the imported module's visible declarations to
+modules which import the current module:
 
-### <a id="public"></a>`public`
+```d
+public import public_api;
+```
 
-On an import, `public` makes the imported binding available to modules
-that import the current module.
+An import without an explicit visibility modifier is private. The modules
+chapter defines lookup and re-export behavior.
 
-### <a id="package"></a>`package`
+## Type qualification
 
-> **Under review:**
->
-> Package visibility is part of the unresolved package
-> module and package hierarchy review.
+`const` and `immutable` construct qualified types:
 
-### <a id="export"></a>`export`
+```d
+alias ReadOnlyPointer = const(int)*;
+immutable int permanent = 42;
+```
 
-> **Under review:**
->
-> Export visibility and shared-library symbol publication
-> have not yet been specified for Laser-D.
+`const` is an aliasable read-only view. `immutable` is permanently and
+transitively unmodifiable. Their declaration, conversion, pointer, aggregate,
+and receiver rules are defined by the type-qualifier chapter.
 
-## <a id="mutability"></a>Mutability and Storage Modifiers
+## Type inference
 
-### <a id="immutable"></a>`immutable`
+`auto` infers a type from a required initializer:
 
-`immutable` constructs a transitively immutable type or declaration as
-defined by the type-qualifier chapter. It may be used for local values and for
-static data whose initializer is compile-time evaluable.
+```d
+int infer()
+{
+    auto value = 42;
+    static assert(is(typeof(value) == int));
+    return value;
+}
+```
 
-### <a id="static"></a>`static`
+The inferred type is fixed at compile time.
 
-`static` is available where a supported declaration uses static
-membership or storage. Mutable module, function-static, and aggregate-static
-storage is rejected; manifest constants and deeply immutable static data are
-the supported static-data cases.
+An `auto` function result is inferred from its reachable value-return
+expressions, as defined by the functions chapter.
 
-### <a id="auto"></a>`auto`
+## Static immutable storage
 
-`auto` requests compile-time type inference from a required initializer.
-It does not enable `auto ref`, safety inference, purity inference, or
-inference of a rejected type.
+`static immutable` declares deeply immutable static data with a compile-time
+initializer:
 
-### <a id="ref"></a>`ref`
+```d
+struct Constants
+{
+    static immutable int answer = 42;
+}
+```
 
-`ref` is supported for function parameters and local reference
-variables under the declaration and function rules. Reference function results
-and `auto ref` are rejected.
+Manifest `enum` constants also occupy no mutable runtime storage. Static
+storage and initialization are defined by the declarations and qualifier
+chapters.
 
-## <a id="function-attributes"></a>Implicit Function Attributes
+`static import` is a separate import form which requires qualified member
+access:
 
-> **Laser-D normative:**
->
-> Every Laser-D function and function type is implicitly
-> `nothrow`, `@nogc`, and `@system`. The attributes are properties of
-> the type even though they cannot be written in source. Functions remain
-> conservatively impure.
+```d
+static import geometry.matrix;
+```
 
-### <a id="nothrow"></a>`nothrow`
+## Parameter modifiers
 
-No exception may escape a Laser-D function. Explicit `nothrow` is
-rejected because it is mandatory and implicit.
+The function parameter modifiers are:
 
-### <a id="nogc"></a>`@nogc`
+- `in` for an input value;
+- `out` for caller-provided output storage; and
+- `ref` for an alias to an initialized caller lvalue.
 
-A Laser-D function cannot use a GC operation. Explicit `@nogc` is
-rejected because it is mandatory and implicit.
+```d
+void update(in int input, out int output, ref int state)
+{
+    output = input;
+    state += input;
+}
+```
 
-### <a id="safe"></a>and `@system`
+Their initialization, lvalue, lifetime, and calling rules are defined in the
+functions chapter.
 
-Laser-D performs no D safety inference. Every function is implicitly
-`@system`; explicit `@system`, `@safe`, and `@trusted` are all
-rejected. Pointer and lifetime correctness remain programmer responsibilities.
+## Implicit function properties
 
-### <a id="system-variables"></a>System Variables (Excluded)
+Every Laser-D function and function type is:
 
-Explicit `@system` variables and fields are rejected with the explicit
-safety-attribute surface. Laser-D does not distinguish a separate safety class
-of variables.
+- `nothrow`;
+- `@nogc`;
+- `@system`; and
+- conservatively impure.
 
-### <a id="pure"></a>`pure`
-
-> **Excluded from Laser-D:**
->
-> `pure` is rejected. Laser-D functions are conservatively
-> impure, so the compiler does not promise absence of externally visible state.
-
-### <a id="property"></a>`@property`
-
-> **Excluded from Laser-D:**
->
-> `@property` is rejected. Ordinary functions and methods
-> must be called with parentheses and cannot behave syntactically like fields.
-
-## <a id="shared-storage"></a>Threading Attributes
-
-### <a id="shared"></a>`shared`
-
-> **Excluded from Laser-D:**
->
-> `shared` is not a Laser-D type qualifier or declaration
-> attribute.
-
-### <a id="gshared"></a>`__gshared`
-
-> **Excluded from Laser-D:**
->
-> `__gshared` is rejected because D-owned mutable global
-> state and native language-level threading are disabled.
-
-### <a id="synchronized"></a>`synchronized`
-
-> **Excluded from Laser-D:**
->
-> `synchronized` declarations and statements are rejected.
-> Programs may call explicit C threading and synchronization APIs.
-
-## <a id="rejected_attributes"></a>Other Rejected Attributes
-
-> **Excluded from Laser-D:**
->
-> `@live`, `scope`, `lazy`, parameter/result
-> `return`, `inout`, `final` parameters, `__rvalue`, `abstract`, `final`, and `override` are rejected in the source
-> locations governed by their corresponding feature decisions.
-
-### <a id="scope"></a>`scope`
-
-The parameter and variable `scope` annotation is rejected. The
-`scope(exit)` statement is a separate cleanup statement and remains
-supported.
-
-### <a id="scope-class-var"></a>Scope Class Instances (Excluded)
-
-Scope-managed class instances are unavailable because `scope`, native
-classes, class destruction, and language-managed allocation are all rejected.
-
-### <a id="__rvalue"></a>`__rvalue`
-
-`__rvalue` is rejected together with the related `__traits(isReturnOnStack)`
-surface.
-
-## <a id="uda"></a>User-Defined Attributes
-
-### <a id="UserDefinedAttribute"></a>User-Defined Attribute Syntax (Excluded)
-
-> **Excluded from Laser-D:**
->
-> User-defined attributes are rejected in every source
-> location. This includes `@(arguments)`, `@identifier`, UDA template
-> instances, and UDA call expressions. Supported `__traits(getAttributes)`
-> queries remain useful to generic code but return an empty sequence for ordinary
-> Laser-D declarations.
-
-## <a id="attributes_under_review"></a>Built-in Attributes Under Review
-
-> **Under review:**
->
-> The following built-in facilities are not yet Laser-D
-> guarantees: `align`, `deprecated`, `@__future`, general visibility, `export`, `pragma`, and compiler-recognized special
-> attributes. They remain reserved syntax while their individual reviews are
-> pending.
-
-### <a id="align"></a>`align`
-
-#### <a id="AlignAttribute"></a>Alignment Attribute Grammar (Under Review)
-
-Explicit alignment control remains under review. The compile-time
-`.alignof` property is supported independently.
-
-### <a id="deprecated"></a>`deprecated`
-
-#### <a id="DeprecatedAttribute"></a>Deprecation Attribute Grammar (Under Review)
-
-Source-level deprecation annotations and module deprecation remain under
-review.
-
-### <a id="disable"></a>`@disable`
-
-> **Rejected in Laser-D:**
->
-> Explicit `@disable` is rejected. Laser-D does not use an
-> attribute to create unavailable declarations, disabled overloads, nonconstructible structs, or noncopyable structs.
-
-### <a id="future"></a>`@__future`
-
-The implementation-reserved future attribute is not a portability
-guarantee.
-
-### <a id="FunctionAttributeKwd"></a>Explicit Function Attribute Keywords
-
-Explicit `nothrow` and `pure` are rejected. The first is implicit;
-the second is not a Laser-D function property.
-
-### <a id="AtAttribute"></a>At-Sign Attributes
-
-Settled at-sign attributes are rejected: safety attributes, `@nogc`, `@live`, `@property`, and UDAs. Remaining built-in at-sign attributes are
-under review.
-
-### <a id="Property"></a>Property Attribute (Excluded)
-
-`@property` is excluded as described under implicit function
-attributes.
-
-## <a id="class-attributes"></a>Object-Oriented Attributes
-
-> **Excluded from Laser-D:**
->
-> Class-specific uses of `abstract`, `final`, `override`, and `synchronized` are absent with native classes and
-> interfaces.
+These are fixed properties of the function type. They apply to free functions,
+methods, external declarations, pointers, delegates, literals, templates,
+inferred functions, and compiler-generated helpers.
+
+The properties are implicit and therefore add no source modifier to a function
+declaration.
