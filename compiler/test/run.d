@@ -132,8 +132,12 @@ Options:
     hostDMD = environment.get("HOST_DMD", "dmd");
     unitTestRunnerCommand = resultsDir.buildPath("unit_test_runner").exeName;
 
+    const laserDOnly = args.length && args.all!(arg =>
+        arg == "laser-d" || arg == "run_laser_d_tests" ||
+        arg.startsWith("laser-d/") || arg.startsWith("laser-d\\"));
+
     // bootstrap all needed environment variables
-    const env = getEnvironment();
+    const env = getEnvironment(laserDOnly);
 
     // Dump environnment
     if (verbose || dumpEnvironment)
@@ -154,9 +158,6 @@ Options:
         return spawnProcess(unitTestRunnerCommand ~ args, env, Config.none, scriptDir).wait();
     }
 
-    const laserDOnly = args.length && args.all!(arg =>
-        arg == "laser-d" || arg == "run_laser_d_tests" ||
-        arg.startsWith("laser-d/") || arg.startsWith("laser-d\\"));
     if (laserDOnly)
         ensureToolsExists(env, testRunner, testRunnerUnittests, jsonSanitizer);
     else
@@ -546,7 +547,7 @@ string setDefault(string[string] env, string key, string default_)
 }
 
 // Sets the environment variables required by d_do_test and sh_do_test.sh
-string[string] getEnvironment()
+string[string] getEnvironment(bool laserDOnly)
 {
     string[string] env;
 
@@ -601,6 +602,17 @@ string[string] getEnvironment()
             version(X86_64)
                 env["D_OBJC"] = "1";
     }
+
+    // Laser-D has neither druntime nor Phobos. Keep platform requirements such
+    // as PIC, but do not leak full-D import or library search paths into its
+    // compiler and linker invocations.
+    if (laserDOnly)
+    {
+        env["DFLAGS"] = "";
+        version(Windows)
+            env["LIB"] = environment.get("LIB");
+    }
+
     return env;
 }
 

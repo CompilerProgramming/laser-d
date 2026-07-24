@@ -616,6 +616,11 @@ Laser-D, separately from the language-conformance suite under
 `compiler/test/laser-d`. The remaining upstream `core.stdc` modules are not
 implicitly supported merely because their source still exists under druntime.
 
+Laser-D-only conformance runs do not inherit the upstream test harness's
+druntime or Phobos import and library search paths. The full host D installation
+is used to compile the test tools, while compiler invocations under test retain
+only required target flags such as position-independent code on POSIX systems.
+
 Dub builds the compiler executable as `laserd` (`laserd.exe` on Windows),
 distinguishing it from the full upstream `dmd` compiler used to bootstrap the
 build. CMake owns standard-library C compilation, mixed C/Laser-D integration
