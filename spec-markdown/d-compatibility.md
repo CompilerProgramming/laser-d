@@ -58,6 +58,11 @@ Array literals are available only where they initialize fixed storage without
 allocation. String literals are immutable static storage and string slices are
 non-owning views.
 
+When a named enum uses another enum as its base, every member after the first
+has an explicit initializer; Laser-D does not synthesize the next value by
+applying arithmetic to the base enum. An opaque enum has layout from its base
+type but no default initializer.
+
 ## Aggregates and object model
 
 Laser-D structs and unions are value types. They have no hidden vtable, class

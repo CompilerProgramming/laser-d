@@ -1,28 +1,26 @@
----
-title: Enums
-status: supported
-source: ../spec/enum.dd
----
-
 # Enums
 
-Laser-D supports named, anonymous, based, and opaque enums together with
-single-member manifest constants. Enum declarations create compile-time values
-and, for named enums, lightweight value types. They require no D runtime or
-TypeInfo.
+Laser-D enums provide named integral value types, anonymous compile-time
+members, manifest constants, and opaque foreign-facing types.
+
+Enum values are fixed-size values. Their declarations and properties are
+resolved at compile time.
+
+## Syntax
 
 ```text
 EnumDeclaration:
     enum Identifier EnumBody
     enum Identifier : EnumBaseType EnumBody
+    enum Identifier : EnumBaseType ;
     AnonymousEnumDeclaration
+    ManifestConstantDeclaration
 
 EnumBaseType:
     Type
 
 EnumBody:
     { EnumMembers }
-    ;
 
 EnumMembers:
     EnumMember
@@ -34,8 +32,8 @@ EnumMember:
     Identifier = AssignExpression
 
 AnonymousEnumDeclaration:
-    enum : EnumBaseType { EnumMembers }
     enum { AnonymousEnumMembers }
+    enum : EnumBaseType { EnumMembers }
 
 AnonymousEnumMembers:
     AnonymousEnumMember
@@ -43,207 +41,221 @@ AnonymousEnumMembers:
     AnonymousEnumMember , AnonymousEnumMembers
 
 AnonymousEnumMember:
-    EnumMember
+    Identifier
+    Identifier = AssignExpression
     Type Identifier = AssignExpression
+
+ManifestConstantDeclaration:
+    enum Identifier = AssignExpression ;
+    enum Type Identifier = AssignExpression ;
 ```
 
-> **Rejected in Laser-D:**
->
-> Enum members cannot carry user-defined attributes or
-> `@disable`. Other built-in declaration attributes are available only when
-> their individual Laser-D specifications permit them.
+## Named enums
 
-## <a id="named_enums"></a>Named Enums
-
-A named enum introduces a distinct value type. Its members are declared in
-the enum's scope and have the named enum type.
+A named enum introduces a distinct value type. Its members belong to the enum's
+scope and have the named enum type:
 
 ```d
 enum Direction : ubyte
 {
-    north
-east
-south
-west
+    north,
+    east,
+    south,
+    west,
 }
 ```
 
-A named enum base may be a retained primitive scalar type or another named
-enum. If no base is written, the base is inferred from the first explicit
-member value when possible and otherwise defaults to `int`. A rejected type
-cannot be introduced as an enum base.
+The base is a supported integral type or another named enum. When the base is
+omitted, it is `int`.
 
-An enum value implicitly converts to its base type where the ordinary
-conversion rules allow. A base-type value does not implicitly convert to the
-named enum; an explicit cast or an enum member is required.
-
-<a id="enum_default_initializer"></a>enum_variables
-
-A defined named enum default-initializes to the value of its first member, not necessarily to numeric zero.
+Members are referenced through the enum name:
 
 ```d
-d
+Direction direction = Direction.north;
+```
+
+An enum value converts to its base type where the ordinary value-conversion
+rules permit. Converting a base value to the named enum uses an explicit cast:
+
+```d
+ubyte encoded = Direction.east;
+Direction decoded = cast(Direction) encoded;
+```
+
+### Default value
+
+A defined named enum's `.init` value is its first declared member, regardless
+of that member's numeric value:
+
+```d
 enum Status : int
 {
-    ready = 4
-running = 7
+    ready = 4,
+    running = 7,
 }
 
-Status value;
+Status status;
 static assert(Status.init == Status.ready);
-
 ```
 
-### <a id="member_values"></a>Enum Member Values
+### Member values
 
-A member with an initializer uses its compile-time value after conversion
-to the enum base. The initializer is subject to all ordinary Laser-D and CTFE
-restrictions.
+A member initializer is a compile-time expression converted to the enum base
+type.
 
-For an enum whose base is not another enum, the first uninitialized member
-has the base type's zero/default value. Each later uninitialized member is the
-previous member plus one. The compiler rejects overflow, a base without a
-compile-time `+ 1` operation, or an increment that does not change the
-value.
+For an enum with an integral base, the first member without an initializer uses
+the base type's zero value. Each subsequent uninitialized member is the
+previous member plus one:
 
 ```d
-d
 enum Code : ushort
 {
-    first
-second
-explicitValue = 10
-following
+    first,
+    second,
+    explicitValue = 10,
+    following,
 }
 
 static assert(Code.first == 0);
 static assert(Code.second == 1);
 static assert(Code.following == 11);
-
 ```
 
-All members are visible to member initializer expressions, subject to
-normal forward-reference and circular-dependency diagnostics.
+Automatic assignment must produce a representable, distinct value. An explicit
+initializer is used at an overflow boundary or whenever the desired value is
+not the preceding value plus one.
 
-#### <a id="enum-based-values"></a>Enum-Based Values
+Member initializers use ordinary compile-time name lookup. Forward references
+and circular value dependencies must be resolvable at compile time.
 
-> **Laser-D normative:**
->
-> When the base type is another enum, the first member may use
-> the base enum's default value or an explicit value. Every member after the
-> first must have an explicit initializer. Laser-D does not implicitly apply
-> arithmetic to produce the next value of another enum type.
+### Enum-based values
+
+When the base type is another enum, the first member may use the base enum's
+default value or an explicit base-enum value. Every following member has an
+explicit initializer:
 
 ```d
-enum Base : int { zero
-one }
+enum Base : int
+{
+    zero,
+    one,
+}
 
 enum Derived : Base
 {
-    first = Base.zero
-second = Base.one
+    first = Base.zero,
+    second = Base.one,
 }
 ```
 
-#### <a id="opaque-enums"></a>Opaque Enums
+This preserves the value domain of the base enum without applying implicit
+arithmetic to it.
 
-A named declaration with a base type and no body introduces an opaque enum.
+## Opaque enums
+
+A named enum declaration with a base type and no body introduces an opaque
+enum:
 
 ```d
 enum NativeHandle : uint;
 ```
 
-> **Laser-D normative:**
->
-> An opaque enum has a known size and alignment but no known
-> members and no default initializer. It may be used in declarations that supply
-> an explicit value, in function signatures, and for interoperability. A
-> default-initialized variable of opaque enum type is rejected.
+The base supplies the opaque enum's size and alignment. Its members and default
+value are unknown, so every object of the type is initialized with an explicit
+value:
 
-### <a id="enum_properties"></a>Enum Properties
+```d
+NativeHandle handle = cast(NativeHandle) 1u;
+```
 
-| Property | Meaning |
-| --- | --- |
-| `.init` | Value of the first declared member |
-| `.min` | Smallest declared member value |
-| `.max` | Largest declared member value |
-| `.sizeof` | Storage size of an enum value |
+Opaque enums may be used in function signatures, pointers, aggregates, and
+foreign interfaces.
 
-Computing `.min` and `.max` requires member values that the compiler
-can compare at compile time. Opaque enums have `.sizeof` through their base
-type but no member-dependent `.init`, `.min`, or `.max`. Generic
-compiler properties such as `.stringof` remain governed by the properties
-chapter.
-
-### <a id="enum_copying_and_assignment"></a>Copying and Assignment
-
-Enum values have ordinary value-copy and assignment semantics. They never
-invoke a struct copy constructor, move constructor, postblit, destructor, or
-assignment hook. Those aggregate lifecycle facilities are independently
-rejected or restricted by the struct and operator chapters.
-
-## <a id="anonymous_enums"></a>Anonymous Enums
+## Anonymous enums
 
 An enum declaration without a name introduces its members directly into the
-surrounding scope and does not create a new enum type.
+surrounding scope and does not create a named enum type:
 
 ```d
 enum
 {
-    bufferSize = 256
-retryCount = 3
+    bufferSize = 256,
+    retryCount = 3,
 }
 ```
 
-With an explicit base, every member has that base type. Without a base, a
-member's type is its explicitly written type, the type of its initializer, the
-previous member's type, or `int`, in that order where applicable. Every such
-type must itself be supported by Laser-D.
+With an explicit base, each member has that base type:
 
-Uninitialized anonymous members use the same initial-value and checked
-increment rules as named enums whose base is not another enum.
+```d
+enum : ushort
+{
+    readFlag = 1,
+    writeFlag = 2,
+}
+```
 
-### <a id="single_member"></a>Single-Member Syntax
+Without an explicit base, a member's type comes from its written type,
+initializer, previous member, or `int`, as applicable. Uninitialized members
+use the same checked increment rule as an integral-based named enum.
 
-A single anonymous member may omit braces. This form declares a manifest
-constant.
+## Manifest constants
+
+The single-member form declares a manifest constant:
 
 ```d
 enum pageSize = 4096;
 enum ulong elementSize = int.sizeof;
 ```
 
-## <a id="manifest_constants"></a>Manifest Constants
+A manifest constant:
 
-A manifest constant exists only at compile time. It has no runtime storage, is not an lvalue, and its address cannot be taken. Its initializer is evaluated
-by CTFE and must use only supported Laser-D constructs.
+- is evaluated at compile time;
+- has no runtime storage;
+- is not an lvalue; and
+- can be used wherever its value is valid at compile time.
 
 ```d
-d
 enum rows = 3;
 enum columns = 4;
 alias Matrix = int[columns][rows];
 
 static assert(Matrix.sizeof == rows * columns * int.sizeof);
-
 ```
 
-Manifest constants may be declared at module, aggregate, function, template, or other scopes where an ordinary declaration is permitted. They do not violate
-the rejection of mutable static storage because they have no runtime location.
+Manifest constants may be declared at module, aggregate, function, or template
+scope.
 
-## <a id="conversions"></a>Enum Conversions and Operations
+## Properties
 
-Enum casts, comparisons, arithmetic, bitwise operations, and switch behavior
-follow the type, expression, and statement chapters. Operations cannot produce
-a rejected type or invoke unavailable runtime support. A `final switch` over
-a defined named enum provides compile-time exhaustiveness checking over its
-declared members.
+Defined named enums provide:
 
-## <a id="conformance"></a>Conformance Boundary
+| Property | Meaning |
+| --- | --- |
+| `.init` | first declared member |
+| `.min` | member with the smallest declared value |
+| `.max` | member with the largest declared value |
+| `.sizeof` | storage size of the enum type |
+| `.alignof` | alignment of the enum type |
 
-Laser-D enum conformance includes named and anonymous enums, retained scalar
-and enum bases, explicit and checked implicit member values, ordinary enum
-properties, opaque enum types, manifest constants, value copying, and switch
-use. Attribute-bearing members, rejected base types, default initialization of
-opaque enums, and implicit continuation of enum-based member values are outside
-the language.
+`.min` and `.max` are compile-time values. An opaque enum provides layout
+properties derived from its base but has no member-dependent properties.
+
+The common compiler properties, including `.stringof` and `.mangleof`, are
+defined in the properties chapter.
+
+## Copying, conversion, and operations
+
+Enum values use ordinary value copying and assignment:
+
+```d
+Direction first = Direction.north;
+Direction second = first;
+```
+
+Comparisons, casts, integral operations, and bitwise operations follow the
+expression and conversion rules for the enum's base while preserving the
+requirements of the destination type.
+
+An ordinary `switch` may select enum values. A `final switch` over a defined
+named enum must cover its declared members, as specified by the statements
+chapter.
