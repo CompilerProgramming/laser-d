@@ -337,8 +337,8 @@ Several environmental version identifiers and identifier
 | `Std` | Defined when building the standard library |
 | `unittest` | Never predefined. |
 | `assert` | Checks are being emitted for AssertExpressions |
-| `D_PreConditions` | Checks are being emitted for [in contracts](function.md#contracts) |
-| `D_PostConditions` | Checks are being emitted for [out contracts](function.md#contracts) |
+| `D_PreConditions` | Never predefined. |
+| `D_PostConditions` | Never predefined. |
 | `D_Invariants` | Never predefined. |
 | *Special Cases* |  |
 | `none` | Never defined; used to just disable a section of code |

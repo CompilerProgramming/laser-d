@@ -1,20 +1,15 @@
----
-title: Functions
-status: restricted
-source: ../spec/function.dd
----
-
 # Functions
 
-Laser-D supports ordinary functions, struct methods, function pointers, non-capturing function and delegate literals, non-capturing delegates, and
-delegates to struct methods. Functions use an explicit, runtime-free calling
-model and remain subject to every Laser-D type and storage restriction.
+Laser-D functions are explicitly called, runtime-free callable units. The
+language supports free functions, struct and union methods, function pointers,
+non-capturing function and delegate literals, delegates to aggregate methods,
+function templates, and compile-time execution.
 
-## <a id="grammar"></a>Function Declarations
+## Declarations
 
 ```text
 FunctionDeclaration:
-    Type Identifier Parameters FunctionBody
+    ResultType Identifier Parameters FunctionBody
     auto Identifier Parameters FunctionBody
 
 Parameters:
@@ -26,552 +21,417 @@ ParameterList:
     Parameter , ParameterList
 
 Parameter:
-    ParameterStorageClass[] Type Identifier[]
-    ParameterStorageClass[] Type Identifier[] = AssignExpression
-
-ParameterStorageClass:
-    in
-    out
-    ref
+    Type Identifier
+    Type Identifier = DefaultArgument
+    in Type Identifier
+    in Type Identifier = DefaultArgument
+    out Type Identifier
+    ref Type Identifier
 
 FunctionBody:
     ;
     BlockStatement
 ```
 
-### Function Parameters
+A definition has a block body:
 
-Parameters are evaluated and matched from left to right according to the
-ordinary call and overload rules. A parameter with no storage-class annotation
-is passed by value. The only permitted source annotations are `in`, `out`, and `ref`.
+```d
+int add(int left, int right)
+{
+    return left + right;
+}
+```
 
-> **Rejected in Laser-D:**
->
-> Parameter annotations `scope`, `lazy`, `return`, `inout`, and `shared`, together with combinations derived from them, are
-> rejected. User-defined parameter attributes are also rejected.
+A declaration ending in `;` introduces a function whose definition is supplied
+by a separately compiled module or foreign library:
 
-### <a id="attributes"></a>Function Model and Attributes
+```d
+extern(C) int abs(int value);
+```
 
-> **Laser-D normative:**
->
-> Every Laser-D function and function type is implicitly
-> `nothrow`, `@nogc`, and `@system`. These properties apply to ordinary
-> functions, external declarations, methods, pointers, delegates, literals, templates, inferred functions, and frontend-generated helpers.
+The declaration and definition have compatible result types, parameter types,
+parameter passing, linkage, and calling conventions.
 
-The implicit attributes are language invariants and are not written in
-source. Attribute inference cannot weaken or strengthen them.
+## Fixed function model
 
-> **Rejected in Laser-D:**
->
-> Explicit `nothrow`, `@nogc`, `@system`, `@safe`, `@trusted`, `pure`, `@live`, `@property`, and `@disable` are
-> rejected. Function contracts and user-defined attributes are rejected
-> separately below.
+Every function and function type is:
 
-A struct method may use an `immutable` receiver. The rejected `const`, `inout`, and `shared` receiver qualifiers are unavailable.
+- `nothrow`;
+- `@nogc`;
+- `@system`; and
+- conservatively impure.
 
-### <a id="function-bodies"></a>Function Bodies
+These properties are part of the type even though they are not written in
+source. They apply to free functions, methods, external declarations, function
+pointers, delegates, literals, templates, inferred functions, and
+compiler-generated helpers.
 
-A function definition has a normal block body. Its statements and local
-declarations must use supported Laser-D constructs.
+A function body uses ordinary Laser-D statements, expressions, local
+declarations, and explicitly called foreign APIs.
 
-> **Rejected in Laser-D:** Contract-style `do` bodies, expression and block contracts, and body syntax belonging to rejected function facilities are not supported.
+## Parameters
 
-### <a id="function-declarations"></a>Function Prototypes
+A parameter without an annotation is passed by value:
 
-A declaration ending in `;` introduces a function without defining its
-body. This is used for separate compilation and C or supported C++ free-function
-interoperability. The declaration's type must match its definition and ABI.
+```d
+int doubled(int value)
+{
+    return value * 2;
+}
+```
 
-## <a id="contracts"></a>Function Contracts
+The supported parameter annotations are `in`, `out`, and `ref`.
 
-### <a id="preconditions"></a>Preconditions
+### `in`
 
-> **Rejected in Laser-D:**
->
-> Function `in` contract blocks and expressions are rejected.
-> The parameter annotation `in` is a distinct, supported parameter feature.
+An `in` parameter supplies an input value. The function does not use the
+parameter to replace the caller's value:
 
-### <a id="postconditions"></a>Postconditions
+```d
+int square(in int value)
+{
+    return value * value;
+}
+```
 
-> **Rejected in Laser-D:**
->
-> Function `out` contract blocks, result identifiers, and
-> contract-style `do` bodies are rejected. The parameter annotation `out`
-> is a distinct, supported parameter feature.
+The compiler may select an ABI-appropriate physical passing strategy without
+changing the source-level input semantics.
 
-Preconditions and postconditions may be expressed as ordinary explicitly
-called functions when desired.
+### `ref`
 
-## <a id="function-return-values"></a>Function Return Values
+A `ref` parameter aliases an initialized compatible caller lvalue:
 
-A function may return `void` or a supported value type. A value-returning
-function uses `return expression;`; a void function uses `return;` or
-reaches the end of its body where permitted.
+```d
+void increment(ref int value)
+{
+    ++value;
+}
+```
 
-Returning fixed arrays, structs, unions, enums, pointers, non-owning slices, function pointers, and delegates follows their respective value and lifetime
-rules. A returned slice or pointer does not acquire ownership or an extended
-lifetime.
+Changes made through the parameter affect the caller's object.
 
-> **Rejected in Laser-D:**
->
-> Source-level `ref` return values are rejected, including
-> `auto ref`, explicit constructor return annotations, and reference-returning
-> operator hooks. Return annotations on parameters are also rejected.
+### `out`
 
-## <a id="pure-functions"></a>Purity
+An `out` parameter aliases compatible caller storage for an output value:
 
-> **Rejected in Laser-D:**
->
-> Laser-D does not expose D's explicit or inferred `pure`
-> function property. Functions remain conservatively impure so calls to C and
-> explicitly managed state require no qualifier escape.
+```d
+void split(int value, out int quotient, out int remainder)
+{
+    quotient = value / 10;
+    remainder = value % 10;
+}
+```
 
-### <a id="weak-purity"></a>Purity Categories
+The parameter storage is initialized according to its type before the function
+body uses it.
 
-D's weak/strong purity distinction is not part of Laser-D.
+`ref` and `out` require lvalues. They allocate no storage and do not extend an
+object's lifetime.
 
-### <a id="pure-special-cases"></a>Purity Special Cases
+### Default arguments
 
-No special pure-function conversions or optimizations form part of the
-Laser-D language contract.
+A value parameter may have a compile-time-valid default expression:
 
-#### <a id="pure-debug"></a>Debugging Pure Functions
+```d
+int scale(int value, int factor = 2)
+{
+    return value * factor;
+}
 
-This upstream facility is unavailable because `pure` is rejected.
+int result()
+{
+    return scale(21);
+}
+```
 
-### <a id="pure-nested"></a>Pure Nested Functions
+The default is evaluated at the call site when the argument is omitted.
+Parentheses remain part of the call.
 
-This upstream facility is unavailable because `pure` is rejected.
+## Return values
 
-### <a id="pure-factory-functions"></a>Pure Factory Functions
+A function returns `void` or a supported value type.
 
-This upstream facility is unavailable because `pure` and implicit
-allocation are rejected.
+```d
+int answer()
+{
+    return 42;
+}
 
-### <a id="pure-optimization"></a>Purity Optimizations
+void consume(int value)
+{
+    return;
+}
+```
 
-Backend optimizations do not create source-visible purity guarantees.
+A value-returning function uses `return expression;`. A `void` function uses
+`return;` or reaches the end of its body where control flow permits.
 
-## <a id="nothrow-functions"></a>Non-Throwing Functions
+Fixed arrays, structs, unions, enums, pointers, slices, function pointers, and
+delegates are returned according to their value representation. Returning a
+pointer, slice, or delegate does not transfer ownership or extend the lifetime
+of referenced context or storage.
 
-Every function is implicitly non-throwing because D exceptions and
-`throw` are rejected. The `nothrow` keyword cannot be written explicitly.
+### Inferred result type
 
-## <a id="ref-functions"></a>Reference-Returning Functions
+`auto` infers a value result type from reachable return expressions:
 
-> **Rejected in Laser-D:**
->
-> Reference-returning functions are rejected. Functions return
-> values, pointers, or non-owning slices when caller-visible access is required.
+```d
+auto difference(int left, int right)
+{
+    return left - right;
+}
 
-## <a id="auto-functions"></a>Inferred Return Types
+static assert(is(typeof(difference(4, 2)) == int));
+```
 
-A function declared with `auto` may infer its value return type from all
-reachable return expressions. Every inferred type must be supported and the
-returns must have a common compatible type.
+All reachable value returns have a common compatible result type.
 
-## <a id="auto-ref-functions"></a>Inferred Reference Returns
+## Calls
 
-> **Rejected in Laser-D:**
->
-> `auto ref` and every inferred or explicit reference return
-> are rejected.
+A source-level call always uses parentheses:
 
-## <a id="inout-functions"></a>Inout Functions
+```d
+int callAnswer()
+{
+    return answer();
+}
+```
 
-> **Rejected in Laser-D:**
->
-> `inout` functions, receivers, parameters, returns, and
-> wildcard qualifier matching are rejected.
+Arguments are evaluated and matched to parameters using overload resolution.
+Each argument converts to its selected parameter type before the call.
 
-## <a id="optional-parenthesis"></a>Optional Parentheses
+Calling through a null function pointer or delegate is invalid.
 
-> **Rejected in Laser-D:**
->
-> Function and method calls always require explicit
-> parentheses, including zero-argument functions and functions whose parameters
-> all have default arguments.
+## Overloading
 
-## <a id="property-functions"></a>Property Functions
+Free functions and aggregate methods may share a name when their parameter
+types or immutable receiver status allow one unique best candidate:
 
-> **Rejected in Laser-D:**
->
-> User-defined `@property` functions and property-style
-> getter/setter calls are rejected. Executable source-defined behavior must look
-> like an explicit call.
+```d
+int magnitude(int value)
+{
+    return value < 0 ? -value : value;
+}
 
-## <a id="virtual-functions"></a>Virtual Functions
+double magnitude(double value)
+{
+    return value < 0.0 ? -value : value;
+}
+```
 
-> **Rejected in Laser-D:**
->
-> Virtual functions are unavailable because classes and
-> interfaces are rejected. Struct methods use static dispatch and have no hidden
-> virtual-function table.
+The result type alone does not distinguish overloads. Imports, aliases, and
+templates may contribute functions to an overload set. A call must have one
+best applicable function.
 
-### <a id="final"></a>Final Functions
+## Local variables
 
-Class/interface `final` semantics are unavailable. Any remaining
-declaration use of `final` is governed by the attribute review and is not
-implied by support for ordinary functions.
+Function-local variables have automatic storage unless they refer to storage
+provided explicitly by a caller or foreign API:
 
-### <a id="covariance"></a>Covariant Returns
+```d
+int calculate(int input)
+{
+    int temporary = input + 1;
+    return temporary * 2;
+}
+```
 
-Class and interface return covariance is unavailable with those object
-models.
+A function may contain deeply immutable static data with a compile-time
+initializer, as defined by the declarations chapter.
 
-### <a id="base-methods"></a>Base Methods
+## Aggregate methods
 
-There are no base methods or `super` calls in Laser-D.
+A struct or union method uses the aggregate as its explicit context:
 
-### <a id="function-inheritance"></a>Inherited Overloads
+```d
+struct Counter
+{
+    int value;
 
-Function inheritance and overriding are unavailable. Free-function and
-struct-method overload sets remain ordinary static overloads.
+    void increment()
+    {
+        ++value;
+    }
 
-### <a id="override-defaults"></a>Overridden Default Arguments
+    int read()
+    {
+        return value;
+    }
+}
+```
 
-Overriding is unavailable. Defaults on ordinary overloads are resolved at
-the selected declaration.
+Method selection is static and direct. Methods add no per-object storage.
 
-### <a id="inheriting-attributes"></a>Inherited Attributes
+An immutable receiver method places `immutable` after its parameter list:
 
-There is no class/interface attribute inheritance.
+```d
+struct Value
+{
+    int number;
 
-### <a id="override-restrictions"></a>Override Restrictions
+    int read() immutable
+    {
+        return number;
+    }
+}
+```
 
-Override-specific restrictions are unavailable because overriding is
-unavailable.
+## Function pointers
 
-## <a id="inline-functions"></a>Inlining
+A function pointer contains a code address and no context:
 
-Inlining is a compiler optimization and does not change Laser-D semantics.
-Source controls for forcing or preventing inlining remain governed by the
-pragma and attribute reviews.
+```d
+alias BinaryOperation = int function(int, int);
 
-## <a id="function-overloading"></a>Function Overloading
+int add(int left, int right)
+{
+    return left + right;
+}
 
-Free functions and struct methods may share a name when their parameter
-types or supported qualifiers allow overload resolution to select one unique
-candidate. Return type alone does not distinguish overloads.
+int invoke(BinaryOperation operation, int left, int right)
+{
+    return operation(left, right);
+}
+```
 
-### <a id="overload-sets"></a>Overload Sets
+Taking a free function's address produces a compatible function pointer:
 
-Imports, aliases, templates, and local declarations form overload sets under
-their respective scope rules. A call that has no unique best supported match is
-rejected.
+```d
+int callThroughPointer()
+{
+    BinaryOperation operation = &add;
+    return operation(20, 22);
+}
+```
 
-## <a id="parameters"></a>Function Parameters
+A non-capturing function literal may also initialize a function pointer:
 
-### <a id="param-storage"></a>Parameter Storage Classes
+```d
+int callLiteral()
+{
+    int function(int) increment =
+        function int(int value) { return value + 1; };
+    return increment(41);
+}
+```
 
-The only parameter storage-class annotations are `in`, `out`, and
-`ref`. An omitted annotation passes a normal value.
+Function-pointer assignment and argument passing require compatible function
+types.
 
-### <a id="in-params"></a>`in` Parameters
+## Delegates
 
-An `in` parameter is an input parameter. It cannot be used to return a
-replacement value to the caller. Its exact ABI passing strategy is selected by
-the compiler without changing source semantics.
+A delegate contains a context pointer and a function pointer.
 
-### <a id="ref-params"></a>`ref` and `out` Parameters
+A non-capturing delegate literal has no lexical state:
 
-A `ref` parameter aliases an initialized caller lvalue. An `out`
-parameter aliases caller storage for an output value and initializes that
-storage according to the parameter rules before the function body uses it.
+```d
+int callDelegateLiteral()
+{
+    int delegate(int) twice = (int value) => value * 2;
+    return twice(21);
+}
+```
 
-Both forms require a compatible caller lvalue and do not allocate or extend
-its lifetime.
+A delegate to a struct method uses the addressed struct object as its context:
 
-### <a id="lazy-params"></a>Lazy Parameters
+```d
+struct Offset
+{
+    int amount;
 
-> **Rejected in Laser-D:**
->
-> `lazy` parameters are rejected. They introduce implicit
-> deferred calls and delegate machinery.
+    int add(int value)
+    {
+        return amount + value;
+    }
+}
 
-### <a id="function-default-args"></a>Default Arguments
+int invokeMethod(ref Offset offset)
+{
+    int delegate(int) operation = &offset.add;
+    return operation(2);
+}
+```
 
-A parameter may have a compile-time-valid default expression. The expression
-is evaluated at the call site when that argument is omitted. The call must
-still include parentheses.
+The delegate does not own or extend the lifetime of its context.
 
-### <a id="return-ref-parameters"></a>Return-Ref Parameters
+Delegate `.ptr` and `.funcptr` expose the two represented pointers as described
+by the properties chapter.
 
-> **Rejected in Laser-D:**
->
-> `return`, `return ref`, and equivalent parameter
-> annotations are rejected.
+## Function and delegate literals
 
-#### <a id="struct-return-methods"></a>Struct Return Methods
+Function syntax and lambda syntax create anonymous callable values:
 
-Struct methods may return supported values, pointers, or slices but not
-references.
+```d
+int callLiterals()
+{
+    int function(int) increment =
+        function int(int value) { return value + 1; };
 
-### <a id="scope-parameters"></a>Scope Parameters
+    int delegate(int) doubled = (int value) => value * 2;
+    return increment(20) + doubled(10);
+}
+```
 
-> **Rejected in Laser-D:**
->
-> Explicit and inferred source `scope` parameters are not part
-> of Laser-D's function interface.
+Their parameters, result types, bodies, and implicit function properties follow
+the same rules as named functions. Laser-D delegate literals have no captured
+lexical variables.
 
-### <a id="return-scope-parameters"></a>Return-Scope Parameters
+## C variadic functions
 
-> **Rejected in Laser-D:** `return scope` parameters are rejected.
+An `extern(C)` function may end its parameter list with `...`:
 
-### <a id="ref-return-scope-parameters"></a>Ref Return-Scope Parameters
+```d
+extern(C) int firstArgument(int first, ...);
+alias CVariadicFunction = extern(C) int function(int first, ...);
+```
 
-> **Rejected in Laser-D:**
->
-> Combined `ref`, `return`, and `scope` lifetime
-> annotations are rejected.
+C variadic functions may be declared, defined, called, and used through
+function pointers. They have at least one named parameter and use the target C
+ABI.
 
-### <a id="pure-scope-inference"></a>Scope Inference
+A definition makes the target `va_list` declarations visible where required,
+normally by importing `core.stdc.stdarg`.
 
-Laser-D does not expose purity-based or safety-based scope inference as a
-source function property.
+Variadic template parameters are a separate compile-time template feature.
 
-### <a id="udas-parameters"></a>Parameter Attributes
+## Function templates
 
-> **Rejected in Laser-D:** User-defined attributes on parameters are rejected.
+A function template may infer template arguments from a call:
 
-### <a id="variadic"></a>Variadic Functions
+```d
+T maximum(T)(T left, T right)
+{
+    return left > right ? left : right;
+}
 
-Laser-D supports C ABI variadic functions solely for C interoperability.
-D runtime variadic forms are rejected. Variadic template parameters are a
-separate supported compile-time feature.
+static assert(maximum(3, 4) == 4);
+```
 
-#### <a id="c_style_variadic_functions"></a>C-Style Variadic Functions
+Explicit arguments, inference, specialization, defaults, and constraints follow
+the templates chapter. Every instantiated function follows this function
+model.
 
-> **Supported in Laser-D:**
->
-> A function type declared with `extern(C)` may end its
-> parameter list with `...`. Such functions may be declared, defined, called, and used through function pointers. Their arguments and return values use the
-> target C ABI. At least one named parameter is required. A definition must have
-> the target's `va_list` ABI declarations visible where the ABI requires them;
-> the usual source is `core.stdc.stdarg`.
+## Compile-time execution
 
-#### <a id="d_style_variadic_functions"></a>D-Style Variadic Functions
+A supported function may execute during compile-time function evaluation:
 
-> **Rejected in Laser-D:**
->
-> D-style untyped variadic functions are rejected. Laser-D does
-> not provide the hidden TypeInfo argument list used by that calling convention.
+```d
+int square(int value)
+{
+    return value * value;
+}
 
-#### <a id="typesafe_variadic_functions"></a>Typesafe Variadic Functions
+enum sixteen = square(4);
+```
 
-> **Rejected in Laser-D:**
->
-> Typesafe runtime variadic parameters are rejected. Callers
-> must pass an explicit supported aggregate or use variadic template parameters
-> when compile-time expansion is intended.
+Compile-time execution uses the same function body and language semantics as
+runtime execution.
 
-#### <a id="lazy_variadic_functions"></a>Lazy Variadic Functions
+## Uniform function call syntax
 
-> **Rejected in Laser-D:**
->
-> Lazy variadic parameters are rejected by both the lazy
-> parameter and runtime variadic restrictions. Laser-D does not create implicit
-> delegates for variadic arguments.
-
-### <a id="hidden-parameters"></a>Hidden Parameters
-
-Struct methods receive their object context, and delegates contain an
-explicit context pointer as part of the delegate value. Laser-D rejects class
-context, closure capture, hidden-context nested structs, and hidden lifetime or
-TypeInfo parameter protocols.
-
-## <a id="refscopereturn"></a>Ref/Scope/Return Classification
-
-### <a id="rsr_definitions"></a>Definitions
-
-### <a id="rsr_classification"></a>Classification
-
-### <a id="rsr_mapping"></a>Syntax Mapping
-
-### <a id="rsr_memberfunctions"></a>Member Functions
-
-### <a id="rsr_PandRef"></a>Pointer and Reference Cases
-
-### <a id="rsr_covariance"></a>Variance
-
-> **Rejected in Laser-D:**
->
-> D's ref/scope/return lifetime-classification system is not a
-> Laser-D source feature. The anchors above are retained for links from excluded
-> upstream chapters.
-
-## <a id="Local Variables"></a>Local Variables
-
-Function-local variables use automatic storage unless explicitly provided
-through supported external/manual storage. Their initialization and cleanup use
-the ordinary declaration and statement rules.
-
-### <a id="Local Static Variables"></a>Local Static Variables
-
-> **Rejected in Laser-D:**
->
-> Mutable function-static storage is rejected. Eligible deeply
-> immutable static values remain governed by the declaration and qualifier
-> chapters.
-
-## <a id="nested"></a>Named Nested Functions
-
-> **Rejected in Laser-D:**
->
-> Named functions declared inside another function are rejected, including capturing, context-free, and `static` forms. Use a module-level
-> helper or a non-capturing function literal.
-
-### <a id="nested-qualifiers"></a>Nested Function Qualifiers
-
-Nested functions cannot restore rejected qualifiers or attributes.
-
-### <a id="nested-declaration-order"></a>Nested Declaration Order
-
-Nested-function declaration order is unavailable because named nested
-functions are rejected.
-
-## <a id="function-pointers-delegates"></a>Function Pointers and Delegates
-
-### <a id="function-pointers"></a>Function Pointers
-
-A function pointer stores a callable code address with a compatible
-function type. Taking the address of a free function, assigning a non-capturing
-function literal, passing the pointer, and calling it with explicit parentheses
-are supported.
-
-### <a id="closures"></a>Delegates and Closures
-
-A delegate stores a context pointer and function pointer. Non-capturing
-delegate literals are supported and have no captured lexical state.
-
-> **Rejected in Laser-D:**
->
-> A function or delegate literal that captures a local variable
-> is rejected. Named nested functions are rejected separately. Laser-D does not
-> allocate or preserve closure frames.
-
-### <a id="method-delegates"></a>Method Delegates
-
-A delegate to a struct method is supported. Its context explicitly identifies
-the struct value on which the method operates; this is not lexical closure
-capture.
-
-### <a id="function-pointer-attributes"></a>Function-Type Attributes
-
-Function pointer and delegate types carry the same implicit `nothrow`, `@nogc`, and `@system` invariants as declarations. Explicit spellings and
-rejected attributes are diagnosed.
-
-### <a id="function-delegate-init"></a>Pointer and Delegate Initialization
-
-Null initialization, compatible assignment, address-taking, and supported
-explicit conversions follow the normal type rules. A null pointer or delegate
-cannot be called validly.
-
-### <a id="anonymous"></a>Function and Delegate Literals
-
-Non-capturing function literals, lambdas, and delegate literals are
-supported. Their parameter, return, body, and attribute surface is the same
-restricted Laser-D function surface.
-
-## <a id="main"></a>Program Entry Point
-
-> **Supported in Laser-D:**
->
-> An executable Laser-D program shall define exactly one of:
->
->
->
-> ```d
-> extern(C) int main();
-> extern(C) int main(int argc, char argv);
-> ```
->
->
->
-> The entry point is explicit and uses the target C runtime ABI. A library need
-> not define an entry point.
-
-> **Rejected in Laser-D:**
->
-> D-linkage `main`, `string[]` arguments, inferred, `void`, or `noreturn` return types, other parameter lists, the POSIX
-> third environment-pointer parameter, and the special `WinMain` and
-> `DllMain` entry points are rejected. The `-main` compiler option is
-> rejected because it would silently generate an entry point.
-
-ImportC source retains C entry-point rules. Frontend-generated function
-helpers needed by otherwise supported constructs are implementation details, not additional source-level entry points.
-
-## <a id="function-templates"></a>Function Templates
-
-Function templates, inference, specialization, and constraints are
-supported by the template chapter. Every instantiated function must obey this
-chapter.
-
-## <a id="interpretation"></a>Compile-Time Function Execution
-
-Supported functions may execute during CTFE. CTFE does not relax any
-Laser-D restriction and cannot perform compile-time file I/O or output.
-
-### <a id="string-mixins"></a>CTFE and String Mixins
-
-> **Rejected in Laser-D:**
->
-> CTFE may compute strings as values but cannot reparse them as
-> source through a string mixin.
-
-## <a id="nogc-functions"></a>No-GC Functions
-
-Every function is implicitly `@nogc`. The attribute cannot be written, and no function may use an operation requiring GC allocation.
-
-## <a id="function-safety"></a>Function Safety
-
-Every function is implicitly `@system`. Laser-D does not provide D's
-checked memory-safety subset or trusted boundary.
-
-### <a id="safe-functions"></a>Safe Functions
-
-> **Rejected in Laser-D:** Explicit or inferred `@safe` functions are rejected.
-
-#### Safe External Functions
-
-External functions remain implicitly `@system`.
-
-### <a id="trusted-functions"></a>Trusted Functions
-
-> **Rejected in Laser-D:** `@trusted` functions are rejected.
-
-### <a id="system-functions"></a>System Functions
-
-All functions are implicitly system functions; explicit `@system` is
-rejected because it is redundant.
-
-### <a id="safe-interfaces"></a>Safe Interfaces
-
-Interfaces and safe-interface rules are unavailable.
-
-### <a id="safe-values"></a>Safe Values
-
-No value acquires D safety guarantees from a function annotation.
-
-### <a id="null-dereferences"></a>Null Dereferences
-
-Calling through a null function pointer/delegate or dereferencing a null
-pointer is invalid. Implicit `@system` does not insert a safety proof.
-
-### <a id="safe-aliasing"></a>Safety Aliasing Rules
-
-D's `@safe` aliasing restrictions are not Laser-D guarantees.
-
-## <a id="function-attribute-inference"></a>Function Attribute Inference
-
-Return type inference with `auto` is supported. Safety, purity, GC, and
-throwing attributes are not inferred: the Laser-D function invariants are fixed
-for every function type.
-
-## <a id="pseudo-member"></a>Uniform Function Call Syntax (UFCS)
-
-UFCS is supported for an ordinary free function whose first parameter
-matches the expression before the dot. The call must use explicit parentheses, and UFCS does not create property behavior.
+Uniform function call syntax (UFCS) rewrites a method-shaped call to an
+ordinary free-function call when the expression before the dot matches the
+first parameter:
 
 ```d
 int twice(int value)
@@ -579,15 +439,34 @@ int twice(int value)
     return value * 2;
 }
 
-int result = 3.twice();
+int calculate()
+{
+    return 3.twice();
+}
 ```
 
-## <a id="conformance"></a>Conformance Boundary
+The call uses parentheses and ordinary overload resolution.
 
-The established function subset includes ordinary declarations and bodies, prototypes, value returns and inference, explicit calls, static overloads, `in`/`out`/`ref` parameters, default arguments, local automatic
-variables, function pointers, non-capturing literals and delegates, struct
-method delegates, UFCS, function templates, and CTFE. Rejected attributes, contracts, reference returns, lifetime annotations, lazy parameters, closure
-capture, virtual dispatch, property calls, and optional parentheses are outside
-the language. Named nested functions and D runtime variadics are rejected; C
-ABI variadics are supported. Executables use one of the two explicit C
-`main` signatures specified above.
+## Program entry point
+
+An executable defines exactly one of:
+
+```d
+extern(C) int main();
+extern(C) int main(int argc, char** argv);
+```
+
+The definition uses the target C runtime ABI and returns an integer status:
+
+```d
+extern(C) int main()
+{
+    return 0;
+}
+```
+
+A library does not define an entry point. ImportC translation units retain
+their C entry-point handling.
+
+Compiler-generated helpers required to implement another supported construct
+are implementation details and do not add source-level entry-point forms.

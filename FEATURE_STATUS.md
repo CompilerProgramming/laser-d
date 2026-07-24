@@ -268,6 +268,8 @@ Each chapter should be split into individual features as it is investigated.
 
 | Feature | Status | Decision | Tests |
 | --- | --- | --- | --- |
+| Function inlining controls | Undecided | Review source attributes, pragmas, and command-line controls which request or suppress inlining. Backend inlining without a source-visible semantic change remains an implementation optimization. | None |
+| Platform calling conventions | Undecided | Review `extern(Windows)`, `extern(System)`, and any other platform-specific calling conventions for portability across Windows, Linux, and macOS. Native, C, and reviewed C++ free-function linkage retain their existing classifications. | None |
 | Ordinary functions and function pointers | Supported | Direct calls, taking function addresses, indirect calls, and non-capturing function literals converted to function pointers are supported. | `functions_and_function_pointers_accepted.d` |
 | Delegates | Supported | Non-capturing delegate literals and delegates to struct methods are supported as context-and-function-pointer values. | `delegates_accepted.d` |
 | Capturing delegates and closures | Rejected | Function and delegate literals cannot capture lexical state, regardless of whether the context is stack-scoped or would require heap allocation. Named nested functions are rejected separately. | `capturing_delegates_rejected.d` |
