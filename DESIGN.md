@@ -670,3 +670,13 @@ devoted entirely to absent D features are removed from the Markdown
 specification once their decisions have been preserved in that compatibility
 document. The historical Ddoc sources remain under `spec/` during the
 transition.
+
+The expression specification follows that organization by documenting only
+the reviewed Laser-D core: scalar operators, assignment, explicit calls,
+indexing and slicing, supported primary expressions, non-capturing function
+literals, and compile-time assertions. Upstream expression semantics which
+have not received focused review are not treated as accidental guarantees.
+Comma expressions, named arguments, exact evaluation and temporary-lifetime
+rules, built-in aggregate equality, membership expressions, numeric edge
+semantics, low-level reinterpretation casts, and `delete` are recorded as
+distinct undecided features in `FEATURE_STATUS.md`.

@@ -6,326 +6,159 @@ source: ../spec/expression.dd
 
 # Expressions
 
-> **Laser-D normative:**
->
-> Expressions compute values, select storage, call functions, and perform explicit side effects using supported Laser-D types. Expression
-> syntax never restores an excluded type, allocation model, runtime service, or
-> implicit function call.
+Expressions compute values, designate storage, call functions, and perform
+explicit side effects. An expression is valid only when every type and language
+facility it uses is part of Laser-D.
 
-## <a id="Expression"></a>Expression Grammar
+This chapter specifies the reviewed expression forms. Differences from D are
+summarized in [D compatibility notes](d-compatibility.md). Expression forms
+awaiting a decision are listed in [Feature status](../FEATURE_STATUS.md).
+
+## Values and storage
+
+An lvalue designates storage. Variables, mutable fields, pointer
+dereferences, built-in indexing, and assignments are lvalues when their
+underlying storage is mutable. Indexing a mutable slice designates its backing
+storage; the slice itself does not own that storage.
+
+Literals, manifest constants, and function results are values rather than
+lvalues. Index operators return values; an overloaded index is changed through `opIndexAssign`,
+`opIndexOpAssign`, or `opIndexUnary`.
+
+Taking an address requires addressable storage. A pointer or slice does not own
+or extend the lifetime of the storage it refers to.
+
+## Core operators
+
+The reviewed scalar expression operators are:
 
 ```text
-Expression:
-    CommaExpression
+Assignment:
+    =
+    +=  -=  *=  /=  %=
+    &=  |=  ^=
+    <<=  >>=
 
-CommaExpression:
-    AssignExpression
-    CommaExpression , AssignExpression
+Logical:
+    !
+    &&
+    ||
 
-AssignExpression:
-    ConditionalExpression
-    ConditionalExpression = AssignExpression
-    ConditionalExpression += AssignExpression
-    ConditionalExpression -= AssignExpression
-    ConditionalExpression *= AssignExpression
-    ConditionalExpression /= AssignExpression
-    ConditionalExpression %= AssignExpression
-    ConditionalExpression &= AssignExpression
-    ConditionalExpression |= AssignExpression
-    ConditionalExpression ^= AssignExpression
-    ConditionalExpression ~= AssignExpression
-    ConditionalExpression <<= AssignExpression
-    ConditionalExpression >>= AssignExpression
-    ConditionalExpression >>>= AssignExpression
-    ConditionalExpression ^^= AssignExpression
+Conditional:
+    condition ? whenTrue : whenFalse
 
-ConditionalExpression:
-    OrOrExpression
-    OrOrExpression ? Expression : ConditionalExpression
+Bitwise:
+    &
+    |
+    ^
+    ~
+    <<
+    >>
 
-OrOrExpression:
-    AndAndExpression
-    OrOrExpression || AndAndExpression
+Comparison:
+    ==
+    !=
+    is
+    !is
+    <
+    <=
+    >
+    >=
 
-AndAndExpression:
-    OrExpression
-    AndAndExpression && OrExpression
+Arithmetic:
+    unary +
+    unary -
+    +
+    -
+    *
+    /
+    %
+    ++
+    --
+```
 
-OrExpression:
-    XorExpression
-    OrExpression | XorExpression
+The operands must have supported types and must satisfy the normal type
+conversion rules. `&&` and `||` short-circuit. The conditional expression
+evaluates only its selected result expression.
 
-XorExpression:
-    AndExpression
-    XorExpression ^ AndExpression
+The left operand of assignment must be a modifiable lvalue. Simple assignment
+converts the right operand to the destination type. Compound assignment
+evaluates the destination as a single storage location, performs the selected
+operation, and stores the result.
 
-AndExpression:
-    CmpExpression
-    AndExpression & CmpExpression
+`is` and `!is` test representation identity. For pointers they compare
+addresses. For slices they compare both pointer and length.
 
-CmpExpression:
-    EqualExpression
-    IdentityExpression
-    RelExpression
-    InExpression
-    ShiftExpression
+Modern struct operator overloads may provide the corresponding behavior for
+value types. See [Operator overloading](operatoroverloading.md).
 
-EqualExpression:
-    ShiftExpression == ShiftExpression
-    ShiftExpression != ShiftExpression
+## Addresses and indirection
 
-IdentityExpression:
-    ShiftExpression is ShiftExpression
-    ShiftExpression ! is ShiftExpression
+`&expression` produces a non-owning pointer to addressable storage.
+`*pointer` designates the pointed-to storage. The programmer is responsible for
+ensuring that the pointer is non-null, correctly aligned, within the lifetime
+of the referred object, and valid for the operation.
 
-RelExpression:
-    ShiftExpression < ShiftExpression
-    ShiftExpression <= ShiftExpression
-    ShiftExpression > ShiftExpression
-    ShiftExpression >= ShiftExpression
+Pointer indexing and explicit pointer slicing are supported systems
+operations.
 
-InExpression:
-    ShiftExpression in ShiftExpression
-    ShiftExpression ! in ShiftExpression
+## Explicit conversion
 
-ShiftExpression:
-    AddExpression
-    ShiftExpression << AddExpression
-    ShiftExpression >> AddExpression
-    ShiftExpression >>> AddExpression
-
-AddExpression:
-    MulExpression
-    AddExpression + MulExpression
-    AddExpression - MulExpression
-    AddExpression ~ MulExpression
-
-MulExpression:
-    UnaryExpression
-    MulExpression * UnaryExpression
-    MulExpression / UnaryExpression
-    MulExpression % UnaryExpression
-
-UnaryExpression:
-    & UnaryExpression
-    ++ UnaryExpression
-    -- UnaryExpression
-    * UnaryExpression
-    - UnaryExpression
-    + UnaryExpression
-    ! UnaryExpression
-    ComplementExpression
-    CastExpression
-    PowExpression
-
-ComplementExpression:
-    ~ UnaryExpression
-
+```text
 CastExpression:
     cast ( Type ) UnaryExpression
+```
 
-PowExpression:
-    PostfixExpression
-    PostfixExpression ^^ UnaryExpression
+`cast(T) expression` explicitly converts an expression to supported type `T`
+when that conversion has been reviewed. Scalar numeric conversions are
+supported. A modern `opCast` overload may define conversion of a struct value.
 
-PostfixExpression:
-    PrimaryExpression
-    PostfixExpression . Identifier
-    PostfixExpression . TemplateInstance
-    PostfixExpression ++
-    PostfixExpression --
-    PostfixExpression ( NamedArgumentList[] )
-    TypeCtors[] BasicType ( NamedArgumentList[] )
-    PostfixExpression IndexOperation
-    PostfixExpression SliceOperation
+A cast target must be a supported Laser-D type and qualifier.
+
+## Calls
+
+Functions, function pointers, delegates, struct constructors, templates,
+operator calls, and UFCS calls use an explicit parenthesized argument list.
+Arguments bind positionally and are evaluated once. An omitted trailing
+parameter must have a supported default argument.
+
+```text
+CallExpression:
+    PostfixExpression ( )
+    PostfixExpression ( ArgumentList )
 
 ArgumentList:
     AssignExpression
     AssignExpression ,
     AssignExpression , ArgumentList
+```
 
-NamedArgumentList:
-    NamedArgument
-    NamedArgument ,
-    NamedArgument , NamedArgumentList
+## Indexing and slicing
 
-NamedArgument:
-    Identifier : AssignExpression
-    AssignExpression
-
+```text
 IndexOperation:
     [ ArgumentList ]
 
 SliceOperation:
     [ ]
-    [ Slice ]
-    [ Slice , ]
-
-Slice:
-    AssignExpression
-    AssignExpression , Slice
-    AssignExpression .. AssignExpression
-    AssignExpression .. AssignExpression , Slice
+    [ AssignExpression .. AssignExpression ]
 ```
 
-## <a id="definitions-and-terms"></a>Values and Storage
+Fixed arrays, slices, and pointers support one-dimensional indexing. Within a
+built-in index or slice operation, `$` denotes the current length when the
+operand has one.
 
-### <a id=".define-lvalue"></a>Lvalues
+Slicing a fixed array, slice, or explicit pointer range produces a non-owning
+slice. The backing storage must remain alive for every use of that slice.
 
-An lvalue designates writable or addressable storage. Variables, mutable
-fields, pointer dereferences, built-in array indexing, and assignments are
-lvalues where their underlying storage is mutable. A slice value is not an
-owner, but indexing a mutable slice designates its backing storage.
+Structs may provide one-dimensional and multidimensional indexing, slicing,
+assignment, compound assignment, unary mutation, and `$` through the modern
+operator hooks. See [Arrays](arrays.md) and
+[Operator overloading](operatoroverloading.md).
 
-Function results are values, not lvalues, because Laser-D rejects reference
-returns. Operator overloads likewise return values; index mutation uses
-`opIndexAssign`, `opIndexOpAssign`, or `opIndexUnary` rather than a
-reference-returning `opIndex`.
+## Primary expressions
 
-### <a id=".define-rvalue"></a>Rvalues
-
-Literals, manifest constants, function results, and other expressions not
-designating storage are rvalues. Taking an address and binding a local
-`ref` variable require an lvalue.
-
-### <a id=".define-full-expression"></a>Full Expressions
-
-A full expression is an expression not contained within another expression.
-Temporary scalar and aggregate values live until the end of their full
-expression. Laser-D has no destructor or postblit hook to run implicitly at
-that boundary.
-
-## <a id="order-of-evaluation"></a>Evaluation Order
-
-Ordinary binary operands are evaluated left to right. `&&` and `||`
-evaluate the right operand only when required. The conditional operator
-evaluates its condition and then exactly one branch. D-linkage call targets and
-arguments are evaluated left to right; foreign linkage follows the applicable
-ABI.
-
-## <a id="assign_expressions"></a>Assignment
-
-### <a id="simple_assignment_expressions"></a>Simple Assignment
-
-The left operand must be a modifiable lvalue. The right operand converts to
-the destination type. Struct assignment copies value storage without a
-user-defined postblit. Fixed-array and slice assignment follow the arrays
-chapter; assignment cannot resize a slice.
-
-### <a id="assignment_operator_expressions"></a>Compound Assignment
-
-`a op= b` evaluates `a` once, performs the corresponding operation, and stores the converted result. Modern struct overloads use the operator
-overloading hooks defined by that chapter.
-
-## <a id="logical_expressions"></a>Logical and Conditional Expressions
-
-`!`, `&&`, and `||` use Boolean conversion. The latter two
-short-circuit. `condition ? yes : no` evaluates only the selected branch and
-produces their common supported type.
-
-## <a id="bitwise_expressions"></a>Bitwise and Shift Expressions
-
-`&`, `|`, `^`, `~`, `<<`, `>>`, and `>>>` operate on
-integral values after the integer conversions defined by the types chapter.
-A compile-time invalid shift count is rejected; invalid runtime shift counts
-are implementation-defined.
-
-## <a id="compare_expressions"></a>Comparisons
-
-### <a id="equality_expressions"></a>Equality
-
-`==` and `!=` compare supported scalars, pointers, enums, structs
-with supported equality, and compatible fixed arrays or slices. Slice equality
-compares length and elements and does not allocate.
-
-### <a id="identity_expressions"></a>Identity
-
-`is` and `!is` compare representation identity. For pointers this
-compares addresses; for slices it compares pointer and length. Laser-D has no
-class or interface identity.
-
-### <a id="array_comparisons"></a>Array and Slice Comparisons
-
-Equality and identity are supported for compatible arrays and slices.
-Ordered comparisons `<`, `<=`, `>`, and `>=` are rejected because
-their D implementation requires a runtime comparison hook.
-
-### <a id="struct_equality"></a>Struct Equality
-
-Struct equality uses a supported `opEquals` overload when present;
-otherwise it compares fields according to their supported equality semantics.
-
-### <a id="class-comparisons"></a>Class Comparisons (Excluded)
-
-> **Excluded from Laser-D:** Class and interface comparisons are unavailable.
-
-## <a id="arithmetic_expressions"></a>Arithmetic
-
-Supported numeric values provide unary sign, addition, subtraction, multiplication, division, remainder, and exponentiation under the conversions
-defined by the types chapter. Integer overflow wraps to the destination width.
-Integer division by zero and signed minimum divided by negative one are invalid;
-when encountered at runtime their behavior is undefined.
-
-### <a id="pointer_arithmetic"></a>Pointer Arithmetic
-
-Adding or subtracting an integer from `T*` advances by multiples of
-`T.sizeof`. Subtracting pointers into the same object yields `ptrdiff_t`.
-Producing or dereferencing an invalid pointer is undefined.
-
-### <a id="CatExpression"></a>Concatenation (Excluded)
-
-> **Excluded from Laser-D:**
->
-> Built-in array and string concatenation with `~` or
-> `~=` is rejected because it requires allocation. The tokens remain in the
-> grammar for modern operator overloading.
-
-## <a id="cast_expressions"></a>Casts
-
-`cast(T) expression` performs an explicit conversion to a supported
-type `T`. It cannot cast to a rejected scalar family, class, interface, associative array, vector, or rejected qualifier.
-
-### <a id="cast_pointers"></a>Pointer Casts
-
-Pointer casts reinterpret an address and do not establish alignment, lifetime, bounds, or ownership.
-
-### <a id="cast_array"></a>Array and Slice Casts
-
-Array and slice casts are limited by the fixed-storage and non-owning-view
-rules in the arrays chapter.
-
-### <a id="cast_class"></a>Class Casts (Excluded)
-
-> **Excluded from Laser-D:** Class casts and runtime checked casts are unavailable.
-
-## <a id="postfix_expressions"></a>and Slicing
-
-### <a id="argument-list"></a>Function Arguments
-
-Functions, function pointers, delegates, constructors, templates, operator
-calls, and UFCS calls require an explicit parenthesized argument list. Named
-and positional arguments bind to parameters once; omitted parameters must have
-a supported default argument.
-
-#### <a id="argument-parameter-matching"></a>Argument Matching
-
-Positional arguments bind in order. A named argument binds the parameter
-with that name. A parameter cannot be bound twice. Every remaining parameter
-must have a default.
-
-### <a id="index_operations"></a>Indexing
-
-Fixed arrays, slices, and pointers support one-dimensional indexing.
-`$` is the current length where available. Struct operators may implement
-one- and multidimensional indexing using the modern hooks.
-
-### <a id="slice_operations"></a>Slicing
-
-Slicing fixed arrays, slices, or explicit pointer ranges produces a
-non-owning slice. Bounds and lifetime remain the programmer's responsibility.
-Modern struct hooks may implement dimension-tagged slicing.
-
-## <a id="primary_expressions"></a>Primary Expressions
+The reviewed primary forms are:
 
 ```text
 PrimaryExpression:
@@ -335,10 +168,7 @@ PrimaryExpression:
     . TemplateInstance
     $
     LiteralExpression
-    FundamentalType . Identifier
-    TypeCtor[] ( Type ) . Identifier
-    FundamentalType ( NamedArgumentList[] )
-    TypeCtor[] ( Type ) ( NamedArgumentList[] )
+    FundamentalType ( ArgumentList? )
     Typeof
     IsExpression
     ( Expression )
@@ -348,90 +178,59 @@ PrimaryExpression:
 LiteralExpression:
     this
     null
-    true_falsetrue
+    true
     false
     IntegerLiteral
     FloatLiteral
-    CharacterLiteralcharacter-literalCharacterLiteral
+    CharacterLiteral
     StringLiteral
     FunctionLiteral
 ```
 
-> **Laser-D normative:**
->
-> The primary-expression grammar is fully classified.
-> Identifiers, root-qualified identifiers, template instances, `$` in an
-> indexing context, literals of retained types, retained compiler properties, scalar construction, `typeof`, `is`, parentheses, the supported special
-> keywords, and non-capturing function literals are available. Each form remains
-> subject to its type and feature-specific restrictions.
+Root-qualified names, template instances, parentheses, properties of supported
+types, scalar construction, `typeof`, `is`, traits, and non-capturing function
+literals are supported subject to their feature-specific rules.
 
-> **Excluded from Laser-D:**
->
-> Primary forms that allocate, require runtime type metadata, perform compile-time file I/O, inject source text, introduce a rejected type, or depend on classes are unavailable. This includes dynamic and associative
-> array literals, `typeid`, import expressions, string mixin expressions, `new`, `super`, and literals or properties belonging to rejected scalar
-> families.
+### `this`
 
-### <a id="this"></a>`this`
+Within a struct or union constructor or instance method, `this` denotes the
+current value. It may qualify a field, be passed or returned by value, have its
+address taken, and form a delegate to a method. `typeof(this)` yields the
+receiver type without evaluating it. A template `this` parameter may infer a
+mutable or immutable receiver type.
 
-> **Supported in Laser-D:**
->
-> Inside a struct or union constructor or instance method, `this` denotes the current value. It may qualify field access, be passed or
-> returned by value, have its address taken as a non-owning pointer, and form a
-> delegate to a method. `typeof(this)` yields the receiver type without
-> evaluating it. Template `this` parameters may infer a mutable or immutable
-> receiver type.
+A pointer or delegate derived from `this` does not own or extend the receiver
+lifetime.
 
-A pointer or delegate derived from `this` does not own or extend the
-receiver lifetime. Structs and unions have no inheritance or hidden virtual
-table. Member aggregate types have no enclosing value instance, and local
-structs that require a hidden outer context are rejected. Reference returns, closure capture, constructor delegation, and `alias this` remain governed
-by their separate rejection rules.
+### `null`
 
-### <a id="super"></a>`super` (Excluded)
+`null` converts to a pointer, slice, function pointer, or delegate.
 
-> **Excluded from Laser-D:**
->
-> `super` has no meaning because Laser-D structs do not
-> inherit and native classes and interfaces are rejected.
+### String literals
 
-### <a id="null"></a>`null`
+String literals occupy immutable, compiler-provided static storage and are
+viewed through non-owning character slices. Their operations are specified in
+[Arrays](arrays.md).
 
-`null` converts to a pointer, slice, function pointer, or delegate. It
-does not represent a class or associative-array reference.
-
-### <a id="StringLiteral"></a>String Literals
-
-String literals are immutable, compiler-provided static storage viewed
-through a non-owning character slice.
-
-### <a id="function_literals"></a>Function Literals
+### Function literals
 
 ```text
 FunctionLiteral:
-    function BasicTypeWithSuffixes[] Parameters[] FunctionLiteralBody
-    delegate BasicTypeWithSuffixes[] Parameters[] FunctionLiteralBody
+    function ReturnType? Parameters FunctionLiteralBody
+    delegate ReturnType? Parameters FunctionLiteralBody
     Parameters FunctionLiteralBody
     Identifier => AssignExpression
 
-BasicTypeWithSuffixes:
-    BasicType TypeSuffixes[]
-
 FunctionLiteralBody:
     => AssignExpression
-    SpecifiedFunctionBody
+    FunctionBody
 ```
 
-Non-capturing function and delegate literals are supported, including
-parameter and return-type inference. A literal that captures an enclosing local
-variable is rejected. Function contracts, ref results, and `auto ref` are
-also rejected.
+Non-capturing function and delegate literals are supported. Parameter and
+return types may be inferred at compile time. Inference cannot introduce an
+excluded type or function feature.
 
-#### <a id="lambda-type-inference"></a>Lambda Type Inference
-
-Omitted parameter or result types are inferred at compile time. Inference
-cannot produce an excluded type or attribute.
-
-### <a id="is_expression"></a>`is` Expressions
+### `is` expressions
 
 ```text
 IsExpression:
@@ -441,24 +240,12 @@ IsExpression:
     is ( Type Identifier )
     is ( Type Identifier : TypeSpecialization )
     is ( Type Identifier == TypeSpecialization )
-
-TypeSpecialization:
-    Type
-    TypeCtor
-    struct
-    union
-    enum
-    function
-    delegate
-    return
-    __parameters
-    module
-    package
 ```
 
-`is` performs compile-time validity, equivalence, conversion, category, and pattern-deduction queries over the supported type system. Class, interface, vector, and `super` specializations are absent.
+An `is` expression performs a compile-time validity, equivalence, conversion,
+category, or pattern-deduction query over the supported type system.
 
-### <a id="specialkeywords"></a>Special Keywords
+### Special keywords
 
 ```text
 SpecialKeyword:
@@ -470,101 +257,16 @@ SpecialKeyword:
     __PRETTY_FUNCTION__
 ```
 
-These keywords produce compile-time source-location and symbol strings or
-the current source line. They allocate no runtime storage.
+These keywords provide compile-time source-location or symbol information.
+They require no runtime service.
 
-## <a id="excluded_primary"></a>Excluded Primary Expressions
+## Compile-time assertions
 
-### <a id="array_literals"></a>Array Literals (Excluded)
+```text
+StaticAssert:
+    static assert ( AssignExpression ) ;
+    static assert ( AssignExpression , AssignExpression ) ;
+```
 
-#### <a id="array-literal-heap"></a>Runtime Array Literal Allocation
-
-> **Excluded from Laser-D:**
->
-> Dynamic array literal expressions are rejected. Fixed-array
-> and static-data initializers use declaration initializer syntax instead.
-
-### <a id="associative_array_literals"></a>Associative Array Literals (Excluded)
-
-#### <a id="AssocArrayLiteral"></a>Associative Array Literal Grammar
-
-> **Excluded from Laser-D:** Associative-array types and literals are rejected.
-
-### <a id="mixin_expressions"></a>String Mixin Expressions (Excluded)
-
-> **Excluded from Laser-D:**
->
-> Compile-time source-text injection with `mixin(expression)`
-> is rejected. Template mixins are separate.
-
-### <a id="import_expressions"></a>Compile-Time Import Expressions (Excluded)
-
-> **Excluded from Laser-D:**
->
-> `import("file")` is rejected because source-selected
-> compile-time file I/O is disabled.
-
-### <a id="new_expressions"></a>`new` Expressions (Excluded)
-
-#### <a id="NewExpression"></a>New Expression Grammar
-
-> **Excluded from Laser-D:** Every `new` form is rejected, including scalar, struct, array, placement, class, and allocator forms.
-
-### <a id="typeid_expressions"></a>`typeid` Expressions (Excluded)
-
-> **Excluded from Laser-D:**
->
-> `typeid` is rejected because runtime `TypeInfo` is
-> absent.
-
-### <a id="RvalueExpression"></a>`__rvalue` Expression (Excluded)
-
-> **Excluded from Laser-D:**
->
-> `__rvalue(expression)` is rejected. Laser-D exposes no
-> unchecked move or ownership hint.
-
-### <a id="delete_expressions"></a>`delete` Expressions (Excluded)
-
-> **Excluded from Laser-D:**
->
-> `delete` is rejected with GC ownership and class
-> destruction.
-
-### <a id="throw_expression"></a>Throw Expressions (Excluded)
-
-> **Excluded from Laser-D:** Throw expressions are rejected with D exception handling.
-
-## <a id="expressions_under_review"></a>Expressions Under Review
-
-### <a id="assert_expressions"></a>Assert Expressions
-
-#### <a id="AssertExpression"></a>Assert Expression Grammar
-
-> **Rejected in Laser-D:**
->
-> Runtime `assert(condition)`, message forms, and
-> `assert(0)` are rejected. Laser-D does not provide the druntime assertion
-> failure hooks, and runtime checks do not disappear according to release or
-> check-action compiler options. Programs use explicit conditions, return
-> values, or C-compatible error reporting.
-
-#### <a id="assert-ct"></a>Compile-Time Assertions
-
-> **Supported in Laser-D:**
->
-> `static assert(condition)` and
-> `static assert(condition, message)` are supported. They are evaluated by
-> the compiler and produce no runtime code. An ordinary runtime `assert`
-> inside a CTFE-capable function remains rejected; CTFE does not change its
-> source-language classification. ImportC retains C `_Static_assert`.
-
-### <a id="interpolation_expressions"></a>Interpolation Expressions
-
-> **Rejected in Laser-D:**
->
-> Interpolation expression sequences are rejected in all lexical
-> forms. Their string-like syntax lowers to a tuple-like sequence of sentinels, template metadata, and embedded values, automatically imports
-> `core.interpolation`, and reparses stored expression text through an
-> internal string mixin. Use ordinary string literals and explicit formatting or
-> argument passing.
+`static assert` evaluates its condition and optional message during
+compilation. It emits no runtime code. ImportC retains C `_Static_assert`.
