@@ -702,3 +702,11 @@ and mangled strings, aggregate fields and offsets, numeric metadata, array and
 slice components, delegate components, and enum limits. Absent D property
 families remain consolidated in the compatibility notes rather than appearing
 as exclusions in the active chapter.
+
+The operator-overloading specification documents modern struct hooks as
+ordinary method rewrites, including unary and binary operations, explicit
+casts and calls, assignment, indexing, slicing, multidimensional lowering,
+`opDispatch`, and immutable receivers. Legacy hooks and attempts to restore
+other absent language facilities remain compatibility concerns. Automatic
+field-wise equality and membership dispatch are omitted from the normative
+chapter while their expression-level behavior remains explicitly undecided.

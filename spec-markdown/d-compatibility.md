@@ -188,8 +188,11 @@ through explicit foreign interfaces.
 
 Modern struct operator hooks remain available, including value-returning
 multidimensional indexing and slicing. Legacy D1 operator hook names are
-absent. Operator hooks cannot restore reference returns, allocation, or any
-other absent feature.
+absent. This includes the old unary, binary, reverse-binary, membership,
+concatenation, dereference, postfix, and compound-assignment families such as
+`opNeg`, `opAdd`, `opAdd_r`, `opIn_r`, `opCat`, `opStar`, `opPostInc`, and
+`opAddAssign`. Operator hooks cannot restore reference returns, allocation, or
+any other absent feature.
 
 Compiler-provided properties are available only where specified for Laser-D
 types. GC-dependent array properties, class properties, `.im`, and
