@@ -42,6 +42,165 @@ private extern(C) st_index_t constant_hash(st_data_t key)
     return 7;
 }
 
+private struct ReentrantContext
+{
+    st_table* table;
+    void* extra_keys;
+    size_t extra_count;
+    int triggered;
+}
+
+private struct ReentrantKey
+{
+    ReentrantContext* context;
+    st_data_t value;
+}
+
+private extern(C) st_index_t reentrant_hash(st_data_t raw_key)
+{
+    ReentrantKey* key = cast(ReentrantKey*) raw_key;
+    return key.value & 1;
+}
+
+private extern(C) int reentrant_compare(
+    st_data_t raw_left,
+    st_data_t raw_right)
+{
+    ReentrantKey* left = cast(ReentrantKey*) raw_left;
+    ReentrantKey* right = cast(ReentrantKey*) raw_right;
+    ReentrantContext* context = left.context;
+    if (context !is null && context.triggered == 0)
+    {
+        context.triggered = 1;
+        ReentrantKey* extras =
+            cast(ReentrantKey*) context.extra_keys;
+        foreach (size_t index; 0 .. context.extra_count)
+            st_insert(
+                context.table,
+                cast(st_data_t) &extras[index],
+                extras[index].value);
+    }
+    return left.value != right.value;
+}
+
+private struct ForeachInsertContext
+{
+    st_table* table;
+    int triggered;
+}
+
+private extern(C) int insert_during_foreach(
+    st_data_t key,
+    st_data_t value,
+    st_data_t raw_context)
+{
+    ForeachInsertContext* context =
+        cast(ForeachInsertContext*) raw_context;
+    if (context.triggered == 0)
+    {
+        context.triggered = 1;
+        foreach (st_data_t inserted; 100 .. 140)
+            st_insert(context.table, inserted, inserted);
+    }
+    return ST_CONTINUE;
+}
+
+private int test_hash_vectors()
+{
+    if (require(st_numhash(
+            cast(st_data_t) 0x123456789abcdef0UL) ==
+            cast(st_index_t) 10_656_780_064_946_940_997UL))
+        return 1;
+
+    enum seed = cast(st_index_t) 0x811c9dc5;
+    if (require(st_hash("".ptr, 0, seed) ==
+            cast(st_index_t) 9_674_187_198_854_108_257UL))
+        return 1;
+    if (require(st_hash("a".ptr, 1, seed) ==
+            cast(st_index_t) 13_275_174_337_784_471_242UL))
+        return 1;
+    if (require(st_hash("Laser-D".ptr, 7, seed) ==
+            cast(st_index_t) 13_965_654_480_679_965_192UL))
+        return 1;
+    if (require(st_hashtype_str.hash(
+            cast(st_data_t) "Laser-D".ptr) ==
+            cast(st_index_t) 13_965_654_480_679_965_192UL))
+        return 1;
+    if (require(st_hashtype_strcase.hash(
+            cast(st_data_t) "Laser-D".ptr) ==
+            cast(st_index_t) 9_466_887_608_465_540_149UL))
+        return 1;
+    if (require(st_hash("abcdefgh".ptr, 8, seed) ==
+            cast(st_index_t) 2_012_693_205_819_137_116UL))
+        return 1;
+    if (require(st_hash("abcdefghi".ptr, 9, seed) ==
+            cast(st_index_t) 2_081_646_479_900_152_290UL))
+        return 1;
+    if (require(st_hash_uint32(123, 456) ==
+            cast(st_index_t) 8_525_600_690_438_344_755UL))
+        return 1;
+    if (require(st_hash_uint(123, 456) ==
+            cast(st_index_t) 623_087_270_292_831_951UL))
+        return 1;
+    if (require(st_hash_end(123) ==
+            cast(st_index_t) 15_658_915_475_255_836_868UL))
+        return 1;
+    return 0;
+}
+
+private int test_reentrant_callbacks(rpmalloc_heap_t* heap)
+{
+    immutable st_hash_type policy =
+        st_hash_type(&reentrant_compare, &reentrant_hash);
+    ReentrantContext context;
+    ReentrantKey base = ReentrantKey(&context, 1);
+    ReentrantKey query = ReentrantKey(&context, 1);
+    ReentrantKey[20] extras;
+    foreach (size_t index; 0 .. extras.length)
+        extras[index] = ReentrantKey(&context, index + 10);
+
+    st_table* table = st_init_table(heap, &policy);
+    if (require(table !is null))
+        return 1;
+    context.table = table;
+    context.extra_keys = extras.ptr;
+    context.extra_count = extras.length;
+    if (require(st_insert(
+            table, cast(st_data_t) &base, 77) == 0))
+        return 1;
+
+    st_data_t value;
+    if (require(st_lookup(
+            table, cast(st_data_t) &query, &value) == 1 &&
+            value == 77 &&
+            context.triggered == 1 &&
+            st_table_size(table) == extras.length + 1))
+        return 1;
+    st_free_table(table);
+
+    table = st_init_numtable(heap);
+    if (require(table !is null))
+        return 1;
+    foreach (st_data_t key; 0 .. 16)
+        if (require(st_insert(table, key, key) == 0))
+            return 1;
+    ForeachInsertContext foreach_context =
+        ForeachInsertContext(table, 0);
+    if (require(st_foreach(
+            table,
+            &insert_during_foreach,
+            cast(st_data_t) &foreach_context) == 0))
+        return 1;
+    if (require(foreach_context.triggered == 1 &&
+            st_table_size(table) == 56))
+        return 1;
+    foreach (st_data_t key; 100 .. 140)
+        if (require(st_is_member(table, key) == 1))
+            return 1;
+    st_free_table(table);
+    return 0;
+}
+
 private int test_storage_representations(rpmalloc_heap_t* heap)
 {
     st_table* table = st_init_numtable(heap);
@@ -302,6 +461,8 @@ extern(C) int main()
         return EXIT_FAILURE;
 
     int result =
+        test_hash_vectors() |
+        test_reentrant_callbacks(heap) |
         test_storage_representations(heap) |
         test_collisions(heap) |
         test_strings(heap) |

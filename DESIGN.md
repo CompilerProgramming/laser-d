@@ -366,6 +366,10 @@ insertion order. Tables through entry power four have no bin array and use
 linear entry search. Larger tables append packed bins to the entry allocation;
 bin indices widen from 8 to 16, 32, and 64 bits as the entry power crosses 8,
 16, and 32. Rebuilding preserves the original compaction and growth thresholds.
+The numeric bit mixing, Murmur-based C-string and incremental hashes,
+case-insensitive FNV hash, probing sequence, single-pass insertion reservation,
+and rebuild/retry handling around reentrant comparison and iteration callbacks
+are retained from the C implementation.
 
 Every table borrows a caller-supplied `rpmalloc_heap_t*` for its entire
 lifetime. It allocates, grows, compacts, copies, and frees its own table storage

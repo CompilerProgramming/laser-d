@@ -18,6 +18,15 @@ Sources reviewed:
 - Laser-D language constraints:
   `spec-markdown/d-compatibility.md`, `spec-markdown/portability.md`
 
+> **Follow-up status:** A subsequent fidelity pass restored rebuild detection
+> and retry for comparison and iteration callbacks, the original numeric hash,
+> the Murmur-based string and incremental hash family, the case-insensitive
+> FNV hash, and single-pass find-and-reserve insertion. Exact C-produced hash
+> vectors and callback-triggered rebuild tests now cover these paths. The
+> historical findings below are retained as the review that prompted those
+> changes; sections 1–3 and the single-pass item in section 4 no longer
+> describe the current implementation.
+
 ---
 
 ## Summary

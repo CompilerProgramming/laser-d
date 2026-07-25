@@ -57,6 +57,10 @@ insertion-ordered port of the public-domain `st` C hash table with machine-word
 keys and values. It retains the original binless linear-search representation
 for small tables, the packed 8/16/32/64-bit bin indices for larger tables, the
 combined entries-and-bins allocation, probing sequence, and rebuild thresholds.
+A fidelity test checks the original numeric, C-string, case-insensitive, and
+incremental hash algorithms against vectors produced by the C source.
+Comparison callbacks and iteration may rebuild the table; searches detect the
+changed rebuild counter, discard cached entry locations, and retry.
 A caller supplies and retains ownership of an `rpmalloc_heap_t`; a table uses
 that heap for its own allocation and growth but never clears or releases it.
 Numeric, C-string, and ASCII case-insensitive C-string policies are predefined,
