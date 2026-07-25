@@ -27,6 +27,40 @@ Sources reviewed:
 > changes; sections 1–3 and the single-pass item in section 4 no longer
 > describe the current implementation.
 
+## Second-pass verification (post-fix)
+
+The updated [`import/laserd/hash.d`](import/laserd/hash.d) and
+[`test/hash_test.d`](test/hash_test.d) were re-reviewed against the original
+findings. Result: **§1, §2, §3, and the single-pass item of §4 are resolved
+and correct.** No correctness regression was introduced by the rewrite.
+
+| Finding | Status | Evidence in current code |
+|---------|--------|--------------------------|
+| §1 Reentrancy / retry | **Fixed** | `entry_matches` snapshots `rebuilds_num` around the compare ([`hash.d:131`](import/laserd/hash.d)); all searches propagate `REBUILT_INDEX`; every read/mutate entry point has a retry loop; `foreach`/`foreach_check`/`foreach_with_replace` re-find the current entry by `(hash, key)` after a rebuild. `st_update`/replace return `ST_ERROR` instead of C's `assert`. |
+| §2 Numeric hash | **Fixed** | `numeric_hash` restored to `(v>>11 \| v<<3) ^ (v>>3)` ([`hash.d:594`](import/laserd/hash.d)); pinned by a vector in `test_hash_vectors`. |
+| §3 String / incremental hash | **Fixed** | `st_hash` is word-at-a-time MurmurHash3 with matching `C1/C2` and Mix13 finalizer ([`hash.d:1257`](import/laserd/hash.d)); `st_hash_uint*`/`st_hash_end` back on Murmur; `string_case_hash` mirrors C's separate FNV-1a. Seven exact C vectors asserted. |
+| §4 Single-pass insert | **Fixed** | `find_entry_and_reserve` does one probe walk for lookup + bin reservation ([`hash.d:372`](import/laserd/hash.d)). |
+| §4 prefetch / branch hints / CLZ / feature table | Open (by design) | Constant-factor only; deliberately not ported. |
+| §5 Embedded init, `st_replace`, HASH_LOG, debug fill | Open (by design) | Not ported; `st_add_direct` returning `int` is now documented ([`hash.d:822`](import/laserd/hash.d)). |
+
+Two correctness details worth recording, since they are what make the retry
+machinery safe rather than merely present:
+
+- **No dangling deref inside the compare.** `entry_matches` reads `entry.hash`
+  and `entry.key` *before* `keys_equal` runs (short-circuit `&&` plus
+  argument evaluation order), and afterwards touches only `table.rebuilds_num`.
+  A callback that frees and reallocates `table.entries` therefore cannot cause
+  a use-after-free here.
+- **Iteration survives compaction.** After a callback-triggered rebuild the
+  `foreach` variants re-find by key and continue forward; because both the grow
+  and compaction paths preserve insertion order, every surviving entry is still
+  visited exactly once. Verified against the insert-during-`foreach` test
+  (16 → 56 entries) and the re-entrant-compare test (`size == 21`).
+
+*Caveat:* this pass is a static re-read plus hand-tracing of the two re-entrant
+tests; I did not compile or run the suite. The seven `st_hash*` vectors and the
+`st_numhash` vector are assumed to have been generated from the C original.
+
 ---
 
 ## Summary
