@@ -13,7 +13,7 @@ if(BUILD_TESTING)
         IMPORT_DIRECTORIES
             "${CMAKE_SOURCE_DIR}"
             "${CMAKE_CURRENT_SOURCE_DIR}/import"
-            "${CMAKE_SOURCE_DIR}/rpmalloc/import"
+            "${CMAKE_SOURCE_DIR}/import"
         LINK_LIBRARIES
             laserd_rpmalloc
             ${hash_platform_libraries})

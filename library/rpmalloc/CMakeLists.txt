@@ -34,9 +34,6 @@ install(TARGETS laserd_rpmalloc
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 install(FILES rpmalloc/rpmalloc.h
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/laserd/rpmalloc")
-install(DIRECTORY import/
-    DESTINATION import
-    FILES_MATCHING PATTERN "*.d")
 install(FILES LICENSE
     DESTINATION share/laserd/licenses/rpmalloc)
 
@@ -45,7 +42,7 @@ if(BUILD_TESTING)
         SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test/rpmalloc_test.d"
         IMPORT_DIRECTORIES
             "${CMAKE_SOURCE_DIR}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/import"
+            "${CMAKE_SOURCE_DIR}/import"
         LINK_LIBRARIES
             laserd_rpmalloc
             ${rpmalloc_platform_libraries})

@@ -49,8 +49,11 @@ example under `share/laserd/examples/checksum`.
 The `rpmalloc` component is the first production C-backed library. It builds
 rpmalloc 2.0.1 as `laserd_rpmalloc`, without replacing the process-wide C
 allocator, and enables both its general allocation API and its explicit,
-single-thread-owned heap API. Laser-D programs import declarations from
-`laserd.rpmalloc`. The CTest integration program exercises both API families.
+single-thread-owned heap API. Laser-D programs import the
+implementation-neutral `laserd.memory` module. Its public names include
+`Heap`, `allocate`, `free`, `acquireHeap`, and `allocateFromHeap`; native
+rpmalloc names remain private ABI details. The CTest integration program
+exercises both API families.
 
 The `hash` component provides the Laser-D module `laserd.hash`. It is an
 insertion-ordered port of the public-domain `st` C hash table with machine-word
@@ -61,7 +64,7 @@ A fidelity test checks the original numeric, C-string, case-insensitive, and
 incremental hash algorithms against vectors produced by the C source.
 Comparison callbacks and iteration may rebuild the table; searches detect the
 changed rebuild counter, discard cached entry locations, and retry.
-A caller supplies and retains ownership of an `rpmalloc_heap_t`; a table uses
+A caller supplies and retains ownership of a `laserd.memory.Heap`; a table uses
 that heap for its own allocation and growth but never clears or releases it.
 Numeric, C-string, and ASCII case-insensitive C-string policies are predefined,
 and callers may supply compatible hash and comparison function pointers.
@@ -97,7 +100,7 @@ Laser-D plans to use nsync for public synchronization primitives, avoiding two
 overlapping synchronization interfaces. Foundation may continue using its
 private primitives internally.
 
-`laserd.foundation.thread` provides the initial thread-management surface:
+`laserd.thread` provides the initial thread-management surface:
 opaque thread handles, callback-based creation, start, join, destruction,
 status queries, current-thread identifiers, sleep, and yield. Foundation must
 be initialized first. A Foundation-created worker automatically establishes
@@ -105,13 +108,12 @@ and releases Foundation and rpmalloc per-thread state around its callback.
 Destruction joins a started worker if it has not already been joined.
 
 Thread signalling, affinity, externally-created thread registration, and
-caller-owned `thread_t` storage are not yet exposed. Synchronization between
+caller-owned `Thread` storage is not yet exposed. Synchronization between
 threads will be supplied separately rather than exposing Foundation's internal
 beacon.
 
 Foundation process and pipe support is exposed through the narrow
-`laserd.foundation.process`, `laserd.foundation.pipe`, and
-`laserd.foundation.stream` modules. Processes and streams are opaque.
+`laserd.system` module. Processes and streams are opaque.
 Executable paths, working directories, and arguments are copied into the
 process object. Redirected standard streams are borrowed from their process
 and are released when the process is destroyed.
@@ -129,12 +131,14 @@ only its C static library as `laserd_nsync`; the C++ library and upstream test
 suite are disabled in the Laser-D parent build. Supported targets are x86-64
 Windows, Linux, and macOS.
 
-`laserd.nsync` initially exposes zero-initializable `nsync_mu` reader/writer
-mutexes and `nsync_cv` condition variables. Their reviewed 64-bit ABI occupies
+`laserd.thread` also exposes zero-initializable `Mutex` reader/writer locks and
+`Condition` variables. Their reviewed 64-bit ABI occupies
 16 bytes each and is checked by both native C static assertions and Laser-D
-static assertions. The integration test uses a condition-variable handshake
-between a Foundation worker and the main thread, and also covers exclusive,
-reader, and non-blocking mutex acquisition.
+static assertions. Grouping synchronization with thread management keeps the
+public module organized by purpose rather than backing library. The integration
+test uses a condition-variable handshake between a Foundation worker and the
+main thread, and also covers exclusive, reader, and non-blocking mutex
+acquisition.
 
 Timed waits, cancellation notes, counters, once initialization, wait sets, and
 conditional critical sections remain unexposed pending focused API and ABI

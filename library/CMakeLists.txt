@@ -61,9 +61,6 @@ set_target_properties(nsync PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     MSVC_RUNTIME_LIBRARY MultiThreaded)
 
-install(DIRECTORY nsync_laserd/import/
-    DESTINATION import
-    FILES_MATCHING PATTERN "*.d")
 install(FILES nsync/LICENSE
     DESTINATION share/laserd/licenses/nsync)
 
@@ -105,6 +102,9 @@ install(FILES foundation/c/foundation_rpmalloc.h
 install(DIRECTORY foundation/import/
     DESTINATION import
     FILES_MATCHING PATTERN "*.d")
+install(DIRECTORY import/
+    DESTINATION import
+    FILES_MATCHING PATTERN "*.d")
 
 if(BUILD_TESTING)
     set(foundation_platform_libraries)
@@ -133,6 +133,7 @@ if(BUILD_TESTING)
         IMPORT_DIRECTORIES
             "${CMAKE_SOURCE_DIR}"
             "${CMAKE_CURRENT_SOURCE_DIR}/foundation/import"
+            "${CMAKE_CURRENT_SOURCE_DIR}/import"
         LINK_LIBRARIES
             foundation
             laserd_rpmalloc
@@ -147,6 +148,7 @@ if(BUILD_TESTING)
         IMPORT_DIRECTORIES
             "${CMAKE_SOURCE_DIR}"
             "${CMAKE_CURRENT_SOURCE_DIR}/foundation/import"
+            "${CMAKE_CURRENT_SOURCE_DIR}/import"
         LINK_LIBRARIES
             foundation
             laserd_rpmalloc
@@ -161,7 +163,7 @@ if(BUILD_TESTING)
         IMPORT_DIRECTORIES
             "${CMAKE_SOURCE_DIR}"
             "${CMAKE_CURRENT_SOURCE_DIR}/foundation/import"
-            "${CMAKE_CURRENT_SOURCE_DIR}/nsync_laserd/import"
+            "${CMAKE_CURRENT_SOURCE_DIR}/import"
         LINK_LIBRARIES
             foundation
             laserd_rpmalloc

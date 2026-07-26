@@ -1,0 +1,278 @@
+/**
+ * Portable threads, mutexes, and condition variables for Laser-D.
+ *
+ * Foundation must be initialized before creating a thread. Threads created by
+ * this module automatically enter and leave Foundation and rpmalloc thread
+ * state around the callback.
+ */
+module laserd.thread;
+
+import core.stdc.stddef : size_t;
+import core.stdc.stdint : uint64_t;
+
+private:
+
+struct thread_t
+{
+}
+
+alias ThreadFunction = extern(C) void* function(void*);
+alias ThreadPriority = int;
+
+enum ThreadPriority THREAD_PRIORITY_LOW = 0;
+enum ThreadPriority THREAD_PRIORITY_BELOW_NORMAL = 1;
+enum ThreadPriority THREAD_PRIORITY_NORMAL = 2;
+enum ThreadPriority THREAD_PRIORITY_ABOVE_NORMAL = 3;
+enum ThreadPriority THREAD_PRIORITY_HIGHEST = 4;
+enum ThreadPriority THREAD_PRIORITY_TIME_CRITICAL = 5;
+
+/**
+ * A mutex is valid and unlocked when zero initialized. It may be held by one
+ * thread in write (exclusive) mode or by many threads in read (shared) mode.
+ *
+ * A thread that acquires a mutex must release it. Acquiring in one thread and
+ * releasing in another is illegal. A thread must not reacquire a mutex it
+ * already holds, including a second read lock.
+ */
+struct nsync_mu
+{
+    private uint word;
+    private uint padding;
+    private void* waiters;
+}
+
+/**
+ * A zero-initialized Mesa-style condition variable. Waiters must test their
+ * predicate in a loop because waits may wake spuriously and the predicate may
+ * become false again before the awakened thread reacquires the mutex.
+ */
+struct nsync_cv
+{
+    private uint word;
+    private uint padding;
+    private void* waiters;
+}
+
+static assert(nsync_mu.sizeof == 16);
+static assert(nsync_mu.word.offsetof == 0);
+static assert(nsync_mu.waiters.offsetof == 8);
+static assert(nsync_cv.sizeof == 16);
+static assert(nsync_cv.word.offsetof == 0);
+static assert(nsync_cv.waiters.offsetof == 8);
+
+extern(C):
+
+/**
+ * Allocate a new thread.
+ *
+ * Params:
+ *   function_ = thread execution function
+ *   data = argument sent to the execution function
+ *   name = thread name
+ *   nameLength = length of the thread name
+ *   priority = thread priority
+ *   stackSize = thread stack size
+ * Returns: the new thread
+ */
+thread_t* thread_allocate(
+    ThreadFunction function_,
+    void* data,
+    const(char)* name,
+    size_t nameLength,
+    ThreadPriority priority,
+    uint stackSize);
+
+/** Deallocate a thread previously allocated by `thread_allocate`. */
+void thread_deallocate(thread_t* thread);
+
+/**
+ * Start execution of a thread. This must be paired with `thread_join`.
+ * Returns: true on success, otherwise false
+ */
+bool thread_start(thread_t* thread);
+
+/**
+ * Join a started thread and free its system resources.
+ * Returns: the thread callback's exit value
+ */
+void* thread_join(thread_t* thread);
+
+/** Returns true if the thread has started execution. */
+bool thread_is_started(const(thread_t)* thread);
+
+/** Returns true if the thread is running. */
+bool thread_is_running(const(thread_t)* thread);
+
+/** Returns true if the thread has completed and is safe to join. */
+bool thread_is_finished(const(thread_t)* thread);
+
+/** Returns true if the calling thread is the main thread. */
+bool thread_is_main();
+
+/** Returns the calling thread's system identifier. */
+uint64_t thread_id();
+
+/** Sleep the calling thread for the specified number of milliseconds. */
+void thread_sleep(uint milliseconds);
+
+/** Yield the calling thread's remaining time slice to other threads. */
+void thread_yield();
+
+/** Zero a mutex to initialize it as valid and unlocked. */
+void nsync_mu_init(nsync_mu* mutex);
+
+/**
+ * Block until the mutex is free, then acquire it in write mode. The calling
+ * thread must not already hold the mutex in any mode.
+ */
+void nsync_mu_lock(nsync_mu* mutex);
+
+/**
+ * Release a mutex held in write mode by the calling thread and wake waiters
+ * when appropriate.
+ */
+void nsync_mu_unlock(nsync_mu* mutex);
+
+/**
+ * Attempt to acquire the mutex in write mode without blocking.
+ * Returns: nonzero if acquired
+ */
+int nsync_mu_trylock(nsync_mu* mutex);
+
+/**
+ * Block until the mutex can be acquired in reader mode. The calling thread
+ * must not already hold the mutex in any mode.
+ */
+void nsync_mu_rlock(nsync_mu* mutex);
+
+/**
+ * Release a mutex held in read mode by the calling thread and wake waiters
+ * when appropriate.
+ */
+void nsync_mu_runlock(nsync_mu* mutex);
+
+/**
+ * Attempt to acquire the mutex in reader mode without blocking. This may fail
+ * if a writer is waiting, to avoid starvation.
+ * Returns: nonzero if acquired
+ */
+int nsync_mu_rtrylock(nsync_mu* mutex);
+
+/** May abort unless the calling thread holds the mutex in write mode. */
+void nsync_mu_assert_held(const(nsync_mu)* mutex);
+
+/** May abort unless the calling thread holds the mutex in read or write mode. */
+void nsync_mu_rassert_held(const(nsync_mu)* mutex);
+
+/**
+ * Query whether the mutex is held in read mode. The calling thread must hold
+ * the mutex in some mode.
+ */
+int nsync_mu_is_reader(const(nsync_mu)* mutex);
+
+/** Zero a condition variable to initialize it. */
+void nsync_cv_init(nsync_cv* condition);
+
+/** Wake at least one thread currently blocked on the condition variable. */
+void nsync_cv_signal(nsync_cv* condition);
+
+/** Wake all threads currently blocked on the condition variable. */
+void nsync_cv_broadcast(nsync_cv* condition);
+
+/**
+ * Atomically release a held mutex and block on the condition variable. On a
+ * signal, broadcast, or spurious wakeup, reacquire the mutex before returning.
+ * This function must be called in a loop that tests the protected predicate.
+ */
+void nsync_cv_wait(nsync_cv* condition, nsync_mu* mutex);
+
+public:
+
+alias Thread = thread_t;
+alias Mutex = nsync_mu;
+alias Condition = nsync_cv;
+alias Priority = ThreadPriority;
+
+alias PRIORITY_LOW = THREAD_PRIORITY_LOW;
+alias PRIORITY_BELOW_NORMAL = THREAD_PRIORITY_BELOW_NORMAL;
+alias PRIORITY_NORMAL = THREAD_PRIORITY_NORMAL;
+alias PRIORITY_ABOVE_NORMAL = THREAD_PRIORITY_ABOVE_NORMAL;
+alias PRIORITY_HIGHEST = THREAD_PRIORITY_HIGHEST;
+alias PRIORITY_TIME_CRITICAL = THREAD_PRIORITY_TIME_CRITICAL;
+
+alias initializeMutex = nsync_mu_init;
+alias lock = nsync_mu_lock;
+alias unlock = nsync_mu_unlock;
+alias tryLock = nsync_mu_trylock;
+alias lockShared = nsync_mu_rlock;
+alias unlockShared = nsync_mu_runlock;
+alias tryLockShared = nsync_mu_rtrylock;
+alias assertLocked = nsync_mu_assert_held;
+alias assertLockedShared = nsync_mu_rassert_held;
+alias isLockedShared = nsync_mu_is_reader;
+
+alias initializeCondition = nsync_cv_init;
+alias signal = nsync_cv_signal;
+alias broadcast = nsync_cv_broadcast;
+alias wait = nsync_cv_wait;
+
+Thread* create(
+    ThreadFunction function_,
+    void* data,
+    const(char)[] name,
+    Priority priority,
+    uint stackSize)
+{
+    return thread_allocate(
+        function_, data, name.ptr, name.length, priority, stackSize);
+}
+
+void destroy(Thread* thread)
+{
+    thread_deallocate(thread);
+}
+
+bool start(Thread* thread)
+{
+    return thread_start(thread);
+}
+
+void* join(Thread* thread)
+{
+    return thread_join(thread);
+}
+
+bool isStarted(const(Thread)* thread)
+{
+    return thread_is_started(thread);
+}
+
+bool isRunning(const(Thread)* thread)
+{
+    return thread_is_running(thread);
+}
+
+bool isFinished(const(Thread)* thread)
+{
+    return thread_is_finished(thread);
+}
+
+bool isMain()
+{
+    return thread_is_main();
+}
+
+uint64_t currentId()
+{
+    return thread_id();
+}
+
+void sleep(uint milliseconds)
+{
+    thread_sleep(milliseconds);
+}
+
+void yield()
+{
+    thread_yield();
+}

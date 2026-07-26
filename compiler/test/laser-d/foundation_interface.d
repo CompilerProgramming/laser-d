@@ -7,8 +7,9 @@ import laserd.foundation.base64 :
     encode;
 import laserd.foundation.hash : hash, hashBytes;
 import laserd.foundation.lifecycle : finalize, initialize, isInitialized;
-import laserd.foundation.thread :
-    THREAD_PRIORITY_NORMAL,
+import laserd.thread :
+    PRIORITY_NORMAL,
+    Thread,
     create,
     currentId,
     destroy,
@@ -17,7 +18,7 @@ import laserd.foundation.thread :
     isStarted,
     join,
     start,
-    thread_t;
+    yield;
 
 struct ThreadTestData
 {
@@ -46,11 +47,11 @@ extern(C) int main()
 
     ThreadTestData threadData;
     enum threadName = "laser-d-test";
-    thread_t* thread = create(
+    Thread* thread = create(
         &foundationThreadTest,
         &threadData,
         threadName,
-        THREAD_PRIORITY_NORMAL,
+        PRIORITY_NORMAL,
         0);
     if (thread is null)
         return EXIT_FAILURE;

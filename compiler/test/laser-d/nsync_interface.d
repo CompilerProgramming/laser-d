@@ -1,27 +1,26 @@
 import core.stdc.stdlib : EXIT_FAILURE, EXIT_SUCCESS;
 import laserd.foundation.lifecycle : finalize, initialize;
-import laserd.foundation.thread :
-    THREAD_PRIORITY_NORMAL,
+import laserd.thread :
+    Condition,
+    Mutex,
+    PRIORITY_NORMAL,
+    Thread,
+    broadcast,
     create,
     destroy,
     join,
     start,
-    thread_t;
-import laserd.nsync :
-    nsync_cv,
-    nsync_cv_broadcast,
-    nsync_cv_wait,
-    nsync_mu,
-    nsync_mu_lock,
-    nsync_mu_rtrylock,
-    nsync_mu_runlock,
-    nsync_mu_trylock,
-    nsync_mu_unlock;
+    lock,
+    tryLock,
+    tryLockShared,
+    unlock,
+    unlockShared,
+    wait;
 
 struct NsyncTestData
 {
-    nsync_mu mutex;
-    nsync_cv condition;
+    Mutex mutex;
+    Condition condition;
     int ready;
     int proceed;
     int value;
@@ -31,13 +30,13 @@ extern(C) void* nsyncWorker(void* argument)
 {
     auto data = cast(NsyncTestData*) argument;
 
-    nsync_mu_lock(&data.mutex);
+    lock(&data.mutex);
     data.ready = 1;
-    nsync_cv_broadcast(&data.condition);
+    broadcast(&data.condition);
     while (!data.proceed)
-        nsync_cv_wait(&data.condition, &data.mutex);
+        wait(&data.condition, &data.mutex);
     data.value = 42;
-    nsync_mu_unlock(&data.mutex);
+    unlock(&data.mutex);
 
     return argument;
 }
@@ -49,11 +48,11 @@ extern(C) int main()
 
     NsyncTestData data;
     enum workerName = "nsync-test";
-    thread_t* worker = create(
+    Thread* worker = create(
         &nsyncWorker,
         &data,
         workerName,
-        THREAD_PRIORITY_NORMAL,
+        PRIORITY_NORMAL,
         0);
     if (worker is null)
         return EXIT_FAILURE;
@@ -63,26 +62,26 @@ extern(C) int main()
         return EXIT_FAILURE;
     }
 
-    nsync_mu_lock(&data.mutex);
+    lock(&data.mutex);
     while (!data.ready)
-        nsync_cv_wait(&data.condition, &data.mutex);
+        wait(&data.condition, &data.mutex);
     data.proceed = 1;
-    nsync_cv_broadcast(&data.condition);
-    nsync_mu_unlock(&data.mutex);
+    broadcast(&data.condition);
+    unlock(&data.mutex);
 
     void* result = join(worker);
     bool passed = result == &data && data.value == 42;
     destroy(worker);
 
-    if (nsync_mu_trylock(&data.mutex) == 0)
+    if (tryLock(&data.mutex) == 0)
         passed = false;
     else
-        nsync_mu_unlock(&data.mutex);
+        unlock(&data.mutex);
 
-    if (nsync_mu_rtrylock(&data.mutex) == 0)
+    if (tryLockShared(&data.mutex) == 0)
         passed = false;
     else
-        nsync_mu_runlock(&data.mutex);
+        unlockShared(&data.mutex);
 
     finalize();
     return passed ? EXIT_SUCCESS : EXIT_FAILURE;

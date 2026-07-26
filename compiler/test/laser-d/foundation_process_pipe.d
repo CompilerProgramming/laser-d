@@ -3,27 +3,26 @@ import core.stdc.stddef : size_t;
 import core.stdc.stdlib : EXIT_FAILURE, EXIT_SUCCESS;
 import core.stdc.string : strcmp;
 import laserd.foundation.lifecycle : finalize, initialize;
-import laserd.foundation.pipe : createPipe;
-import laserd.foundation.process :
-    PROCESS_DETACHED,
-    PROCESS_STILL_ACTIVE,
-    PROCESS_STDSTREAMS,
-    ProcessArgument,
+import laserd.system :
+    Argument,
+    DETACHED,
+    Process,
+    REDIRECT_STREAMS,
+    STILL_ACTIVE,
+    Stream,
     createProcess,
+    createPipe,
     destroyProcess,
-    process_stdout,
-    process_t,
+    destroyStream,
+    read,
     setArguments,
     setExecutable,
     setFlags,
     spawn,
-    wait;
-import laserd.foundation.stream :
-    destroyStream,
-    readStream,
-    stream_t,
-    writeStream;
-import laserd.foundation.thread : sleep;
+    standardOutput,
+    wait,
+    write;
+import laserd.thread : sleep;
 
 enum childArgument = "--laser-d-process-child";
 enum childMessage = "laser-d-process-child-output";
@@ -38,7 +37,7 @@ extern(C) int main(int argc, char** argv)
     if (initialize() != 0)
         return EXIT_FAILURE;
 
-    stream_t* pipe = createPipe();
+    Stream* pipe = createPipe();
     if (pipe is null) {
         finalize();
         return EXIT_FAILURE;
@@ -48,34 +47,34 @@ extern(C) int main(int argc, char** argv)
     auto pipeBytes = cast(const(ubyte)[]) pipeMessage;
     ubyte[4] pipeResult;
     bool passed =
-        writeStream(pipe, pipeBytes) == pipeBytes.length &&
-        readStream(pipe, pipeResult[]) == pipeResult.length;
+        write(pipe, pipeBytes) == pipeBytes.length &&
+        read(pipe, pipeResult[]) == pipeResult.length;
     foreach (i; 0 .. pipeResult.length)
         if (pipeResult[i] != pipeBytes[i])
             passed = false;
     destroyStream(pipe);
 
-    process_t* process = createProcess();
+    Process* process = createProcess();
     if (process is null) {
         finalize();
         return EXIT_FAILURE;
     }
 
     setExecutable(process, argv[0][0 .. stringLength(argv[0])]);
-    ProcessArgument[1] arguments;
+    Argument[1] arguments;
     arguments[0].data = childArgument.ptr;
     arguments[0].length = childArgument.length;
     setArguments(process, arguments[]);
-    setFlags(process, PROCESS_DETACHED | PROCESS_STDSTREAMS);
+    setFlags(process, DETACHED | REDIRECT_STREAMS);
 
-    if (spawn(process) != PROCESS_STILL_ACTIVE) {
+    if (spawn(process) != STILL_ACTIVE) {
         destroyProcess(process);
         finalize();
         return EXIT_FAILURE;
     }
 
     ubyte[64] output;
-    size_t outputLength = readStream(process_stdout(process), output[]);
+    size_t outputLength = read(standardOutput(process), output[]);
     if (outputLength < childMessage.length)
         passed = false;
     else
@@ -83,10 +82,10 @@ extern(C) int main(int argc, char** argv)
             if (output[i] != cast(ubyte) childMessage[i])
                 passed = false;
 
-    int exitCode = PROCESS_STILL_ACTIVE;
+    int exitCode = STILL_ACTIVE;
     foreach (i; 0 .. 1000) {
         exitCode = wait(process);
-        if (exitCode != PROCESS_STILL_ACTIVE)
+        if (exitCode != STILL_ACTIVE)
             break;
         sleep(1);
     }

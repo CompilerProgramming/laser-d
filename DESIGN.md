@@ -371,10 +371,10 @@ case-insensitive FNV hash, probing sequence, single-pass insertion reservation,
 and rebuild/retry handling around reentrant comparison and iteration callbacks
 are retained from the C implementation.
 
-Every table borrows a caller-supplied `rpmalloc_heap_t*` for its entire
+Every table borrows a caller-supplied `laserd.memory.Heap*` for its entire
 lifetime. It allocates, grows, compacts, copies, and frees its own table storage
 through that heap, but never releases the heap or calls
-`rpmalloc_heap_free_all`. The caller must initialize rpmalloc, keep the heap
+`freeAllFromHeap`. The caller must initialize memory, keep the heap
 alive until `st_free_table` returns, and serialize access. Creation and copying
 report allocation failure with `null`; operations that may grow the table
 report `ST_ERROR` without discarding the existing table. The table does not own
@@ -666,11 +666,13 @@ template for future C libraries.
 The first production C-backed component is rpmalloc 2.0.1. CMake compiles the
 vendored C11 source as `laserd_rpmalloc`, explicitly disables process-wide C
 allocator replacement (`ENABLE_OVERRIDE=0`), and enables first-class heaps
-(`RPMALLOC_FIRST_CLASS_HEAPS=1`). The reviewed `laserd.rpmalloc` import module
-exposes both the general allocator and explicit heap APIs. Its configuration
-structure retains rpmalloc's Linux/Android-only field so its layout matches the
-native header on every supported platform. Integration testing covers ordinary
-allocation, reallocation, aligned allocation, heap ownership, heap
+(`RPMALLOC_FIRST_CLASS_HEAPS=1`). The reviewed `laserd.memory` import module
+exposes both the general allocator and explicit heap APIs using
+implementation-neutral names such as `Heap`, `allocate`, and `free`. Native
+rpmalloc symbol and type names remain private ABI details. The public `Config`
+structure retains rpmalloc's Linux/Android-only field so its layout matches
+the native header on every supported platform. Integration testing covers
+ordinary allocation, reallocation, aligned allocation, heap ownership, heap
 reallocation, zeroed heap allocation, bulk heap cleanup, and finalization.
 The vendored source omits rpmalloc's separate `malloc.c` override
 implementation; its include is therefore conditional on `ENABLE_OVERRIDE`, as
@@ -707,7 +709,7 @@ semaphore, or beacon APIs. Those remain implementation details of Foundation.
 Laser-D intends to use nsync for public synchronization primitives so that
 programs do not have to choose between duplicate locking abstractions.
 
-The initial public Foundation thread interface treats `thread_t` as opaque and
+The initial public Foundation thread interface exposes an opaque `Thread` and
 supports callback-based allocation, start, join, deallocation, basic state
 queries, thread identifiers, sleep, and yield. A thread callback uses the C ABI
 and accepts and returns one opaque pointer. Foundation-created workers enter
@@ -742,12 +744,19 @@ The C++ variant and nsync's thread-starting test support are not part of the
 runtime. The supported build matrix is restricted to x86-64 Windows, Linux,
 and macOS.
 
-The initial `laserd.nsync` module exposes nsync reader/writer mutexes and
-Mesa-style condition variables. Both objects are zero-initializable two-word
-values. Their layout is fixed at 16 bytes for Laser-D's supported 64-bit
-targets and guarded by C and Laser-D compile-time assertions. They do not
-allocate through Foundation and do not require Foundation initialization,
-although the integration test uses Foundation threads.
+The public `laserd.thread` module groups thread creation with `Mutex`
+reader/writer locks and Mesa-style `Condition` variables rather than exposing
+modules or type names after either backing library. Both synchronization
+objects are
+zero-initializable two-word values. Their layout is fixed at 16 bytes for
+Laser-D's supported 64-bit targets and guarded by C and Laser-D compile-time
+assertions. They do not allocate through Foundation and do not require
+Foundation initialization, although Foundation thread creation does.
+
+Portable child-process management, anonymous pipes, and the minimal byte
+streams required by both are grouped in `laserd.system`. This keeps backing
+library names out of the application-facing module structure while retaining
+the native C symbol names at the ABI boundary.
 
 Foundation mutexes, semaphores, and beacons remain private implementation
 details. Timed waits, cancellation, counters, once execution, wait sets, and
