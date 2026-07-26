@@ -109,6 +109,21 @@ caller-owned `thread_t` storage are not yet exposed. Synchronization between
 threads will be supplied separately rather than exposing Foundation's internal
 beacon.
 
+Foundation process and pipe support is exposed through the narrow
+`laserd.foundation.process`, `laserd.foundation.pipe`, and
+`laserd.foundation.stream` modules. Processes and streams are opaque.
+Executable paths, working directories, and arguments are copied into the
+process object. Redirected standard streams are borrowed from their process
+and are released when the process is destroyed.
+Before destroying a detached process, callers must successfully wait for it,
+or kill it and then wait for termination.
+
+The stream surface contains only raw byte reads and writes, flush, end and
+availability queries, and destruction. Unnamed pipes support allocation and
+closing either endpoint. Native handles/file descriptors, stream vtables,
+typed stream serialization, platform-specific process launch modes, and
+process-global exit operations are intentionally not exposed.
+
 nsync 1.30.0 supplies Laser-D's public synchronization layer. CMake builds
 only its C static library as `laserd_nsync`; the C++ library and upstream test
 suite are disabled in the Laser-D parent build. Supported targets are x86-64

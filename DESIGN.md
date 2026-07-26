@@ -719,6 +719,22 @@ internal beacon abstraction. CPU affinity, externally-created thread
 registration, and caller-owned thread structures are also deferred pending
 focused portability and ownership review.
 
+The process interface uses opaque Foundation process handles. It supports
+copied executable paths, working directories and argument arrays; portable
+attached/detached, console and standard-stream flags; spawn, wait and kill;
+and borrowed stdin, stdout and stderr streams. Process destruction owns and
+releases those streams, so callers must not deallocate them independently.
+A detached process must be reaped with `wait`, or killed and then reaped,
+before its process handle is destroyed.
+
+The shared stream interface is deliberately limited to opaque raw byte
+streams. It supports read, write, flush, end-of-stream and available-byte
+queries plus destruction. The pipe interface adds unnamed-pipe allocation and
+closing of individual endpoints. Stream vtables, typed serialization,
+filesystem streams, native descriptors/handles, Windows shell execution,
+macOS application launching, and process-global exit functions remain outside
+the supported API.
+
 ### Synchronization
 
 Laser-D uses the C interface of nsync 1.30.0 for public synchronization.

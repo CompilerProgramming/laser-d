@@ -92,6 +92,9 @@ install(TARGETS foundation
 install(FILES
     foundation_lib/foundation/base64.h
     foundation_lib/foundation/hash.h
+    foundation_lib/foundation/pipe.h
+    foundation_lib/foundation/process.h
+    foundation_lib/foundation/stream.h
     foundation_lib/foundation/thread.h
     foundation_lib/foundation/types.h
     foundation_lib/foundation/platform.h
@@ -137,6 +140,20 @@ if(BUILD_TESTING)
 
     add_test(NAME foundation_interop
         COMMAND "${foundation_test_EXECUTABLE}")
+
+    laserd_add_executable(foundation_process_pipe_test
+        SOURCES
+            "${LASERD_REPOSITORY_ROOT}/compiler/test/laser-d/foundation_process_pipe.d"
+        IMPORT_DIRECTORIES
+            "${CMAKE_SOURCE_DIR}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/foundation/import"
+        LINK_LIBRARIES
+            foundation
+            laserd_rpmalloc
+            ${foundation_platform_libraries})
+
+    add_test(NAME foundation_process_pipe
+        COMMAND "${foundation_process_pipe_test_EXECUTABLE}")
 
     laserd_add_executable(nsync_test
         SOURCES
