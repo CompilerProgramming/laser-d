@@ -116,9 +116,9 @@ if(BUILD_TESTING)
     elseif(APPLE)
         list(APPEND foundation_platform_libraries
             -L-framework
-            -L-Cocoa
+            -LCocoa
             -L-framework
-            -L-CoreFoundation
+            -LCoreFoundation
             -L-lm)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         list(APPEND foundation_platform_libraries
