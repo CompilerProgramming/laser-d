@@ -676,6 +676,24 @@ The vendored source omits rpmalloc's separate `malloc.c` override
 implementation; its include is therefore conditional on `ENABLE_OVERRIDE`, as
 is the override functionality itself.
 
+The vendored Foundation C library is built as the `laserd_foundation` static
+archive, but its presence does not make every Foundation header a supported
+Laser-D API. The initial reviewed surface contains only Base64 encoding and
+decoding plus the library's 64-bit Murmur3 hash. These functions are
+allocation-free, stateless, callback-free, and portable across the supported
+targets; they can therefore be called without Foundation global
+initialization. The `laserd.foundation.base64` and
+`laserd.foundation.hash` modules expose the exact C entry points and small
+slice-based overloads.
+
+Foundation APIs which allocate, own opaque state, require library or thread
+initialization, accept callbacks or variadic arguments, or expose operating
+system resources remain unexposed. Adding one requires a focused ABI and
+ownership review, a documented initialization model where applicable, and a
+cross-platform Laser-D integration test. In particular, the MD5 and SHA
+contexts are not treated as standalone crypto primitives because their
+allocation functions use Foundation's configured global memory system.
+
 No archive is produced for `core.stdc` because those modules consist only of
 declarations resolved by the platform C runtime. Other standard-library
 components may contribute native archives explicitly. Distribution archives

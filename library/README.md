@@ -70,3 +70,17 @@ Allocation failure is returned as `null` from creation/copying and as
 
 The `core.stdc` modules do not produce a library archive because they contain
 declarations only; programs link those APIs directly to the platform C runtime.
+
+The vendored Foundation library is built as `laserd_foundation`. The initial
+reviewed interface deliberately exposes only `laserd.foundation.base64` and
+`laserd.foundation.hash`. These operations are portable, stateless,
+allocation-free, and do not require Foundation global initialization. Their
+wrappers accept Laser-D slices while preserving the raw `extern(C)` entry
+points.
+
+Other Foundation modules are not yet part of the supported Laser-D interface.
+In particular, MD5/SHA and containers allocate through Foundation's global
+memory system; threading, process, filesystem, and stream modules carry
+platform or lifecycle requirements; and callback- or variadic-heavy APIs need
+separate ABI review. They should be exposed only alongside focused tests and a
+documented ownership and initialization model.

@@ -29,6 +29,44 @@ add_subdirectory(checksum)
 add_subdirectory(rpmalloc)
 add_subdirectory(hash)
 
+set(FOUNDATION_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
+set(FOUNDATION_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory(foundation_lib)
+add_library(LaserD::foundation ALIAS foundation)
+
+set_target_properties(foundation PROPERTIES
+    OUTPUT_NAME laserd_foundation
+    POSITION_INDEPENDENT_CODE ON
+    MSVC_RUNTIME_LIBRARY MultiThreaded)
+
+install(TARGETS foundation
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+install(FILES
+    foundation_lib/foundation/base64.h
+    foundation_lib/foundation/hash.h
+    foundation_lib/foundation/types.h
+    foundation_lib/foundation/platform.h
+    foundation_lib/foundation/build.h
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/foundation")
+install(DIRECTORY foundation/import/
+    DESTINATION import
+    FILES_MATCHING PATTERN "*.d")
+
+if(BUILD_TESTING)
+    laserd_add_executable(foundation_test
+        SOURCES
+            "${LASERD_REPOSITORY_ROOT}/compiler/test/laser-d/foundation_interface.d"
+        IMPORT_DIRECTORIES
+            "${CMAKE_SOURCE_DIR}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/foundation/import"
+        LINK_LIBRARIES foundation)
+
+    add_test(NAME foundation_interop
+        COMMAND "${foundation_test_EXECUTABLE}")
+endif()
+
 install(PROGRAMS "${LASERD_COMPILER}"
     TYPE BIN
     RENAME "laserd${CMAKE_EXECUTABLE_SUFFIX}")
