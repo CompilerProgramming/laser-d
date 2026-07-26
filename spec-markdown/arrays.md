@@ -38,6 +38,17 @@ enum columns = 4;
 alias Row = int[columns];
 ```
 
+The dimension may be zero, including for a struct field. Default and compatible
+scalar initialization are accepted; a scalar initializer initializes no
+elements:
+
+```d
+int[0] empty = 10;
+```
+
+The size, alignment, pointer behavior, slicing, and runtime use of zero-length
+fixed arrays remain under review.
+
 When the bracket contents are a name, semantic resolution distinguishes a
 value used as a fixed-array dimension from a type used as an associative-array
 key. Associative arrays remain rejected.
@@ -173,6 +184,9 @@ void clear(int[] values)
 ```
 
 No new backing storage is created.
+
+For a zero-length fixed array, scalar initialization is valid and performs no
+element assignments.
 
 ### Static initialization
 

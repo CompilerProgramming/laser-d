@@ -95,6 +95,11 @@ for an aggregate type when such a symbol exists.
 functions `getFunctionVariadicStyle` returns `"none"`; for C ABI variadic
 functions it returns `"stdarg"`.
 
+On Laser-D's supported x86-64 targets, `isReturnOnStack` is false for a
+function returning `int` and true for a function returning a struct containing
+ten `int` elements. These results expose the existing target ABI; they do not
+select a different calling convention.
+
 ## Variable and parameter traits
 
 | Trait | Result |
@@ -136,6 +141,10 @@ declaration order. The result is a compile-time sequence.
 Member names, symbols, and overload sets are compile-time entities. Using a
 returned member follows the ordinary access and call rules.
 
+`getOverloads` excludes template overloads by default. Passing `true` as its
+optional final argument includes both template and non-template overloads.
+This behavior is the same when the aggregate operand is a type or a value.
+
 ## Declaration and target metadata
 
 | Trait | Result |
@@ -173,6 +182,9 @@ static assert(!__traits(compiles, Record.init.missing));
 static assert(__traits(isSame, Record, Record));
 static assert(!__traits(isSame, Record, int));
 ```
+
+For function literals, identity ignores parameter names but distinguishes
+different expression structures.
 
 Trait results may be used by templates, constraints, `static if`,
 `static foreach`, `static assert`, and CTFE.

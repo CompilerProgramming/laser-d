@@ -74,6 +74,14 @@ Members are referenced through the enum name:
 Direction direction = Direction.north;
 ```
 
+An enum member's type is the named enum type. Constructing the same named enum
+type from one of its values preserves that type:
+
+```d
+static assert(is(typeof(Direction.north) == Direction));
+static assert(is(typeof(Direction(Direction.north)) == Direction));
+```
+
 An enum value converts to its base type where the ordinary value-conversion
 rules permit. Converting a base value to the named enum uses an explicit cast:
 
@@ -255,6 +263,8 @@ Direction second = first;
 Comparisons, casts, integral operations, and bitwise operations follow the
 expression and conversion rules for the enum's base while preserving the
 requirements of the destination type.
+
+Equality and inequality also accept a `const` view of the same enum value.
 
 An ordinary `switch` may select enum values. A `final switch` over a defined
 named enum must cover its declared members, as specified by the statements

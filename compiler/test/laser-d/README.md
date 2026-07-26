@@ -38,3 +38,9 @@ from the corresponding upstream `compilable`, `runnable`, or
 `fail_compilation` category. Their category prefix avoids collisions in this
 flat directory. Runner metadata, expected source paths and module names, and
 fixture paths are adjusted only as required by their Laser-D location.
+
+Files named `upstream_compilable_*` are D-language regression tests adopted
+from the corresponding upstream `compilable` category after their exercised
+features have been checked against Laser-D's documented subset. The source is
+kept materially equivalent, with Laser-D `TEST_MODE` metadata and provenance
+comments added.

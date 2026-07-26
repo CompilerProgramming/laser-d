@@ -136,6 +136,18 @@ static assert(Apply!(increment, 4) == 5);
 
 Alias parameters may have specializations, constraints, and defaults.
 
+An `is` expression that pattern-matches an instantiated template may bind an
+alias parameter to the matched template argument:
+
+```d
+struct Holder(alias value)
+{
+}
+
+static if (is(Holder!int == Holder!argument, alias argument))
+    static assert(is(argument == int));
+```
+
 ### Sequence parameters
 
 A final parameter written `Name...` accepts a compile-time sequence of zero or

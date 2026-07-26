@@ -195,7 +195,20 @@ Named and anonymous unions retain D's overlapping-storage rules.
 Named, based, anonymous, manifest, and opaque enums are supported when their
 base type is otherwise available in Laser-D. Opaque enums have no default
 initializer. An enum based on another enum requires explicit member values
-after its first member.
+after its first member. A named enum member has the named enum type, including
+through `typeof`, and constructing that enum type from a value already of the
+same enum type preserves the type. Equality and inequality remain valid when
+an enum value is viewed through `const`.
+
+Fixed arrays include zero-length arrays and arrays large enough to require
+indirect ABI return. A scalar initializer for a zero-length fixed array is
+accepted and initializes no elements. Large fixed-array declarations are
+limited by the target object representation and compiler resource limits, not
+by a Laser-D-specific small-array threshold.
+`upstream_compilable_test21039.d` validates the settled zero-length declaration
+and initialization boundary; size, alignment, pointers, slicing, and runtime
+use remain undecided. `upstream_compilable_fix21684.d` is a large-array
+frontend regression guard.
 
 Modern operator overloading has been reviewed separately and is supported under
 the restrictions in the operator section. User-defined copy and move
@@ -555,6 +568,17 @@ parameters, and symbols. This includes semantic probes such as `compiles` and
 `isSame`. Predicates that ask about a rejected language kind remain useful to
 generic templates, but cannot introduce an instance of that kind. Class and
 virtual-method traits consequently have no valid class operands in Laser-D.
+On supported x86-64 targets, `isReturnOnStack` reports false for a scalar
+`int` result and true for a forty-byte fixed-array struct result.
+`getOverloads` excludes template overloads by default and includes them when
+its optional inclusion argument is `true`, for both a struct type and a struct
+value. Function-literal identity ignores parameter spelling but distinguishes
+different expression structure.
+
+The adopted `upstream_compilable_*` tests retain their upstream regression
+identity while adding focused evidence for these already supported or refined
+boundaries. A passing upstream test is not itself a language decision; its
+constructs are first checked against this design and `FEATURE_STATUS.md`.
 
 `__traits(toType)` is rejected because it creates a type from string or mangled
 text and crosses the same compile-time text-to-language boundary as rejected
