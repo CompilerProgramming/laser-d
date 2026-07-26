@@ -37,22 +37,22 @@ if(GIT_EXECUTABLE)
     RESULT_VARIABLE git_result)
 
   if(git_result EQUAL 0 AND git_describe)
-    # Expected form: <major>.<minor>.<revision>-<build>-g<scm>
-    string(REPLACE "-" ";" tokens "${git_describe}")
-    list(LENGTH tokens token_count)
-    if(token_count GREATER 2)
-      list(GET tokens 0 version_numbers)
-      list(GET tokens 1 version_build)
-      list(GET tokens 2 version_scm_raw)
-      # Drop the leading 'g' from the abbreviated commit hash.
-      string(REGEX REPLACE "^g" "" version_scm "${version_scm_raw}")
+    # Parse the commit count and hash from the right so tags may contain
+    # prerelease suffixes such as v2.113.0-beta.1.
+    if(git_describe MATCHES "^(.*)-([0-9]+)-g([0-9a-fA-F]+)$")
+      set(version_tag "${CMAKE_MATCH_1}")
+      set(version_build "${CMAKE_MATCH_2}")
+      set(version_scm "${CMAKE_MATCH_3}")
+      # version_t stores the source-control identifier in 32 bits even when
+      # the repository configures git to emit a longer abbreviation.
+      string(SUBSTRING "${version_scm}" 0 8 version_scm)
 
-      string(REPLACE "." ";" numbers "${version_numbers}")
-      list(LENGTH numbers number_count)
-      if(number_count GREATER 2)
-        list(GET numbers 0 version_major)
-        list(GET numbers 1 version_minor)
-        list(GET numbers 2 version_revision)
+      # Use the first three numeric components of the tag and ignore a
+      # conventional leading 'v' and any prerelease suffix.
+      if(version_tag MATCHES "^v?([0-9]+)\\.([0-9]+)\\.([0-9]+)")
+        set(version_major "${CMAKE_MATCH_1}")
+        set(version_minor "${CMAKE_MATCH_2}")
+        set(version_revision "${CMAKE_MATCH_3}")
       endif()
     endif()
   endif()

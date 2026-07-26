@@ -6,9 +6,17 @@ import laserd.foundation.base64 :
     decode,
     encode;
 import laserd.foundation.hash : hash, hashBytes;
+import laserd.foundation.lifecycle : finalize, initialize, isInitialized;
 
 extern(C) int main()
 {
+    if (isInitialized())
+        return EXIT_FAILURE;
+    if (initialize() != 0 || !isInitialized())
+        return EXIT_FAILURE;
+    if (initialize() != 0 || !isInitialized())
+        return EXIT_FAILURE;
+
     enum text = "engine";
     auto bytes = cast(const(ubyte)[]) text;
 
@@ -46,6 +54,11 @@ extern(C) int main()
     if (base64_decode(
             encoded.ptr, 8, shortDecode.ptr, shortDecode.length) != 3)
         return EXIT_FAILURE;
+
+    finalize();
+    if (isInitialized())
+        return EXIT_FAILURE;
+    finalize();
 
     return EXIT_SUCCESS;
 }

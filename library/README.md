@@ -84,3 +84,15 @@ memory system; threading, process, filesystem, and stream modules carry
 platform or lifecycle requirements; and callback- or variadic-heavy APIs need
 separate ABI review. They should be exposed only alongside focused tests and a
 documented ownership and initialization model.
+
+`laserd.foundation.lifecycle` initializes Foundation with rpmalloc through a
+native adapter. Foundation owns the process-wide rpmalloc lifecycle between
+`initialize` and `finalize`; an application must not independently initialize
+or finalize rpmalloc during that interval. Foundation-created threads invoke
+rpmalloc's per-thread initialization and finalization callbacks. Initialization
+and finalization are idempotent.
+
+Foundation's mutex, semaphore, and beacon APIs are intentionally not exposed.
+Laser-D plans to use nsync for public synchronization primitives, avoiding two
+overlapping synchronization interfaces. Foundation may continue using its
+private primitives internally.

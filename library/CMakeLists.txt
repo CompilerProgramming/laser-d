@@ -34,6 +34,14 @@ set(FOUNDATION_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 add_subdirectory(foundation_lib)
 add_library(LaserD::foundation ALIAS foundation)
 
+target_sources(foundation PRIVATE
+    foundation/c/foundation_rpmalloc.c)
+target_include_directories(foundation
+    PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/foundation/c"
+        "${CMAKE_CURRENT_SOURCE_DIR}/rpmalloc/rpmalloc")
+target_link_libraries(foundation PUBLIC laserd_rpmalloc)
+
 set_target_properties(foundation PROPERTIES
     OUTPUT_NAME laserd_foundation
     POSITION_INDEPENDENT_CODE ON
@@ -50,18 +58,43 @@ install(FILES
     foundation_lib/foundation/platform.h
     foundation_lib/foundation/build.h
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/foundation")
+install(FILES foundation/c/foundation_rpmalloc.h
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/laserd")
 install(DIRECTORY foundation/import/
     DESTINATION import
     FILES_MATCHING PATTERN "*.d")
 
 if(BUILD_TESTING)
+    set(foundation_platform_libraries)
+    if(WIN32)
+        list(APPEND foundation_platform_libraries
+            user32.lib
+            shell32.lib
+            advapi32.lib)
+    elseif(APPLE)
+        list(APPEND foundation_platform_libraries
+            -L-framework
+            -L-Cocoa
+            -L-framework
+            -L-CoreFoundation
+            -L-lm)
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        list(APPEND foundation_platform_libraries
+            -L-lpthread
+            -L-ldl
+            -L-lm)
+    endif()
+
     laserd_add_executable(foundation_test
         SOURCES
             "${LASERD_REPOSITORY_ROOT}/compiler/test/laser-d/foundation_interface.d"
         IMPORT_DIRECTORIES
             "${CMAKE_SOURCE_DIR}"
             "${CMAKE_CURRENT_SOURCE_DIR}/foundation/import"
-        LINK_LIBRARIES foundation)
+        LINK_LIBRARIES
+            foundation
+            laserd_rpmalloc
+            ${foundation_platform_libraries})
 
     add_test(NAME foundation_interop
         COMMAND "${foundation_test_EXECUTABLE}")

@@ -694,6 +694,19 @@ cross-platform Laser-D integration test. In particular, the MD5 and SHA
 contexts are not treated as standalone crypto primitives because their
 allocation functions use Foundation's configured global memory system.
 
+Foundation is initialized through a native adapter which supplies rpmalloc as
+its `memory_system_t`. The adapter maps ordinary and aligned allocation,
+reallocation, deallocation, usable-size queries, zero-initialization hints,
+and per-thread allocator lifecycle callbacks. Foundation owns rpmalloc from
+successful initialization through finalization; mixing that lifecycle with
+independent application calls to `rpmalloc_initialize` or `rpmalloc_finalize`
+is unsupported.
+
+The public synchronization layer will not expose Foundation's mutex,
+semaphore, or beacon APIs. Those remain implementation details of Foundation.
+Laser-D intends to use nsync for public synchronization primitives so that
+programs do not have to choose between duplicate locking abstractions.
+
 No archive is produced for `core.stdc` because those modules consist only of
 declarations resolved by the platform C runtime. Other standard-library
 components may contribute native archives explicitly. Distribution archives
