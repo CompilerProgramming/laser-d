@@ -347,6 +347,15 @@ Initializer initializerSemantic(Initializer init, Scope* sc, ref Type tx, NeedIn
     Initializer visitExp(ExpInitializer i)
     {
         //printf("ExpInitializer::semantic(%s), type = %s\n", i.exp.toChars(), t.toChars());
+
+        /*
+         * A fixed-array declaration supplies inline storage for its literal
+         * initializer. Preserve that context through expression semantic
+         * analysis so the literal is not mistaken for a dynamic array.
+         */
+        if (i.exp.isArrayLiteralExp() && t.toBasetype().ty == Tsarray)
+            i.exp.type = t;
+
         if (needInterpret)
             sc = sc.startCTFE();
         i.exp = i.exp.expressionSemantic(sc);
@@ -1555,7 +1564,10 @@ Expression initializerToExpression(Initializer init, Type itype = null, const bo
             }
         }
 
-        Expression e = new ArrayLiteralExp(init.loc, init.type, elements);
+        Type literalType = init.type;
+        if (!literalType && itype && itype.toBasetype().ty == Tsarray)
+            literalType = itype;
+        Expression e = new ArrayLiteralExp(init.loc, literalType, elements);
         return e;
     }
 

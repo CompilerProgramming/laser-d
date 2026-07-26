@@ -2,6 +2,7 @@
 
 extern(C) int main()
 {
+    int[3] literalStorage = [10, 20, 30];
     int[3] globalStorage;
     globalStorage[0] = 10;
     globalStorage[1] = 20;
@@ -34,6 +35,9 @@ extern(C) int main()
 
     if (globalStorage[0] != 10 || globalStorage[2] != 30)
         return 7;
+    if (literalStorage[0] != 10 || literalStorage[1] != 20 ||
+        literalStorage[2] != 30)
+        return 8;
 
     return 0;
 }

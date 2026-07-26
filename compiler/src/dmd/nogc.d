@@ -165,10 +165,7 @@ public:
         {
             if (!checkOnly)
             {
-                version (IN_GCC)
-                    error(e.loc, "this array literal requires the GC and cannot be used with `???`");
-                else
-                    error(e.loc, "this array literal requires the GC and cannot be used with `-betterC`");
+                error(e.loc, "dynamic array literals are not supported in Laser-D");
             }
             err = true;
             return;

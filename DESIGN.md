@@ -345,10 +345,15 @@ argument model and its rejection of text-to-language generation. Programs use
 ordinary string literals and explicit formatting or argument passing.
 
 Compile-time initializers for statically allocated fixed-size arrays remain
-supported. Dynamic array literal expressions, array allocation with `new`,
+supported, including context-typed literals such as
+`int[3] values = [1, 2, 3]`. The destination supplies inline storage, so this
+form performs no allocation. Array literals whose resulting type remains a
+dynamic slice, array allocation with `new`,
 concatenation, append, `.dup`, `.idup`, `.capacity`, and assignment to dynamic
 array `.length` are rejected because they allocate, resize, or depend on GC
 allocation metadata. Associative-array types and literals are rejected.
+Manifest-identifier fixed-array dimensions retain a separate recorded
+implementation defect.
 
 Built-in associative arrays are rejected as a complete feature rather than
 restricted by key or value type. Their hash-table storage, growth, lookup,

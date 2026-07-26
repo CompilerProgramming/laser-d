@@ -31,12 +31,10 @@ int fixedArrayLength()
 static assert(fixedArrayLength() == 4);
 ```
 
-The dimension is an integral expression evaluated at compile time:
-
-```d
-enum columns = 4;
-alias Row = int[columns];
-```
+The dimension is an integral expression evaluated at compile time. Integer
+literals are supported. Support for equivalent manifest-constant expressions
+has a recorded implementation defect in
+[Feature status](../FEATURE_STATUS.md).
 
 A fixed array stores its elements inline. It may be a local variable, a field,
 an element of another fixed array, a function parameter or result, or part of
@@ -122,6 +120,16 @@ int firstDefaultElement()
 ```
 
 A slice default-initializes to the null slice.
+
+A context-typed array literal initializes fixed storage without allocation:
+
+```d
+int[5] values = [10, 14, 3, 5, 23];
+```
+
+The number of literal elements must match the fixed-array dimension. An array
+literal whose resulting type remains `T[]`, including one inferred with
+`auto`, is a dynamic array literal and is rejected.
 
 ### Void initialization
 

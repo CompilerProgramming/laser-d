@@ -6044,6 +6044,9 @@ private extern (C++) final class ExpressionSemanticVisitor : Visitor
             printf("ArrayLiteralExp::semantic('%s')\n", e.toChars());
         }
 
+        Type fixedArrayContext =
+            e.type && e.type.toBasetype().ty == Tsarray ? e.type : null;
+
         /* Perhaps an empty array literal [ ] should be rewritten as null?
          */
 
@@ -6065,8 +6068,11 @@ private extern (C++) final class ExpressionSemanticVisitor : Visitor
         e.type = t0.arrayOf();
         e.type = e.type.typeSemantic(e.loc, sc);
 
-        error(e.loc, "dynamic array literals are not supported in Laser-D");
-        return setError();
+        if (!fixedArrayContext)
+        {
+            error(e.loc, "dynamic array literals are not supported in Laser-D");
+            return setError();
+        }
 
         /* Disallow array literals of type void being used.
          */
@@ -15716,6 +15722,7 @@ private bool expressionSemanticDone(Expression e)
         || e.isTypeExp() // stores its type in the Expression.type field
         || e.isCompoundLiteralExp() // stores its `(type) {}` in type field, gets rewritten to struct literal
         || e.isVarExp() // type sometimes gets set already before semantic
+        || (e.isArrayLiteralExp() && e.type.toBasetype().ty == Tsarray) // fixed-array initializer context
         || (e.isAssocArrayLiteralExp() && // semanticTypeInfo not run during initialization
             (!e.type.vtinfo || !e.isAssocArrayLiteralExp().lowering))
     );
