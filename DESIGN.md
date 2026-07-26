@@ -805,8 +805,14 @@ The statement specification likewise contains only the reviewed executable
 subset: lexical blocks, value returns, `scope(exit)`, compile-time selection,
 ordinary loops, direct and range iteration, integral and enum switches,
 control transfers, and struct `with`. Unreviewed statement details are tracked
-separately for effect-free expression diagnostics, declaration conditions,
-extended foreach variables, non-struct `with`, and statement pragmas.
+separately for effect-free expression diagnostics, extended foreach
+variables, non-struct `with`, and statement pragmas.
+
+`if` declaration conditions are supported for narrowly scoped value checks.
+Both inferred and explicitly typed declarations initialize once and test the
+resulting value. The declared name exists only in the selected `then` branch,
+not in `else` or after the `if`. Declaration conditions in `while`, `switch`,
+and `with` remain separate review items.
 
 The error-handling specification defines failure as ordinary program data.
 Laser-D APIs use visible status values, output parameters, or result

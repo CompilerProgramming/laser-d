@@ -107,9 +107,30 @@ See [Templates](template.md) for compile-time selection and iteration.
 IfStatement:
     if ( Expression ) Statement
     if ( Expression ) Statement else Statement
+    if ( Declaration = Expression ) Statement
+    if ( Declaration = Expression ) Statement else Statement
 ```
 
 The condition is converted to `bool`. Exactly one selected branch executes.
+
+A declaration condition initializes a local variable once and converts its
+resulting value to `bool`:
+
+```d
+if (auto handle = acquireHandle())
+{
+    useHandle(handle);
+}
+```
+
+The declaration may use `auto` inference or an explicit supported type. The
+declared name is visible only in the selected `then` statement. It is not
+visible in an `else` statement or after the complete `if` statement. This form
+is useful when obtaining or converting a value and testing its validity should
+share one narrow scope.
+
+Declaration conditions in `while`, `switch`, and `with` remain under separate
+review.
 
 ## Loops
 
