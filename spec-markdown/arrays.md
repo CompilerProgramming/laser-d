@@ -31,10 +31,16 @@ int fixedArrayLength()
 static assert(fixedArrayLength() == 4);
 ```
 
-The dimension is an integral expression evaluated at compile time. Integer
-literals are supported. Support for equivalent manifest-constant expressions
-has a recorded implementation defect in
-[Feature status](../FEATURE_STATUS.md).
+The dimension is an integral expression evaluated at compile time:
+
+```d
+enum columns = 4;
+alias Row = int[columns];
+```
+
+When the bracket contents are a name, semantic resolution distinguishes a
+value used as a fixed-array dimension from a type used as an associative-array
+key. Associative arrays remain rejected.
 
 A fixed array stores its elements inline. It may be a local variable, a field,
 an element of another fixed array, a function parameter or result, or part of

@@ -3,8 +3,15 @@
 /*
 TEST_OUTPUT:
 ---
-laser-d/associative_arrays_rejected.d(10): Error: associative array types are not supported in Laser-D
+laser-d/associative_arrays_rejected.d(15): Error: associative array types are not supported in Laser-D
+laser-d/associative_arrays_rejected.d(16): Error: associative array types are not supported in Laser-D
 ---
 */
 
-int[int] lookup;
+alias Key = int;
+
+void rejectAssociativeArrays()
+{
+    int[int] direct;
+    int[Key] named;
+}

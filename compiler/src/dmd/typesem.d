@@ -3509,6 +3509,13 @@ Type typeSemantic(Type type, Loc loc, Scope* sc)
         }
         else
             mtype.index = mtype.index.typeSemantic(loc, sc);
+
+        if (!sc.inCfile)
+        {
+            .error(loc, "associative array types are not supported in Laser-D");
+            return error();
+        }
+
         mtype.index = mtype.index.merge2();
 
         if (mtype.index.nextOf() && !mtype.index.nextOf().isImmutable())

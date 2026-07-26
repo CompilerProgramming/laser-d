@@ -4008,7 +4008,6 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
                         //  2 - an associative array declaration, T[expr]
                         // These  can only be disambiguated later.
                         AST.Type index = parseType(); // [ type ]
-                        error("associative array types are not supported in Laser-D");
                         maybeArray = new AST.TypeAArray(t, index);
                         check(TOK.rightBracket);
                     }
@@ -4093,7 +4092,6 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
                     // It's an associative array declaration
                     //printf("it's an associative array\n");
                     AST.Type index = parseType(); // [ type ]
-                    error("associative array types are not supported in Laser-D");
                     t = new AST.TypeAArray(t, index);
                     check(TOK.rightBracket);
                 }
@@ -4255,7 +4253,6 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
                             // It's an associative array
                             //printf("it's an associative array\n");
                             AST.Type index = parseType(); // [ type ]
-                            error("associative array types are not supported in Laser-D");
                             check(TOK.rightBracket);
                             ta = new AST.TypeAArray(t, index);
                             palt |= 2;

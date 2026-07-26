@@ -2,7 +2,8 @@
 
 extern(C) int main()
 {
-    int[3] literalStorage = [10, 20, 30];
+    enum literalCount = 3;
+    int[literalCount] literalStorage = [10, 20, 30];
     int[3] globalStorage;
     globalStorage[0] = 10;
     globalStorage[1] = 20;

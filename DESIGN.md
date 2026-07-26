@@ -352,8 +352,10 @@ dynamic slice, array allocation with `new`,
 concatenation, append, `.dup`, `.idup`, `.capacity`, and assignment to dynamic
 array `.length` are rejected because they allocate, resize, or depend on GC
 allocation metadata. Associative-array types and literals are rejected.
-Manifest-identifier fixed-array dimensions retain a separate recorded
-implementation defect.
+Fixed-array dimensions may use manifest integral values. The parser preserves
+ambiguous `T[name]` syntax until semantic analysis resolves `name`; value
+symbols become fixed-array dimensions, while type symbols are rejected as
+associative-array keys.
 
 Built-in associative arrays are rejected as a complete feature rather than
 restricted by key or value type. Their hash-table storage, growth, lookup,
