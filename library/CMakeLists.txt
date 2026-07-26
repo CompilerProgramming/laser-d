@@ -29,6 +29,44 @@ add_subdirectory(checksum)
 add_subdirectory(rpmalloc)
 add_subdirectory(hash)
 
+if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+    message(FATAL_ERROR "Laser-D nsync requires a 64-bit target")
+endif()
+if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
+    message(FATAL_ERROR "Laser-D nsync currently supports only x86-64")
+endif()
+if(NOT CMAKE_SYSTEM_NAME MATCHES "^(Windows|Linux|Darwin)$")
+    message(FATAL_ERROR
+        "Laser-D nsync supports only Windows, Linux, and macOS")
+endif()
+
+set(NSYNC_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
+set(NSYNC_ENABLE_CPP OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+add_subdirectory(nsync)
+add_library(LaserD::nsync ALIAS nsync)
+
+target_sources(nsync PRIVATE
+    nsync_laserd/c/nsync_layout.c)
+target_include_directories(nsync
+    PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/nsync/public>"
+        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
+if(UNIX)
+    target_compile_options(nsync PRIVATE -pthread)
+    target_link_libraries(nsync PUBLIC -pthread)
+endif()
+set_target_properties(nsync PROPERTIES
+    OUTPUT_NAME laserd_nsync
+    POSITION_INDEPENDENT_CODE ON
+    MSVC_RUNTIME_LIBRARY MultiThreaded)
+
+install(DIRECTORY nsync_laserd/import/
+    DESTINATION import
+    FILES_MATCHING PATTERN "*.d")
+install(FILES nsync/LICENSE
+    DESTINATION share/laserd/licenses/nsync)
+
 set(FOUNDATION_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
 set(FOUNDATION_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 add_subdirectory(foundation_lib)
@@ -99,6 +137,22 @@ if(BUILD_TESTING)
 
     add_test(NAME foundation_interop
         COMMAND "${foundation_test_EXECUTABLE}")
+
+    laserd_add_executable(nsync_test
+        SOURCES
+            "${LASERD_REPOSITORY_ROOT}/compiler/test/laser-d/nsync_interface.d"
+        IMPORT_DIRECTORIES
+            "${CMAKE_SOURCE_DIR}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/foundation/import"
+            "${CMAKE_CURRENT_SOURCE_DIR}/nsync_laserd/import"
+        LINK_LIBRARIES
+            foundation
+            laserd_rpmalloc
+            nsync
+            ${foundation_platform_libraries})
+
+    add_test(NAME nsync_interop
+        COMMAND "${nsync_test_EXECUTABLE}")
 endif()
 
 install(PROGRAMS "${LASERD_COMPILER}"

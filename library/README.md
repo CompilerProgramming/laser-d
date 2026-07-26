@@ -108,3 +108,19 @@ Thread signalling, affinity, externally-created thread registration, and
 caller-owned `thread_t` storage are not yet exposed. Synchronization between
 threads will be supplied separately rather than exposing Foundation's internal
 beacon.
+
+nsync 1.30.0 supplies Laser-D's public synchronization layer. CMake builds
+only its C static library as `laserd_nsync`; the C++ library and upstream test
+suite are disabled in the Laser-D parent build. Supported targets are x86-64
+Windows, Linux, and macOS.
+
+`laserd.nsync` initially exposes zero-initializable `nsync_mu` reader/writer
+mutexes and `nsync_cv` condition variables. Their reviewed 64-bit ABI occupies
+16 bytes each and is checked by both native C static assertions and Laser-D
+static assertions. The integration test uses a condition-variable handshake
+between a Foundation worker and the main thread, and also covers exclusive,
+reader, and non-blocking mutex acquisition.
+
+Timed waits, cancellation notes, counters, once initialization, wait sets, and
+conditional critical sections remain unexposed pending focused API and ABI
+review.

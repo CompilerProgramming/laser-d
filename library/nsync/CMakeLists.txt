@@ -19,6 +19,7 @@ set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Allow nsync users to turn the tests on or off.
 option (NSYNC_ENABLE_TESTS "Enable for building tests" ON)
+option (NSYNC_ENABLE_CPP "Enable for building the C++ library" ON)
 
 # -----------------------------------------------------------------
 # Functions to set common options on targets and files.
@@ -264,6 +265,7 @@ set_target_properties (nsync PROPERTIES
 
 set_c_target (nsync "${NSYNC_COMMON_SRC} ${NSYNC_OS_SRC}")
 
+if (NSYNC_ENABLE_CPP)
 foreach (s IN ITEMS ${NSYNC_COMMON_SRC} ${NSYNC_OS_CPP_SRC})
 	# The C and C++ libraries are built from the same source files but
 	# compiled with either the C or C++ compiler. CMake normally detects
@@ -287,6 +289,7 @@ set_target_properties (nsync_cpp PROPERTIES
 	SOVERSION ${PROJECT_VERSION_MAJOR})
 
 set_cpp_target (nsync_cpp "${NSYNC_CPP_SRC_COPY}")
+endif ()
 
 
 if (NSYNC_ENABLE_TESTS)
@@ -309,6 +312,7 @@ if (NSYNC_ENABLE_TESTS)
 		"${PROJECT_SOURCE_DIR}/testing"
 	)
 
+	if (NSYNC_ENABLE_CPP)
 	foreach (t IN ITEMS ${NSYNC_TEST_SRC})
 		add_custom_command (
 			OUTPUT cpp/${t}
@@ -330,6 +334,7 @@ if (NSYNC_ENABLE_TESTS)
 	target_include_directories (nsync_test_cpp PUBLIC
 		"${PROJECT_SOURCE_DIR}/testing"
 	)
+	endif ()
 
 	# Test names should not end with _cpp
 	set (NSYNC_TESTS
@@ -364,6 +369,7 @@ if (NSYNC_ENABLE_TESTS)
 		add_test (NAME ${t} COMMAND ${t})
 		add_dependencies (test_c ${t})
 
+		if (NSYNC_ENABLE_CPP)
 		add_custom_command (
 			OUTPUT cpp/testing/${t}.c
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/testing/${t}.c cpp/testing/${t}.c
@@ -381,6 +387,7 @@ if (NSYNC_ENABLE_TESTS)
 		target_link_libraries (${t}_cpp nsync_test_cpp nsync_cpp)
 		add_test (NAME ${t}_cpp COMMAND ${t}_cpp)
 		add_dependencies (test_cpp ${t}_cpp)
+		endif ()
 	endforeach (t)
 
 	find_package (Threads REQUIRED)
@@ -388,11 +395,15 @@ if (NSYNC_ENABLE_TESTS)
 	foreach (t IN ITEMS "nsync" "nsync_test" ${NSYNC_TESTS})
 		if (THREADS_HAVE_PTHREAD_ARG)
 			target_compile_options (${t} PUBLIC "-pthread")
-			target_compile_options (${t}_cpp PUBLIC "-pthread")
+			if (NSYNC_ENABLE_CPP)
+				target_compile_options (${t}_cpp PUBLIC "-pthread")
+			endif ()
 		endif ()
 		if (CMAKE_THREAD_LIBS_INIT)
 			target_link_libraries (${t} "${CMAKE_THREAD_LIBS_INIT}")
-			target_link_libraries (${t}_cpp "${CMAKE_THREAD_LIBS_INIT}")
+			if (NSYNC_ENABLE_CPP)
+				target_link_libraries (${t}_cpp "${CMAKE_THREAD_LIBS_INIT}")
+			endif ()
 		endif ()
 	endforeach (t)
 endif ()
@@ -403,9 +414,11 @@ install (TARGETS nsync EXPORT nsync
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT RuntimeLibraries
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Development)
 
-install (TARGETS nsync_cpp EXPORT nsync_cpp OPTIONAL
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT RuntimeLibraries
-	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Development)
+if (NSYNC_ENABLE_CPP)
+	install (TARGETS nsync_cpp EXPORT nsync_cpp OPTIONAL
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT RuntimeLibraries
+		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Development)
+endif ()
 
 set (NSYNC_INCLUDES
 	"public/nsync.h"
@@ -433,6 +446,8 @@ install(EXPORT nsync
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/nsync
         FILE        nsyncConfig.cmake)
 
-install(EXPORT nsync_cpp
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/nsync_cpp
-        FILE        nsync_cppConfig.cmake)
+if (NSYNC_ENABLE_CPP)
+	install(EXPORT nsync_cpp
+	        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/nsync_cpp
+	        FILE        nsync_cppConfig.cmake)
+endif ()

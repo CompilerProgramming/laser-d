@@ -719,6 +719,25 @@ internal beacon abstraction. CPU affinity, externally-created thread
 registration, and caller-owned thread structures are also deferred pending
 focused portability and ownership review.
 
+### Synchronization
+
+Laser-D uses the C interface of nsync 1.30.0 for public synchronization.
+The C++ variant and nsync's thread-starting test support are not part of the
+runtime. The supported build matrix is restricted to x86-64 Windows, Linux,
+and macOS.
+
+The initial `laserd.nsync` module exposes nsync reader/writer mutexes and
+Mesa-style condition variables. Both objects are zero-initializable two-word
+values. Their layout is fixed at 16 bytes for Laser-D's supported 64-bit
+targets and guarded by C and Laser-D compile-time assertions. They do not
+allocate through Foundation and do not require Foundation initialization,
+although the integration test uses Foundation threads.
+
+Foundation mutexes, semaphores, and beacons remain private implementation
+details. Timed waits, cancellation, counters, once execution, wait sets, and
+conditional critical sections require separate review before being included
+in the supported Laser-D interface.
+
 No archive is produced for `core.stdc` because those modules consist only of
 declarations resolved by the platform C runtime. Other standard-library
 components may contribute native archives explicitly. Distribution archives
