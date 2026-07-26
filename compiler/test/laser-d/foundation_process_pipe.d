@@ -37,11 +37,14 @@ extern(C) int main(int argc, char** argv)
         return EXIT_SUCCESS;
     }
 
-    if (initialize() != 0)
+    if (initialize() != 0) {
+        puts("foundation_process_pipe: initialization failed");
         return EXIT_FAILURE;
+    }
 
     Stream* pipe = createPipe();
     if (pipe is null) {
+        puts("foundation_process_pipe: pipe allocation failed");
         finalize();
         return EXIT_FAILURE;
     }
@@ -49,16 +52,23 @@ extern(C) int main(int argc, char** argv)
     enum pipeMessage = "pipe";
     auto pipeBytes = cast(const(ubyte)[]) pipeMessage;
     ubyte[4] pipeResult;
+    size_t pipeWritten = write(pipe, pipeBytes);
+    size_t pipeRead = read(pipe, pipeResult[]);
     bool passed =
-        write(pipe, pipeBytes) == pipeBytes.length &&
-        read(pipe, pipeResult[]) == pipeResult.length;
+        pipeWritten == pipeBytes.length &&
+        pipeRead == pipeResult.length;
+    if (!passed)
+        puts("foundation_process_pipe: standalone pipe transfer failed");
     foreach (i; 0 .. pipeResult.length)
-        if (pipeResult[i] != pipeBytes[i])
+        if (pipeResult[i] != pipeBytes[i]) {
+            puts("foundation_process_pipe: standalone pipe data mismatch");
             passed = false;
+        }
     destroyStream(pipe);
 
     Process* process = createProcess();
     if (process is null) {
+        puts("foundation_process_pipe: process allocation failed");
         finalize();
         return EXIT_FAILURE;
     }
@@ -71,6 +81,7 @@ extern(C) int main(int argc, char** argv)
     setFlags(process, DETACHED | REDIRECT_STREAMS);
 
     if (spawn(process) != STILL_ACTIVE) {
+        puts("foundation_process_pipe: process spawn failed");
         destroyProcess(process);
         finalize();
         return EXIT_FAILURE;
@@ -78,12 +89,15 @@ extern(C) int main(int argc, char** argv)
 
     ubyte[64] output;
     size_t outputLength = read(standardOutput(process), output[]);
-    if (outputLength < childMessage.length)
+    if (outputLength < childMessage.length) {
+        puts("foundation_process_pipe: child output was too short");
         passed = false;
-    else
+    } else
         foreach (i; 0 .. childMessage.length)
-            if (output[i] != cast(ubyte) childMessage[i])
+            if (output[i] != cast(ubyte) childMessage[i]) {
+                puts("foundation_process_pipe: child output mismatch");
                 passed = false;
+            }
 
     int exitCode = STILL_ACTIVE;
     foreach (i; 0 .. 1000) {
@@ -92,8 +106,10 @@ extern(C) int main(int argc, char** argv)
             break;
         sleep(1);
     }
-    if (exitCode != EXIT_SUCCESS)
+    if (exitCode != EXIT_SUCCESS) {
+        puts("foundation_process_pipe: child wait failed");
         passed = false;
+    }
 
     destroyProcess(process);
     finalize();

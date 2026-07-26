@@ -187,6 +187,7 @@ void nsync_cv_broadcast(nsync_cv* condition);
 void nsync_cv_wait(nsync_cv* condition, nsync_mu* mutex);
 
 public:
+extern(D):
 
 alias Thread = thread_t;
 alias Mutex = nsync_mu;

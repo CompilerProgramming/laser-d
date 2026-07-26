@@ -157,6 +157,7 @@ size_t stream_available_read(stream_t* stream);
 void stream_flush(stream_t* stream);
 
 public:
+extern(D):
 
 alias Stream = stream_t;
 alias Process = process_t;
