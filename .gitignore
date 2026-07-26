@@ -2,6 +2,8 @@
 *.deps
 *.lst
 log*
+!/library/foundation_lib/foundation/log.c
+!/library/foundation_lib/foundation/log.h
 .B*
 *~
 /compiler/src/dmd/lwv
