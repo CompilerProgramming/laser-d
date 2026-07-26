@@ -1,3 +1,6 @@
+// TEST_MODE: compilable
+// REQUIRED_ARGS: -I../../library -I../../library/import -I../../library/foundation/import
+
 import core.stdc.stdio : puts;
 import core.stdc.stddef : size_t;
 import core.stdc.stdlib : EXIT_FAILURE, EXIT_SUCCESS;

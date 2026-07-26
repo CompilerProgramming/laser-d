@@ -1,3 +1,6 @@
+// TEST_MODE: compilable
+// REQUIRED_ARGS: -I../../library -I../../library/import -I../../library/foundation/import
+
 // CMake links this focused ABI test with the vendored Foundation C library.
 import core.stdc.stdlib : EXIT_FAILURE, EXIT_SUCCESS;
 import laserd.foundation.base64 :
