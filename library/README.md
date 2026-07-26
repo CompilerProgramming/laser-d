@@ -96,3 +96,15 @@ Foundation's mutex, semaphore, and beacon APIs are intentionally not exposed.
 Laser-D plans to use nsync for public synchronization primitives, avoiding two
 overlapping synchronization interfaces. Foundation may continue using its
 private primitives internally.
+
+`laserd.foundation.thread` provides the initial thread-management surface:
+opaque thread handles, callback-based creation, start, join, destruction,
+status queries, current-thread identifiers, sleep, and yield. Foundation must
+be initialized first. A Foundation-created worker automatically establishes
+and releases Foundation and rpmalloc per-thread state around its callback.
+Destruction joins a started worker if it has not already been joined.
+
+Thread signalling, affinity, externally-created thread registration, and
+caller-owned `thread_t` storage are not yet exposed. Synchronization between
+threads will be supplied separately rather than exposing Foundation's internal
+beacon.

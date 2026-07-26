@@ -7,6 +7,33 @@ import laserd.foundation.base64 :
     encode;
 import laserd.foundation.hash : hash, hashBytes;
 import laserd.foundation.lifecycle : finalize, initialize, isInitialized;
+import laserd.foundation.thread :
+    THREAD_PRIORITY_NORMAL,
+    create,
+    currentId,
+    destroy,
+    isFinished,
+    isMain,
+    isStarted,
+    join,
+    start,
+    thread_t;
+
+struct ThreadTestData
+{
+    int value;
+    int hasThreadId;
+    int isWorkerMain;
+}
+
+extern(C) void* foundationThreadTest(void* argument)
+{
+    auto data = cast(ThreadTestData*) argument;
+    data.value = 42;
+    data.hasThreadId = currentId() != 0;
+    data.isWorkerMain = isMain();
+    return argument;
+}
 
 extern(C) int main()
 {
@@ -15,6 +42,32 @@ extern(C) int main()
     if (initialize() != 0 || !isInitialized())
         return EXIT_FAILURE;
     if (initialize() != 0 || !isInitialized())
+        return EXIT_FAILURE;
+
+    ThreadTestData threadData;
+    enum threadName = "laser-d-test";
+    thread_t* thread = create(
+        &foundationThreadTest,
+        &threadData,
+        threadName,
+        THREAD_PRIORITY_NORMAL,
+        0);
+    if (thread is null)
+        return EXIT_FAILURE;
+    if (!start(thread)) {
+        destroy(thread);
+        return EXIT_FAILURE;
+    }
+    void* threadResult = join(thread);
+    bool threadPassed =
+        threadResult == &threadData &&
+        isStarted(thread) &&
+        isFinished(thread) &&
+        threadData.value == 42 &&
+        threadData.hasThreadId &&
+        !threadData.isWorkerMain;
+    destroy(thread);
+    if (!threadPassed)
         return EXIT_FAILURE;
 
     enum text = "engine";

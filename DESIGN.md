@@ -707,6 +707,18 @@ semaphore, or beacon APIs. Those remain implementation details of Foundation.
 Laser-D intends to use nsync for public synchronization primitives so that
 programs do not have to choose between duplicate locking abstractions.
 
+The initial public Foundation thread interface treats `thread_t` as opaque and
+supports callback-based allocation, start, join, deallocation, basic state
+queries, thread identifiers, sleep, and yield. A thread callback uses the C ABI
+and accepts and returns one opaque pointer. Foundation-created workers enter
+and exit Foundation's thread context automatically, which also invokes
+rpmalloc's per-thread lifecycle hooks.
+
+Thread signalling and waiting are omitted because they expose Foundation's
+internal beacon abstraction. CPU affinity, externally-created thread
+registration, and caller-owned thread structures are also deferred pending
+focused portability and ownership review.
+
 No archive is produced for `core.stdc` because those modules consist only of
 declarations resolved by the platform C runtime. Other standard-library
 components may contribute native archives explicitly. Distribution archives

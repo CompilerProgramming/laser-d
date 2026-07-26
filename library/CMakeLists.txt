@@ -54,6 +54,7 @@ install(TARGETS foundation
 install(FILES
     foundation_lib/foundation/base64.h
     foundation_lib/foundation/hash.h
+    foundation_lib/foundation/thread.h
     foundation_lib/foundation/types.h
     foundation_lib/foundation/platform.h
     foundation_lib/foundation/build.h
