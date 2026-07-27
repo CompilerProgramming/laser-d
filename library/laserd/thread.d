@@ -4,6 +4,31 @@
  * Foundation must be initialized before creating a thread. Threads created by
  * this module automatically enter and leave Foundation and rpmalloc thread
  * state around the callback.
+ *
+ * Synchronization and memory visibility:
+ *
+ * A successful exclusive or shared mutex acquisition has acquire semantics,
+ * and releasing either mode has release semantics. A release of a mutex
+ * happens before a later successful acquisition of the same mutex. Ordinary
+ * non-atomic data written while holding the mutex is therefore visible to a
+ * thread that subsequently acquires that mutex. Shared acquisitions may
+ * overlap only when every holder reads the protected data; mutation requires
+ * an exclusive acquisition.
+ *
+ * `wait` releases the supplied mutex with release semantics and reacquires it
+ * with acquire semantics before returning. `signal` and `broadcast` only wake
+ * waiters: they do not publish unprotected data by themselves. Change and test
+ * the condition predicate while holding the same mutex, and always test it in
+ * a loop.
+ *
+ * Starting a thread publishes the argument data initialized before `start` to
+ * its callback. A completed `join` makes the callback's preceding writes
+ * visible to the joining thread. The argument and any referenced storage must
+ * remain alive until the thread has been joined.
+ *
+ * Laser-D does not provide `shared` types or language-level atomics. Programs
+ * must protect every conflicting concurrent access with these mutex
+ * operations or an explicitly reviewed foreign synchronization API.
  */
 module laserd.thread;
 
@@ -33,6 +58,9 @@ enum ThreadPriority THREAD_PRIORITY_TIME_CRITICAL = 5;
  * A thread that acquires a mutex must release it. Acquiring in one thread and
  * releasing in another is illegal. A thread must not reacquire a mutex it
  * already holds, including a second read lock.
+ *
+ * Unlocking has release semantics. A later successful acquisition of the same
+ * mutex has acquire semantics and observes writes made before the unlock.
  */
 struct nsync_mu
 {
@@ -173,16 +201,24 @@ int nsync_mu_is_reader(const(nsync_mu)* mutex);
 /** Zero a condition variable to initialize it. */
 void nsync_cv_init(nsync_cv* condition);
 
-/** Wake at least one thread currently blocked on the condition variable. */
+/**
+ * Wake at least one thread currently blocked on the condition variable.
+ * This does not replace locking the mutex that protects the predicate.
+ */
 void nsync_cv_signal(nsync_cv* condition);
 
-/** Wake all threads currently blocked on the condition variable. */
+/**
+ * Wake all threads currently blocked on the condition variable.
+ * This does not replace locking the mutex that protects the predicate.
+ */
 void nsync_cv_broadcast(nsync_cv* condition);
 
 /**
  * Atomically release a held mutex and block on the condition variable. On a
  * signal, broadcast, or spurious wakeup, reacquire the mutex before returning.
- * This function must be called in a loop that tests the protected predicate.
+ * The release has release semantics and the reacquisition has acquire
+ * semantics. This function must be called in a loop that tests the protected
+ * predicate while holding the mutex.
  */
 void nsync_cv_wait(nsync_cv* condition, nsync_mu* mutex);
 

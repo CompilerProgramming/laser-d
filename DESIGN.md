@@ -815,6 +815,30 @@ Laser-D's supported 64-bit targets and guarded by C and Laser-D compile-time
 assertions. They do not allocate through Foundation and do not require
 Foundation initialization, although Foundation thread creation does.
 
+nsync implements successful exclusive and reader acquisitions with acquire
+operations and releases either mode with release operations on every supported
+platform backend. Releasing a mutex therefore happens before a later successful
+acquisition of the same mutex. Ordinary data protected by that mutex may be
+shared between threads: writes made while holding it are visible after the
+later acquisition. Reader acquisitions may overlap only for read-only access;
+mutation requires the exclusive mode.
+
+Condition variables add wakeup coordination but no independent publication
+mechanism. A wait releases its mutex with release semantics and reacquires it
+with acquire semantics before returning. Signal and broadcast do not make
+unprotected data safe, so the predicate is changed and tested while holding the
+same mutex and is retested in a loop after every wakeup.
+
+Foundation creates threads with the platform thread API. A successful start
+publishes argument data initialized before the call to the callback, and a
+completed join makes the callback's preceding writes visible to the joining
+thread. Referenced argument storage must remain alive through the join.
+Laser-D's rejection of `shared` and language-level atomics is unchanged:
+programs protect every conflicting concurrent access with `laserd.thread`
+mutexes or another explicitly reviewed foreign synchronization API. This is a
+library synchronization contract, not a reintroduction of D language-level
+threading features.
+
 Portable child-process management, anonymous pipes, and the minimal byte
 streams required by both are grouped in `laserd.system`. This keeps backing
 library names out of the application-facing module structure while retaining

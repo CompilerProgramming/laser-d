@@ -151,6 +151,26 @@ test uses a condition-variable handshake between a Foundation worker and the
 main thread, and also covers exclusive, reader, and non-blocking mutex
 acquisition.
 
+Successful exclusive and reader acquisitions have acquire semantics; releasing
+either mode has release semantics. A release happens before a later successful
+acquisition of the same mutex, so ordinary writes made while holding it are
+visible to the later holder. Concurrent reader holders must only read protected
+data, and mutation requires the exclusive mode.
+
+`Condition` variables use Mesa semantics. Waiting releases the mutex with
+release semantics and reacquires it with acquire semantics before returning.
+Signalling and broadcasting only wake waiters and do not publish unprotected
+data independently. Change and test the predicate while holding the same mutex,
+and retest it in a loop after every wakeup.
+
+A successful thread start publishes the argument data initialized before
+`start` to the callback. A completed `join` makes the callback's preceding
+writes visible to the joining thread; the argument and referenced storage must
+remain alive until then. Laser-D still has no `shared` qualifier or
+language-level atomics. Every conflicting concurrent access must be protected
+by these mutex operations or by another explicitly reviewed foreign
+synchronization API.
+
 Timed waits, cancellation notes, counters, once initialization, wait sets, and
 conditional critical sections remain unexposed pending focused API and ABI
 review.

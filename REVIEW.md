@@ -192,6 +192,23 @@ own Laser-D sources contain no rejected constructs.
    that, and there is no guidance for programs that have threads without
    `shared`, atomics, or mutable statics.
 
+   **Response (2026-07-27): resolved.** `laserd.thread`, DESIGN.md, and
+   `library/README.md` now define the library synchronization contract.
+   Successful exclusive and reader mutex acquisitions have acquire semantics,
+   and releases have release semantics; a release happens before a later
+   successful acquisition of the same mutex. Condition waits release and
+   reacquire the mutex with those semantics, while signal and broadcast only
+   wake waiters and do not independently publish unprotected data. Thread start
+   publishes initialized argument data to the callback, and a completed join
+   makes the callback's preceding writes visible to the joining thread.
+   Programs must protect every conflicting concurrent access with these
+   mutexes or another explicitly reviewed foreign synchronization API.
+
+   FEATURE_STATUS.md remains correct as a language-feature ledger:
+   `shared`, `__gshared`, `synchronized`, and language-level atomics remain
+   rejected. The documented guarantees belong to the `laserd.thread` foreign
+   library facade and do not reintroduce D language-level threading support.
+
 5. **The Markdown check is weaker than DESIGN.md claims.**
    `check_markdown_docs.py` validates front matter only when it is present, so
    chapters without it are skipped silently. Ten of the twenty-two chapters
