@@ -1,3 +1,9 @@
+---
+title: D compatibility notes
+status: restricted
+source: ../FEATURE_STATUS.md
+---
+
 # D compatibility notes
 
 Laser-D, short for Lesser D, is a deliberately smaller D dialect. It uses D

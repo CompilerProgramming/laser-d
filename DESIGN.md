@@ -77,6 +77,17 @@ declarations, function pointers, and delegate types.
 
 ## Lexical analysis
 
+Laser-D retains D lexical analysis unchanged. This includes the source
+character set, whitespace, comments, identifiers, tokens, literal forms,
+escape sequences, keywords, and special tokens. Laser-D restrictions are
+applied during parsing or semantic analysis after tokenization; they do not
+introduce a separate lexical dialect.
+
+The focused tests in `compiler/test/laser-d/lexical_*.d` cover accepted forms
+and representative malformed constructs. The upstream lexer diagnostic tests
+were also compared between upstream DMD in BetterC mode and Laser-D; the
+rejection results matched for the reviewed cases.
+
 ## Deterministic cleanup and error handling
 
 Laser-D supports `scope(exit)` as its single source-language cleanup construct.
@@ -133,22 +144,13 @@ remain supported, and architecture-specific vector implementations may be
 provided behind C interfaces. ImportC vector extensions remain a separate part
 of the ImportC audit.
 
+## Mutable static storage and native threading
+
 Laser-D source cannot declare mutable global, module, function-static, or
 aggregate-static storage. Manifest constants and deeply `immutable` static data
 remain available. Native D multithreading constructs (`shared`, `__gshared`,
 and `synchronized`) are rejected. Programs may still use C APIs for external
 state, threads, atomics, and locks; ImportC globals are exempt.
-
-Laser-D retains D lexical analysis unchanged. This includes the source
-character set, whitespace, comments, identifiers, tokens, literal forms,
-escape sequences, keywords, and special tokens. Laser-D restrictions are
-applied during parsing or semantic analysis after tokenization; they do not
-introduce a separate lexical dialect.
-
-The focused tests in `compiler/test/laser-d/lexical_*.d` cover accepted forms
-and representative malformed constructs. The upstream lexer diagnostic tests
-were also compared between upstream DMD in BetterC mode and Laser-D; the
-rejection results matched for the reviewed cases.
 
 ## Basic declarations and primitive scalar types
 
@@ -319,7 +321,7 @@ literals, `typeid`, compile-time import expressions, string mixin expressions,
 under their individual decisions. Operators, assignment, calls, casts, and
 other non-primary expressions retain their individual review status.
 
-### Mixins
+## Mixins
 
 String mixins are rejected in every syntactic position: declarations,
 statements, expressions, and types. Laser-D source cannot construct source text
@@ -327,7 +329,7 @@ and ask the compiler to reparse it. Template mixin declarations and template
 mixin instantiations remain supported because they compose already parsed D
 declarations rather than reparsing strings.
 
-### Static arrays and slices
+## Static arrays and slices
 
 Fixed-size arrays and non-owning dynamic-array slices are supported. A slice is
 a pointer-and-length view and does not imply garbage-collected ownership. It
@@ -411,7 +413,7 @@ Programs that need dynamic storage must obtain and release it explicitly, for
 example through C interoperability, and initialize supported value types in
 that explicitly managed storage.
 
-### Functions, delegates, and closures
+## Functions, delegates, and closures
 
 Ordinary functions, direct calls, function pointers, and non-capturing function
 literals are supported. Delegates are supported as two-word values containing a
@@ -471,7 +473,7 @@ contract-style `do` function bodies. Ordinary functions use a direct `{ ... }`
 body and perform any required validation through explicit statements and return
 values. This decision does not classify the separate `assert` expression.
 
-### Properties
+## Properties
 
 Compiler-provided properties are supported when their underlying type and
 operation are supported. This includes `.init`, `.sizeof`, `.alignof`,
@@ -496,7 +498,7 @@ with the removed imaginary and complex type family and has no role once those
 types are unavailable. This restriction applies only to the compiler-provided
 numeric property; aggregates may declare an ordinary field named `im`.
 
-### Operator overloading
+## Operator overloading
 
 Modern operator overloading on structs is supported where the overload itself
 uses supported Laser-D types and function features. Unary and binary operators,
@@ -528,7 +530,7 @@ is evaluated once before these rewrites. Slice descriptor types and backing
 storage are ordinary Laser-D values; the feature does not imply dynamic
 allocation or GC-backed multidimensional arrays.
 
-### Templates and compile-time execution
+## Templates and compile-time execution
 
 The template and CTFE machinery is supported. This includes type, value, alias,
 and variadic template parameters; explicit and inferred instantiation;
@@ -593,7 +595,7 @@ runtime contract. `__traits(getUnitTests)` is rejected because language
 unit-test declarations and their hidden-function discovery protocol are not
 part of Laser-D.
 
-### Compile-time I/O
+## Compile-time I/O
 
 Language-level compile-time I/O is rejected. Import expressions cannot read
 files selected by source code, even when the compiler is given an import-file
@@ -606,7 +608,7 @@ It also does not include ordinary compiler diagnostics or compiler-generated
 object files and documentation, which are outputs of the compiler rather than
 I/O initiated by the compiled language program.
 
-### Modules
+## Modules
 
 The core D module system is supported. A source file may have an explicit
 module declaration or derive its module name from its file name. Module names
@@ -627,7 +629,7 @@ still module startup and shutdown hooks. Shared lifecycle forms are rejected by
 both this rule and the cross-cutting rejection of `shared`. Package modules and
 visibility, module deprecation, and edition-qualified modules remain undecided.
 
-### Runtime type information
+## Runtime type information
 
 Runtime type information is rejected. Laser-D does not expose Druntime's
 `TypeInfo` hierarchy and does not generate type-information objects. Both type
@@ -638,7 +640,7 @@ This does not restrict compile-time inspection through `typeof`, `is`, or the
 supported read-only `__traits` operations. Those mechanisms operate directly
 in the frontend and do not create runtime metadata objects.
 
-### User-defined attributes
+## User-defined attributes
 
 User-defined attributes are rejected throughout Laser-D source. This includes
 argument-list UDAs, identifier and template-instance UDAs, and UDA call
@@ -653,7 +655,7 @@ attributes rather than D UDAs and remain governed by the ImportC review.
 code, but supported Laser-D source declarations cannot contribute UDAs to its
 result.
 
-### C standard library bindings
+## C standard library bindings
 
 Laser-D supplies a standard-library source tree under `library/`. The initial
 `core.stdc` subset contains C ABI types, constants, and `extern(C)`
@@ -802,7 +804,7 @@ filesystem streams, native descriptors/handles, Windows shell execution,
 macOS application launching, and process-global exit functions remain outside
 the supported API.
 
-### Synchronization
+## Synchronization
 
 Laser-D uses the C interface of nsync 1.30.0 for public synchronization.
 The C++ variant and nsync's thread-starting test support are not part of the
@@ -857,7 +859,7 @@ declarations resolved by the platform C runtime. Other standard-library
 components may contribute native archives explicitly. Distribution archives
 are built and tested independently on Windows, Linux, and macOS.
 
-### Specification organization
+## Specification organization
 
 The Markdown specification describes Laser-D directly. Retained language
 chapters define only constructs which exist in Laser-D and avoid repeatedly

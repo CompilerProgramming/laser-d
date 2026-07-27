@@ -1,3 +1,9 @@
+---
+title: Structs and unions
+status: restricted
+source: ../spec/struct.dd
+---
+
 # Structs and unions
 
 Structs and unions are fixed-layout value types. They provide inline storage,

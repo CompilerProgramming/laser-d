@@ -39,6 +39,22 @@ cmake --build generated/cmake-library \
     --config Release --target package
 ```
 
+On Windows, CMake propagates the required system libraries automatically.
+Programs that invoke `laserd` directly must name them explicitly. In
+particular, every direct link that includes `laserd_rpmalloc.lib` also includes
+`advapi32.lib`, which supplies the process-token APIs used by rpmalloc:
+
+```powershell
+bin\laserd.exe app.d lib\laserd_rpmalloc.lib advapi32.lib
+```
+
+This requirement also applies when `laserd_rpmalloc.lib` is reached through
+`laserd.hash` or Foundation. A direct Foundation link includes
+`laserd_foundation.lib`, `laserd_rpmalloc.lib`, `user32.lib`, `shell32.lib`,
+and `advapi32.lib`. The repository CMake build propagates these dependencies
+from its native targets; consumers defining their own targets must preserve
+the same transitive platform libraries.
+
 Library source paths mirror module packages directly. Upstream-compatible
 modules such as `object` and `core.stdc` retain their established names under
 the library root. Laser-D-owned modules and cross-library facades live under

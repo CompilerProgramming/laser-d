@@ -51,7 +51,9 @@ def main() -> int:
                 errors.append(f"{path.relative_to(ROOT)} has no level-one heading")
 
             match = FRONTMATTER_RE.match(text)
-            if match:
+            if not match:
+                errors.append(f"{path.relative_to(ROOT)} has no front matter")
+            else:
                 fields: dict[str, str] = {}
                 for line in match.group("body").splitlines():
                     key, separator, value = line.partition(":")

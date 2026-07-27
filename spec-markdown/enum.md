@@ -1,3 +1,9 @@
+---
+title: Enums
+status: supported
+source: ../spec/enum.dd
+---
+
 # Enums
 
 Laser-D enums provide named integral value types, anonymous compile-time

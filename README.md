@@ -286,6 +286,18 @@ exposes both its general allocator and first-class heap APIs. A distribution
 is platform-specific and must be built on its target platform; CI publishes
 separate Windows, Linux, and macOS ZIP artifacts.
 
+On Windows, a program linked directly with packaged
+`lib\laserd_rpmalloc.lib` must also pass `advapi32.lib` to `laserd`:
+
+```powershell
+bin\laserd.exe app.d lib\laserd_rpmalloc.lib advapi32.lib
+```
+
+The same dependency applies when rpmalloc is used by `laserd.hash` or
+Foundation. Direct Foundation links additionally require `user32.lib` and
+`shell32.lib`. The repository CMake build supplies these platform libraries
+automatically; direct package consumers must name them.
+
 ## Repository layout
 
 This repository is based on DMD and retains its overall structure.

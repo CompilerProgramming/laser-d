@@ -1,3 +1,9 @@
+---
+title: Functions
+status: restricted
+source: ../spec/function.dd
+---
+
 # Functions
 
 Laser-D functions are explicitly called, runtime-free callable units. The

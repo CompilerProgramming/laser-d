@@ -1,3 +1,9 @@
+---
+title: Type qualifiers
+status: restricted
+source: ../spec/const3.dd
+---
+
 # Type qualifiers
 
 Laser-D has two type qualifiers:

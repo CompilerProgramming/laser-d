@@ -1,3 +1,9 @@
+---
+title: Modules
+status: restricted
+source: ../spec/module.dd
+---
+
 # Modules
 
 A Laser-D source file is a module. A module supplies a namespace, controls

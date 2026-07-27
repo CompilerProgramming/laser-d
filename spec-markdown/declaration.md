@@ -1,3 +1,9 @@
+---
+title: Declarations
+status: restricted
+source: ../spec/declaration.dd
+---
+
 # Declarations
 
 A declaration introduces a name, storage object, function, aggregate, alias, or

@@ -1,3 +1,9 @@
+---
+title: Attributes and declaration modifiers
+status: restricted
+source: ../spec/attribute.dd
+---
+
 # Attributes and declaration modifiers
 
 Laser-D declaration modifiers specify linkage, import visibility, type

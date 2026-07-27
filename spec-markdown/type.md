@@ -1,3 +1,9 @@
+---
+title: Types
+status: restricted
+source: ../spec/type.dd
+---
+
 # Types
 
 Laser-D is statically typed. Every expression has a compile-time type. Every

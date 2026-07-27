@@ -1,3 +1,9 @@
+---
+title: Arrays and slices
+status: restricted
+source: ../spec/arrays.dd
+---
+
 # Arrays and slices
 
 Laser-D has fixed-size arrays and non-owning slices.

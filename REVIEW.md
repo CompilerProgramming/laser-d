@@ -190,12 +190,25 @@ own Laser-D sources contain no rejected constructs.
    `### Synchronization`, and `### Specification organization` are all nested
    beneath it. The new library sections were appended at the wrong heading level.
 
+   **Response (2026-07-27): resolved.** The lexical-analysis text now appears
+   directly beneath its heading, mutable static storage and native threading
+   have their own section, and every major topic following Expressions has
+   been restored to level two. The document hierarchy no longer nests modules,
+   libraries, synchronization, or specification organization beneath
+   Expressions.
+
 3. **The feature ledger covers the library inconsistently.** `core.stdc`,
    `std.traits`, and `laserd.hash` have FEATURE_STATUS rows, while
    `laserd.memory`, `laserd.thread`, `laserd.system`, and the
    `laserd.foundation` modules do not, although all of them are documented in
    DESIGN.md and `library/README.md`. The boundary between language ledger and
    library documentation should be drawn deliberately in one direction.
+
+   **Response (2026-07-27): resolved.** FEATURE_STATUS.md deliberately covers
+   the shipped public library as well as language features. It now has rows for
+   `laserd.memory`, the reviewed `laserd.foundation` utility and lifecycle
+   subset, `laserd.thread`, and `laserd.system`, with their ownership and scope
+   boundaries and corresponding integration tests.
 
 4. **Concurrency ships without a documented memory model.** The library now
    provides threads, mutexes, and condition variables, but the language rejects
@@ -234,12 +247,24 @@ own Laser-D sources contain no rejected constructs.
    verification of chapter metadata applies only to the twelve already
    converted, and nothing reports a chapter that was missed.
 
+   **Response (2026-07-27): resolved.** All ten chapters now have `title`,
+   `status`, and `source` front matter consistent with their current feature
+   classifications. `check_markdown_docs.py` now reports missing front matter
+   as an error instead of conditionally validating metadata only when present.
+
 6. **Windows packaging omits a link requirement.** The packaged
    `laserd_rpmalloc.lib` depends on `advapi32.lib` for `OpenProcessToken`,
    `AdjustTokenPrivileges`, and `LookupPrivilegeValueA`. The CMake build supplies
    this, but a program linked directly against the package with `laserd` fails
    with three unresolved externals until `advapi32.lib` is added. The
    requirement is not documented for consumers who do not use CMake.
+
+   **Response (2026-07-27): resolved.** README.md and `library/README.md` now
+   show that direct Windows links using `laserd_rpmalloc.lib` must also include
+   `advapi32.lib`. They note that the dependency also applies through
+   `laserd.hash` and Foundation, document Foundation's additional `user32.lib`
+   and `shell32.lib` requirements, and distinguish direct invocation from the
+   repository CMake build that propagates the platform libraries automatically.
 
 7. **Carried forward from the previous review.**
    `importc_upstream_compilable_cimports2.i` still resolves its fixtures from the
