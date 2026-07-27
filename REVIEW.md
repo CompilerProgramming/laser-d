@@ -275,6 +275,19 @@ own Laser-D sources contain no rejected constructs.
    directory holds a stale extracted package; like the earlier stale binary it is
    gitignored and is a workspace artifact rather than a repository defect.
 
+   **Response (2026-07-27): resolved.**
+   `importc_upstream_compilable_cimports2.i` now resolves byte-identical
+   `cimports2a.i` and `cimports2b.i` fixtures from
+   `compiler/test/laser-d/extra-files/imports` and no longer uses the upstream
+   `compilable/imports` tree. FEATURE_STATUS.md already tracked `debug`,
+   `deprecated`, and `align` independently; it now also has distinct Undecided
+   entries for `pragma(inline)` and `pragma(mangle)`. DESIGN.md states that
+   parser acceptance of these pragma families is not normative.
+
+   The ignored stale extracted package and CPack staging directories were
+   removed from `dist/`. The generated ZIP archive was retained; the deleted
+   directories can be recreated by running the package target.
+
 ### Assessment
 
 The project is in materially better shape than at the previous review: both

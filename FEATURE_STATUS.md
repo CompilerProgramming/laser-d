@@ -145,6 +145,8 @@ Each chapter should be split into individual features as it is investigated.
 | `export` visibility | Undecided | Review source-level export visibility and shared-library symbol publication on Windows, Linux, and macOS. | None |
 | Explicit alignment attribute | Undecided | Review `align` declaration and aggregate layout control independently of the supported read-only `.alignof` property. | None |
 | General deprecation attributes | Undecided | Review `deprecated` on declarations other than the separately tracked module-deprecation case, including diagnostic and message behavior. | None |
+| Inline-control pragma | Undecided | Review `pragma(inline)` arguments, declaration targets, scope, diagnostics, optimization interaction, and whether source may require or forbid inlining. Current acceptance is not normative. | None |
+| Symbol-mangling pragma | Undecided | Review `pragma(mangle)` arguments, applicable declarations, ABI effects, collisions, portability, and interaction with supported linkage forms. Current acceptance is not normative. | None |
 | `@__future` | Undecided | Review the implementation-reserved future attribute and whether it has any portable Laser-D source meaning. | None |
 | Compiler-recognized special attributes | Undecided | Inventory and review any built-in special attributes not represented by an ordinary named language feature before documenting or accepting them. | None |
 | Static aggregate members beyond immutable data | Undecided | Review `static` aggregate methods and other static members separately from supported manifest constants and deeply immutable static data. | None |

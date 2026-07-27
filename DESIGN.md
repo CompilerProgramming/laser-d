@@ -603,6 +603,12 @@ path with `-J`. Both declaration and statement forms of `pragma(msg)` are
 rejected so compile-time evaluation cannot produce user-selected diagnostic
 output.
 
+Other pragma families are not accepted merely because the parser currently
+recognizes them. Statement-position pragmas, `pragma(inline)`, and
+`pragma(mangle)` remain distinct Undecided features in FEATURE_STATUS.md until
+their syntax, targets, diagnostics, portability, and ABI or optimization
+effects have focused tests and a decision.
+
 This does not restrict pure CTFE over values already available to the compiler.
 It also does not include ordinary compiler diagnostics or compiler-generated
 object files and documentation, which are outputs of the compiler rather than
