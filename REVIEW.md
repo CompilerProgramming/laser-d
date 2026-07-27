@@ -303,3 +303,59 @@ blurred in the compatibility document, which is precisely the accidental
 guarantee the project's robustness principle warns against. Finding 4 is the
 strategic one: the library has outgrown the language's concurrency rationale,
 and the documentation has not yet caught up.
+
+## Lifetime annotations on member functions
+
+Found while implementing `laserd.result`, whose pointer accessors return
+pointers into the receiver and therefore needed a documented lifetime contract.
+
+Laser-D rejects `return` and `scope` as parameter storage annotations, and
+DESIGN.md describes this as removing lifetime annotations from function
+boundaries. Both annotations are still accepted in the member-function
+attribute position, where they apply to the implicit `this` reference:
+
+```d
+int* f(return int* p);                            // rejected
+struct S { int* p() return { return &v; } }       // accepted
+struct S { int* p() scope  { return &v; } }       // accepted
+```
+
+A `return` annotation on a free function is rejected, but by an upstream
+diagnostic reporting that the function has no `this` for `return` to apply to,
+rather than by a Laser-D decision.
+
+These annotations are not inert. They are load-bearing, and they are currently
+the only lifetime checking the language performs. With an ordinary struct, a
+pointer derived from `this` may escape the receiver's lifetime with no
+diagnostic; adding `return` to the method causes the escape to be reported:
+
+```d
+struct S { int v; int* p() { return &v; } }
+int* escape() { S s; return s.p(); }   // accepted, returns a dangling pointer
+
+struct S { int v; int* p() return { return &v; } }
+int* escape() { S s; return s.p(); }   // "escapes a reference to local variable"
+```
+
+The annotation is also inferred for templated member functions, so a template
+receives the checking without spelling it. `laserd.result` relies on that
+inference: its `ptr`, `value`, and `error` accessors are diagnosed when a
+returned pointer outlives its `Optional` or `Result`, even though the module
+does not write `return`. An equivalent non-templated container would silently
+permit the same dangling pointer.
+
+Two documentation statements are therefore inaccurate as written. Lifetime
+annotations have not been removed from function boundaries, only from parameter
+lists; and the claim that Laser-D provides no compiler-checked lifetime
+guarantee understates what the frontend actually does. The practical effect is
+that identical container code is checked or unchecked depending on whether it
+happens to be a template.
+
+This is an unclassified surface rather than a defect: nothing is unsound, and
+the checking is a safety improvement. It has no FEATURE_STATUS entry, no
+specification wording, and no test. The decision to make is whether the
+member-function forms are retained as Laser-D's one supported lifetime
+annotation, and documented and tested accordingly, or rejected for consistency
+with the parameter rule at the cost of losing the only escape checking
+available. Retaining them appears preferable, since library types which hand out
+interior pointers depend on that diagnosis.
