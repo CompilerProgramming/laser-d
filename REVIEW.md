@@ -110,3 +110,124 @@ remain legal; only mutable global or static storage is rejected.
 Overall the design-to-specification-to-test-to-implementation chain is
 consistent and disciplined. The one genuinely misleading trap encountered was
 the stale binary, which is a workspace artifact rather than a source problem.
+
+## Compiler and library review (2026-07-27)
+
+A second verification pass covering the front-end, the Markdown specification,
+and the new CMake-built `library/` tree.
+
+### Method
+
+`laserd.exe` was newer than every compiler source file, so the stale-binary
+hazard recorded in the previous review is resolved and no rebuild was required.
+Everything below was run against that executable.
+
+| Suite | Result |
+| --- | --- |
+| `compiler/test/laser-d`, 206 tests (previously 190) | all pass, exact message and line matching |
+| CMake configure, build, `ctest` (7 tests), `package` | all pass, package produced |
+| `spec-markdown` index coverage and local links | complete, no broken links |
+| Packaged `laserd` plus `import/` and `lib/` compiling and running a program | runs correctly |
+
+`tools/check_markdown_docs.py` could not be executed directly because Python is
+not installed on the review machine (only the Windows Store stub is present).
+Its index, heading, front-matter, and link checks were reimplemented to run the
+equivalent validation.
+
+### Resolved since the previous review
+
+Both implementation defects are fixed, and the intended distinction is
+preserved: `int[4] v = [1, 2, 3, 4];` and `enum n = 3; int[n] a;` are now
+accepted, while `int[] d = [1, 2, 3];` is still rejected as a dynamic array
+literal. The compiler is now named `laserd` to distinguish it from the
+bootstrap `dmd`, `-m32` and `-m32mscoff` are rejected, and every library module
+has at least one CTest.
+
+Two language changes landed consistently. `const` is now a restricted
+qualifier — `const` data and parameters are accepted while postfix `const`
+member-function qualifiers are rejected — and DESIGN.md describes exactly that
+boundary. The reversal of C++ interoperability, from supported free functions to
+wholesale rejection of `extern(C++)`, is propagated across DESIGN.md,
+FEATURE_STATUS.md, the removed Markdown chapter, and the tests. The library's
+own Laser-D sources contain no rejected constructs.
+
+### Findings (no fixes applied)
+
+1. **Some documented rejections are runtime-gated rather than language-gated.**
+   `spec-markdown/d-compatibility.md` lists `.reserve` and implicit-result array
+   operations alongside `.dup`, `.idup`, and `.capacity` as unavailable, but only
+   the latter three are enforced in the front end. Appending a `reserve`
+   declaration to `object.d` re-enables it, whereas `.dup` remains rejected
+   regardless of the runtime. `.sort` and `c[] = a[] + b[];` behave the same way
+   and surface upstream diagnostics rather than Laser-D decisions: `.sort`
+   suggests importing `std.algorithm`, which does not exist in Laser-D, and array
+   operations report an undefined `_arrayOp` identifier. This conflicts with the
+   maintenance rule that a language decision must not be inferred from current
+   implementation behavior, and these forms should either gain explicit
+   front-end checks or be reclassified as runtime-dependent rather than decided.
+
+2. **DESIGN.md structure has degraded further.** The empty `## Lexical analysis`
+   heading and its orphaned body under `## Vector extensions` are unchanged from
+   the previous review. In addition, `## Expressions` is now the final level-two
+   heading in the file, so `### Modules`, `### C standard library bindings`,
+   `### Synchronization`, and `### Specification organization` are all nested
+   beneath it. The new library sections were appended at the wrong heading level.
+
+3. **The feature ledger covers the library inconsistently.** `core.stdc`,
+   `std.traits`, and `laserd.hash` have FEATURE_STATUS rows, while
+   `laserd.memory`, `laserd.thread`, `laserd.system`, and the
+   `laserd.foundation` modules do not, although all of them are documented in
+   DESIGN.md and `library/README.md`. The boundary between language ledger and
+   library documentation should be drawn deliberately in one direction.
+
+4. **Concurrency ships without a documented memory model.** The library now
+   provides threads, mutexes, and condition variables, but the language rejects
+   `shared`, offers no atomics, and forbids mutable static storage.
+   FEATURE_STATUS still justifies the `shared` rejection on the grounds that C
+   threading and atomics remain reachable through ImportC, which no longer
+   describes the situation: `laserd.thread` is `extern(C)` Laser-D, not ImportC.
+   `library/test/thread_sync.d` shares a struct of plain `int` fields between
+   threads through a stack pointer. This is safe in practice because nsync's
+   opaque `extern(C)` calls act as compiler barriers, but no document states
+   that, and there is no guidance for programs that have threads without
+   `shared`, atomics, or mutable statics.
+
+5. **The Markdown check is weaker than DESIGN.md claims.**
+   `check_markdown_docs.py` validates front matter only when it is present, so
+   chapters without it are skipped silently. Ten of the twenty-two chapters
+   (`arrays`, `attribute`, `const3`, `d-compatibility`, `declaration`, `enum`,
+   `function`, `module`, `struct`, and `type`) currently have none, so the stated
+   verification of chapter metadata applies only to the twelve already
+   converted, and nothing reports a chapter that was missed.
+
+6. **Windows packaging omits a link requirement.** The packaged
+   `laserd_rpmalloc.lib` depends on `advapi32.lib` for `OpenProcessToken`,
+   `AdjustTokenPrivileges`, and `LookupPrivilegeValueA`. The CMake build supplies
+   this, but a program linked directly against the package with `laserd` fails
+   with three unresolved externals until `advapi32.lib` is added. The
+   requirement is not documented for consumers who do not use CMake.
+
+7. **Carried forward from the previous review.**
+   `importc_upstream_compilable_cimports2.i` still resolves its fixtures from the
+   upstream `compiler/test/compilable/imports/` directory through
+   `-Icompilable`. The grey areas `pragma(inline)`, `pragma(mangle)`, `debug`,
+   `deprecated`, and `align` remain silently accepted, though bookkeeping
+   improved with an explicit undecided entry for statement pragmas. The `dist/`
+   directory holds a stale extracted package; like the earlier stale binary it is
+   gitignored and is a workspace artifact rather than a repository defect.
+
+### Assessment
+
+The project is in materially better shape than at the previous review: both
+recorded defects are fixed, the conformance suite has grown, and the CMake
+library with its vendored C dependencies builds, tests, packages, and runs
+end to end. The C++ removal and the `const` addition both demonstrate the
+documentation, specification, test, and implementation chain working as
+intended.
+
+Finding 1 is the substantive one. The boundary between constructs Laser-D
+rejects and constructs the minimal runtime merely fails to provide is currently
+blurred in the compatibility document, which is precisely the accidental
+guarantee the project's robustness principle warns against. Finding 4 is the
+strategic one: the library has outgrown the language's concurrency rationale,
+and the documentation has not yet caught up.
