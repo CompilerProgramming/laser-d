@@ -4,12 +4,12 @@ Laser-D is **Lesser-D**: a deliberately smaller dialect of the D programming
 language, implemented as a fork of the DMD compiler frontend.
 
 Laser-D is not intended to mean “D in BetterC mode.” BetterC does not define a
-complete language subset, and its precise boundary is difficult to infer from
-documentation alone. Laser-D instead defines its language through its own
+clear language subset as its precise boundary is difficult to infer from
+documentation alone. Laser-D instead defines a clear subset of D through its own
 specification, implementation, and executable feature tests.
 
 Every Laser-D program is also a D program. Laser-D introduces no new syntax; it
-selects a smaller, more explicit, and more robust part of D.
+selects a smaller, more explicit part of D.
 
 ## Direction
 
@@ -34,9 +34,9 @@ rejected until they can be given a clear and dependable contract.
 The guiding principle is that source code should make consequential behavior
 visible. Syntax that can conceal allocation, control flow, lifetime,
 synchronization, runtime metadata, or an ordinary function call is generally
-rejected or replaced by a more explicit D spelling.
+rejected or replaced by a more explicit D syntax.
 
-Laser-D currently retains substantial parts of D, including:
+Laser-D retains substantial parts of D, including:
 
 - modules and ImportC;
 - primitive scalar types, enums, structs, unions, and bit fields;
