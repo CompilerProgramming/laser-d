@@ -9,7 +9,7 @@ laser-d/string_switch_rejected.d(13): Error: string `switch` statements are not 
 
 extern(C) int main()
 {
-    immutable(char)[] value = "beta";
+    string value = "beta";
     switch (value)
     {
     case "alpha":

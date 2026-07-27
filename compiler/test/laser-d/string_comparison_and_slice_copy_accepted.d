@@ -1,6 +1,6 @@
 // TEST_MODE: runnable
 
-bool equal(immutable(char)[] left, immutable(char)[] right)
+bool equal(string left, string right)
 {
     return left == right;
 }
@@ -10,14 +10,14 @@ void copy(char[] destination, char[] source)
     destination[] = source[];
 }
 
-bool sameView(immutable(char)[] left, immutable(char)[] right)
+bool sameView(string left, string right)
 {
     return left is right;
 }
 
 extern(C) int main()
 {
-    immutable(char)[] text = "Laser-D";
+    string text = "Laser-D";
     if (!equal(text, "Laser-D") || equal(text, "laser-d"))
         return 1;
     if (!sameView(text, text[]))

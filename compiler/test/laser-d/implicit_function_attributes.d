@@ -39,7 +39,7 @@ void functionForms()
     static assert(hasAttribute!(delegateValue, "@system"));
 }
 
-enum bool hasAttribute(alias functionSymbol, immutable(char)[] expected) = ()
+enum bool hasAttribute(alias functionSymbol, string expected) = ()
 {
     foreach (attribute; __traits(getFunctionAttributes, functionSymbol))
         if (attribute == expected)

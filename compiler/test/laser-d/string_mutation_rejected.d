@@ -10,7 +10,7 @@ laser-d/string_mutation_rejected.d(19): Error: cannot implicitly convert express
 
 void mutateLiteral()
 {
-    immutable(char)[] text = "Laser-D";
+    string text = "Laser-D";
     text[0] = 'l';
 }
 

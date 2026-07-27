@@ -95,7 +95,7 @@ is fixed at compile time.
 auto count = 3;                 // int
 immutable limit = 10;           // immutable(int)
 enum width = 4;                 // manifest constant of type int
-auto text = "Laser-D";          // immutable(char)[]
+auto text = "Laser-D";          // string
 ```
 
 Inference does not change the storage or ownership represented by the inferred

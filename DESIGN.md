@@ -345,8 +345,10 @@ immutable `char`, `wchar`, or `dchar` data. UTF-8, UTF-16, and UTF-32 string
 literals provide compiler-owned static storage and may be indexed or sliced
 without allocation. Their elements cannot be mutated, and a literal cannot be
 implicitly converted to a mutable character slice. The conventional `string`,
-`wstring`, and `dstring` names are aliases normally supplied by `object.d`, not
-intrinsic front-end types.
+`wstring`, and `dstring` names are guaranteed by Laser-D's minimal implicit
+`object.d` as aliases for `immutable(char)[]`, `immutable(wchar)[]`, and
+`immutable(dchar)[]`, respectively. They remain ordinary aliases rather than
+intrinsic front-end types and add no runtime or allocation requirement.
 
 Interpolated expression sequences are rejected in double-quoted, backtick, and
 token-string forms. Despite their string-like spelling, they produce a

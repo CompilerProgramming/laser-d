@@ -50,7 +50,7 @@ static assert(__traits(getProtection, Record) == "public");
 static assert(__traits(getVisibility, Record) == "public");
 static assert(__traits(getLocation, Record).length == 3);
 static assert(__traits(getCppNamespaces, cFunction).length == 0);
-static assert(is(typeof(__traits(getTargetInfo, "objectFormat")) : immutable(char)[]));
+static assert(is(typeof(__traits(getTargetInfo, "objectFormat")) : string));
 
 static assert(__traits(compiles, Record.init.value));
 static assert(!__traits(compiles, Record.init.missing));

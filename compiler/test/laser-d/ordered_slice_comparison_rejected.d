@@ -7,7 +7,7 @@ laser-d/ordered_slice_comparison_rejected.d(12): Error: ordered array and slice 
 ---
 */
 
-bool ordered(immutable(char)[] left, immutable(char)[] right)
+bool ordered(string left, string right)
 {
     return left < right;
 }

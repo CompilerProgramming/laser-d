@@ -75,20 +75,20 @@ struct Matrix
                 storage[row * columns + column] = value;
     }
 
-    void opIndexOpAssign(immutable(char)[] operator : "+")(
+    void opIndexOpAssign(string operator : "+")(
         int value, ulong row, Range selectedColumns)
     {
         foreach (column; selectedColumns.lower .. selectedColumns.upper)
             storage[row * columns + column] += value;
     }
 
-    void opIndexUnary(immutable(char)[] operator : "++")(
+    void opIndexUnary(string operator : "++")(
         ulong row, ulong column)
     {
         ++storage[row * columns + column];
     }
 
-    int opIndexUnary(immutable(char)[] operator : "-")(
+    int opIndexUnary(string operator : "-")(
         Range selectedRows, ulong column)
     {
         return -opIndex(selectedRows, column);

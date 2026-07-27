@@ -205,7 +205,7 @@ A struct may use a templated `opDispatch` hook to handle an otherwise
 unresolved member name:
 
 ```d
-ReturnType opDispatch(immutable(char)[] name)(Arguments);
+ReturnType opDispatch(string name)(Arguments);
 ```
 
 The member name is an immutable compile-time string. The selected member call

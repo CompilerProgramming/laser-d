@@ -4,28 +4,28 @@ struct Number
 {
     int value;
 
-    Number opUnary(immutable(char)[] operator : "-")()
+    Number opUnary(string operator : "-")()
     {
         return Number(-value);
     }
 
-    Number opUnary(immutable(char)[] operator : "++")()
+    Number opUnary(string operator : "++")()
     {
         ++value;
         return this;
     }
 
-    Number opBinary(immutable(char)[] operator : "+")(Number right)
+    Number opBinary(string operator : "+")(Number right)
     {
         return Number(value + right.value);
     }
 
-    Number opBinaryRight(immutable(char)[] operator : "+")(int left)
+    Number opBinaryRight(string operator : "+")(int left)
     {
         return Number(left + value);
     }
 
-    void opOpAssign(immutable(char)[] operator : "+")(int right)
+    void opOpAssign(string operator : "+")(int right)
     {
         value += right;
     }
@@ -74,7 +74,7 @@ struct Buffer
         storage[index] = value;
     }
 
-    void opIndexOpAssign(immutable(char)[] operator : "+")(int value, ulong index)
+    void opIndexOpAssign(string operator : "+")(int value, ulong index)
     {
         storage[index] += value;
     }
@@ -97,7 +97,7 @@ struct Buffer
 
 struct Forwarded
 {
-    int opDispatch(immutable(char)[] name)(int value)
+    int opDispatch(string name)(int value)
         if (name == "twice")
     {
         return value * 2;

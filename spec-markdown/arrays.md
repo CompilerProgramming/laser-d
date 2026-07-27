@@ -331,13 +331,25 @@ A string literal is immutable compiler-managed static character storage.
 The literal is normally used through an immutable character slice:
 
 ```d
-immutable(char)[] text = "Laser-D";
+string text = "Laser-D";
 ```
+
+Laser-D's implicitly imported minimal `object` module defines the conventional
+character-slice aliases:
+
+```d
+alias string  = immutable(char)[];
+alias wstring = immutable(wchar)[];
+alias dstring = immutable(dchar)[];
+```
+
+These are ordinary aliases and do not imply allocation, ownership, garbage
+collection, or other runtime support.
 
 String slices may be indexed, sliced, passed, and returned:
 
 ```d
-immutable(char)[] trim(immutable(char)[] value)
+string trim(string value)
 {
     return value[1 .. $ - 1];
 }
@@ -354,7 +366,7 @@ character slice.
 `==` and `!=` compare compatible character slices element by element:
 
 ```d
-bool equal(immutable(char)[] left, immutable(char)[] right)
+bool equal(string left, string right)
 {
     return left == right;
 }
@@ -363,7 +375,7 @@ bool equal(immutable(char)[] left, immutable(char)[] right)
 `is` and `!is` compare the identity of the slice view:
 
 ```d
-bool sameView(immutable(char)[] left, immutable(char)[] right)
+bool sameView(string left, string right)
 {
     return left is right;
 }

@@ -1,6 +1,6 @@
 // TEST_MODE: compilable
 
-immutable(char)[] trim(immutable(char)[] value)
+string trim(string value)
 {
     return value[1 .. $ - 1];
 }
@@ -15,7 +15,7 @@ void fill(char[] destination, char value)
     destination[] = value;
 }
 
-void inspect(immutable(char)[] value)
+void inspect(string value)
 {
     auto length = value.length;
     auto pointer = value.ptr;
