@@ -97,6 +97,34 @@ try/finally nodes when lowering `scope(exit)`; this is implementation machinery,
 not an additional source feature. Laser-D programs report and propagate errors
 explicitly, for example with return values or C APIs, rather than D exceptions.
 
+D exceptions are not merely discouraged in Laser-D; they are unreachable. The D
+exception hierarchy is rooted in `Throwable`, which is a class, and classes are
+not part of Laser-D. Removing the class object model therefore removes the
+exception model with it, and no source-level construct can reintroduce either.
+
+The standard library supplies `laserd.result` as one supported convention for
+returning failure as data. `Optional` carries a value which may be absent, and
+`Result` carries either a value or an error; a `void` value type covers
+operations which produce no value on success. Both are plain value types with no
+allocation, runtime metadata, or hidden control flow. `Result` overlaps its
+value and error storage, which is sound precisely because Laser-D rejects
+destructors, postblits, and copy or move constructors, so no union member
+carries lifecycle behaviour.
+
+Every accessor in that module is total. Laser-D cannot compel a caller to
+inspect a result: `@disable` is rejected, so construction cannot be routed
+through a checked path, and destructors are rejected, so an unexamined value
+cannot be detected when it leaves scope. A checked-access design would therefore
+have to trap misuse at run time, and runtime assertions are also rejected. The
+module instead guarantees that no accessor is undefined on the absent side,
+supplying a documented fallback or a null pointer. Transformations take ordinary
+function pointers, with context passed explicitly, because capturing delegates
+are rejected.
+
+This module is a library convention rather than a language-mandated result
+type. An API may still use status values, output parameters, or its own result
+aggregate where those suit its domain or its foreign interface better.
+
 ## Ordinary control flow
 
 Laser-D supports structured scalar control flow with `if`/`else`, `while`,

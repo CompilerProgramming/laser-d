@@ -80,6 +80,57 @@ int useInteger(const(char)[] text, out int value)
 The status determines which fields contain meaningful data. No hidden
 allocation, propagation, or cleanup is associated with a result aggregate.
 
+## Library optional and result types
+
+The standard library module `laserd.result` provides two general result
+aggregates. `Optional` carries a value which may be absent. `Result` carries
+either a value or an error, and its value type may be `void` for an operation
+which produces no value when it succeeds.
+
+```d
+import laserd.result : Optional, Result;
+
+enum ParseError
+{
+    invalidInput,
+    outOfRange,
+}
+
+Result!(int, ParseError) parseInteger(const(char)[] text);
+
+int useInteger(const(char)[] text, out int value)
+{
+    Result!(int, ParseError) result = parseInteger(text);
+    if (!result.isOk())
+        return cast(int) result.errorOr(ParseError.invalidInput);
+
+    value = result.valueOr(0);
+    return 0;
+}
+```
+
+Both types are ordinary value types. `Result` stores its value and its error in
+overlapping storage, which is well defined because no Laser-D type carries a
+destructor, postblit, or copy or move constructor.
+
+Every accessor is total. The language cannot require a caller to inspect a
+result, so no accessor is undefined when the value is absent. `orElse`,
+`valueOr`, and `errorOr` take a fallback, while `ptr`, `value`, and `error`
+return `null` in the states which carry no data. A returned pointer refers into
+the value it was taken from and is valid only while that value is alive and
+unmodified.
+
+`mapValue` and `mapValueContext` transform a successful value using an ordinary
+function pointer. Context is passed explicitly because Laser-D has no capturing
+delegates.
+
+The representation is uniform for every element type. A pointer element does not
+use `null` to represent absence, so a present `null` pointer remains
+distinguishable from an absent value.
+
+This module is one available convention. An API may use status values, output
+parameters, or its own result aggregate instead.
+
 ## Propagation
 
 Failure is propagated with visible conditions and returns. Each function
