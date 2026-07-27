@@ -55,7 +55,9 @@ slice, not a GC-managed container. The following D array facilities are absent:
 
 - dynamic-array allocation and resizing;
 - assigning to slice `.length`;
-- `.capacity`, `.reserve`, `.dup`, and `.idup`;
+- `.capacity`, `.dup`, and `.idup`;
+- the GC-backed `object.reserve` function (ordinary user-defined `reserve`
+  functions remain available through UFCS);
 - concatenation and append;
 - array operations that allocate an implicit result; and
 - associative-array types, literals, lookup, and mutation.

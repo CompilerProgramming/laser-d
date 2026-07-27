@@ -76,7 +76,6 @@ shared static this()
         "replace": "std.array",
         "rmdir": "std.file",
         "sin": "std.math",
-        "sort": "std.algorithm",
         "split": "std.array",
         "sqrt": "std.math",
         "startsWith": "std.algorithm",

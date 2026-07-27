@@ -166,6 +166,23 @@ own Laser-D sources contain no rejected constructs.
    implementation behavior, and these forms should either gain explicit
    front-end checks or be reclassified as runtime-dependent rather than decided.
 
+   **Response (2026-07-27): resolved with the boundaries separated.**
+   `.dup`, `.idup`, and `.capacity` remain compiler-recognized properties with
+   explicit front-end rejection. D's `object.reserve` is instead a GC-backed
+   runtime function reached through UFCS; the compatibility specification,
+   DESIGN.md, and FEATURE_STATUS.md now describe that standard facility as
+   omitted while preserving user-defined, non-GC `reserve` functions.
+
+   A genuinely implicit-result expression such as `return a[] + b[];` was
+   already rejected by the front end and now has a dedicated conformance test.
+   The destination-backed `c[] = a[] + b[];` form need not allocate and remains
+   the distinct Undecided “Vectorized array expressions” entry in
+   FEATURE_STATUS.md; its current dependency on `object._arrayOp` is not treated
+   as a rejection. `.sort` is likewise an ordinary UFCS/library call rather
+   than a reserved array property. User-defined implementations remain valid,
+   and the compiler no longer suggests importing the unavailable
+   `std.algorithm` module when lookup fails.
+
 2. **DESIGN.md structure has degraded further.** The empty `## Lexical analysis`
    heading and its orphaned body under `## Vector extensions` are unchanged from
    the previous review. In addition, `## Expressions` is now the final level-two

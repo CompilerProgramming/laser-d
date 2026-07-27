@@ -366,7 +366,10 @@ form performs no allocation. Array literals whose resulting type remains a
 dynamic slice, array allocation with `new`,
 concatenation, append, `.dup`, `.idup`, `.capacity`, and assignment to dynamic
 array `.length` are rejected because they allocate, resize, or depend on GC
-allocation metadata. Associative-array types and literals are rejected.
+allocation metadata. The implicit `object` module does not provide D's
+GC-backed `reserve` function. `reserve` is otherwise an ordinary function name,
+so explicitly declared non-GC implementations remain callable through UFCS.
+Associative-array types and literals are rejected.
 Fixed-array dimensions may use manifest integral values. The parser preserves
 ambiguous `T[name]` syntax until semantic analysis resolves `name`; value
 symbols become fixed-array dimensions, while type symbols are rejected as
