@@ -207,6 +207,7 @@ void rpmalloc_heap_thread_set_current(rpmalloc_heap_t* heap);
 rpmalloc_heap_t* rpmalloc_get_heap_for_ptr(void* pointer);
 
 public:
+extern(D):
 
 alias VERSION = RPMALLOC_VERSION;
 alias VERSION_MAJOR = RPMALLOC_VERSION_MAJOR;
