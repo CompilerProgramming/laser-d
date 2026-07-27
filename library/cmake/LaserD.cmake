@@ -36,6 +36,7 @@ function(laserd_add_executable target)
     endif()
 
     set(output "${CMAKE_CURRENT_BINARY_DIR}/${target}${CMAKE_EXECUTABLE_SUFFIX}")
+    set(depfile "${CMAKE_CURRENT_BINARY_DIR}/${target}.d")
     add_custom_command(
         OUTPUT "${output}"
         COMMAND "${LASERD_COMPILER}"
@@ -46,10 +47,12 @@ function(laserd_add_executable target)
             ${LASERD_SOURCES}
             ${link_inputs}
             "-of=${output}"
+            "-makedeps=${depfile}"
         DEPENDS
             "${LASERD_COMPILER}"
             ${LASERD_SOURCES}
             ${link_dependencies}
+        DEPFILE "${depfile}"
         COMMAND_EXPAND_LISTS
         VERBATIM)
 

@@ -696,6 +696,11 @@ with native adapter sources below `laserd/c`. All standard-library and native
 interop tests live under `library/test`; `compiler/test/laser-d` is reserved
 for language and compiler conformance tests.
 
+The CMake helper compiling Laser-D executables requests a Make-compatible
+dependency file from the compiler and registers it with CMake. Changes to
+transitively imported `.d` modules therefore rebuild each affected executable
+without treating entire import roots as dependencies.
+
 The first production C-backed component is rpmalloc 2.0.1. CMake compiles the
 vendored C11 source as `laserd_rpmalloc`, explicitly disables process-wide C
 allocator replacement (`ENABLE_OVERRIDE=0`), and enables first-class heaps
