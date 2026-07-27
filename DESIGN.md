@@ -687,12 +687,14 @@ harness therefore uses model 64 for the Dub-built compiler. A `DMD_MODEL`
 override does not expand the supported target set, and selecting model 32 is
 rejected by the compiler.
 
-The `checksum` component is the reference C-backed library. CMake builds a
-native static archive from its C implementation and installs the C header
-beside a reviewed `laserd.checksum` import module. CTest compiles and runs a
-Laser-D consumer that calls both the raw `extern(C)` declaration and a
-slice-based Laser-D wrapper. Its source is included in the distribution as the
-template for future C libraries.
+Library source paths mirror their public module packages without an additional
+`import` directory. Upstream-compatible modules such as `object` and
+`core.stdc` retain their established package names. Laser-D-owned modules and
+cross-library facades live under `library/laserd`. Bindings and native adapters
+owned by a particular C library live in that library's `laserd` directory,
+with native adapter sources below `laserd/c`. All standard-library and native
+interop tests live under `library/test`; `compiler/test/laser-d` is reserved
+for language and compiler conformance tests.
 
 The first production C-backed component is rpmalloc 2.0.1. CMake compiles the
 vendored C11 source as `laserd_rpmalloc`, explicitly disables process-wide C

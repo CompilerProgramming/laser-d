@@ -1,6 +1,3 @@
-// TEST_MODE: compilable
-// REQUIRED_ARGS: -I../../library -I../../library/import -I../../library/foundation/import
-
 import core.stdc.stdlib : EXIT_FAILURE, EXIT_SUCCESS;
 import laserd.foundation.lifecycle : finalize, initialize;
 import laserd.thread :

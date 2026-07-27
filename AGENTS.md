@@ -20,7 +20,8 @@ I expect most of the changes to occur only in the language front-end.
 
 - Always describe what changes will be done before making any changes.
 - Do not commit
-- Add new tests under compiler/test/laser-d
+- Add language and compiler tests under compiler/test/laser-d
+- Add standard-library and native-library integration tests under library/test
 - Document changes in DESIGN.md
 - When a language feature is identified, accepted, restricted, rejected, or changed, update the applicable language specification under spec-markdown so that it remains consistent with Laser-D's tests and implementation
 - When documentation review encounters a language feature whose status has not been decided, add a distinct Undecided entry to FEATURE_STATUS.md before removing or replacing that material

@@ -272,31 +272,19 @@ Each distribution contains:
 - `bin/laserd` (`bin/laserd.exe` on Windows);
 - an adjacent compiler configuration that automatically adds the packaged
   `import/` directory;
-- `import/object.d` and the supported `core.stdc` source modules; and
-- `lib/liblaserd_checksum.a` (`lib/laserd_checksum.lib` on Windows), its
-  `laserd.checksum` import module, C header, and rebuildable example sources;
+- `import/object.d`, the supported `core.stdc` source modules, and the
+  Laser-D-owned modules under `laserd`;
 - `lib/liblaserd_rpmalloc.a` (`lib/laserd_rpmalloc.lib` on Windows), the
-  `laserd.rpmalloc` import module, rpmalloc C header, and rpmalloc licence;
+  `laserd.memory` module, rpmalloc C header, and rpmalloc licence;
+- the Foundation and nsync native libraries and their supported Laser-D
+  interfaces;
 - the project and standard-library documentation and licence.
 
 The `core.stdc` modules remain declarations for the platform C runtime. The
-checksum example is a genuine native C static library built by CMake and called
-through a reviewed Laser-D `extern(C)` binding. The rpmalloc component is built
-without process-wide `malloc` replacement and exposes both its general
-allocator and first-class heap APIs. A distribution is platform-specific and
-must be built on its target platform; CI publishes separate Windows, Linux,
-and macOS ZIP artifacts.
-
-As an additional check beyond the current CI workflow, an extracted
-distribution's installed example can be rebuilt without the Laser-D source
-repository:
-
-```console
-cmake -S share/laserd/examples/checksum -B build/checksum
-cmake --build build/checksum --config Release
-ctest --test-dir build/checksum \
-    --build-config Release --output-on-failure
-```
+rpmalloc component is built without process-wide `malloc` replacement and
+exposes both its general allocator and first-class heap APIs. A distribution
+is platform-specific and must be built on its target platform; CI publishes
+separate Windows, Linux, and macOS ZIP artifacts.
 
 ## Repository layout
 

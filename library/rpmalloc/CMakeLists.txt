@@ -21,10 +21,8 @@ set_target_properties(laserd_rpmalloc PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     MSVC_RUNTIME_LIBRARY MultiThreaded)
 
-set(rpmalloc_platform_libraries)
 if(WIN32)
     target_link_libraries(laserd_rpmalloc PUBLIC Advapi32)
-    list(APPEND rpmalloc_platform_libraries advapi32.lib)
 endif()
 
 install(TARGETS laserd_rpmalloc
@@ -34,19 +32,10 @@ install(TARGETS laserd_rpmalloc
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 install(FILES rpmalloc/rpmalloc.h
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/laserd/rpmalloc")
+install(DIRECTORY laserd/
+    DESTINATION import/laserd
+    FILES_MATCHING
+        PATTERN "*.d"
+        PATTERN "c" EXCLUDE)
 install(FILES LICENSE
     DESTINATION share/laserd/licenses/rpmalloc)
-
-if(BUILD_TESTING)
-    laserd_add_executable(rpmalloc_test
-        SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test/rpmalloc_test.d"
-        IMPORT_DIRECTORIES
-            "${CMAKE_SOURCE_DIR}"
-            "${CMAKE_SOURCE_DIR}/import"
-        LINK_LIBRARIES
-            laserd_rpmalloc
-            ${rpmalloc_platform_libraries})
-
-    add_test(NAME rpmalloc_c_interop
-        COMMAND "${rpmalloc_test_EXECUTABLE}")
-endif()

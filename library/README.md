@@ -39,12 +39,12 @@ cmake --build generated/cmake-library \
     --config Release --target package
 ```
 
-The `checksum` component demonstrates the intended model for C-backed Laser-D
-libraries. CMake builds `checksum.c` as a native static library, Laser-D imports
-it through `laserd.checksum`, and CTest runs a program that calls both the raw
-`extern(C)` function and its slice-based wrapper. Installation includes the
-archive, C header, `.d` import, CMake helper, and a standalone rebuildable
-example under `share/laserd/examples/checksum`.
+Library source paths mirror module packages directly. Upstream-compatible
+modules such as `object` and `core.stdc` retain their established names under
+the library root. Laser-D-owned modules and cross-library facades live under
+`library/laserd`. Code owned by a native dependency lives in that dependency's
+`laserd` directory, with native adapter sources under `laserd/c`. All library
+and native interoperability tests are collected under `library/test`.
 
 The `rpmalloc` component is the first production C-backed library. It builds
 rpmalloc 2.0.1 as `laserd_rpmalloc`, without replacing the process-wide C
@@ -55,7 +55,7 @@ implementation-neutral `laserd.memory` module. Its public names include
 rpmalloc names remain private ABI details. The CTest integration program
 exercises both API families.
 
-The `hash` component provides the Laser-D module `laserd.hash`. It is an
+The pure Laser-D module `laserd.hash` is an
 insertion-ordered port of the public-domain `st` C hash table with machine-word
 keys and values. It retains the original binless linear-search representation
 for small tables, the packed 8/16/32/64-bit bin indices for larger tables, the
