@@ -30,6 +30,11 @@ laserd_add_executable(core_stdc_test
     IMPORT_DIRECTORIES "${CMAKE_SOURCE_DIR}")
 add_test(NAME core_stdc COMMAND "${core_stdc_test_EXECUTABLE}")
 
+laserd_add_executable(traits_test
+    SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/traits.d"
+    IMPORT_DIRECTORIES "${CMAKE_SOURCE_DIR}")
+add_test(NAME std_traits COMMAND "${traits_test_EXECUTABLE}")
+
 laserd_add_executable(memory_test
     SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/memory.d"
     IMPORT_DIRECTORIES ${laserd_library_import_directories}

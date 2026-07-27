@@ -130,6 +130,8 @@ endif()
 install(FILES object.d DESTINATION import)
 install(DIRECTORY core DESTINATION import
     FILES_MATCHING PATTERN "*.d")
+install(DIRECTORY std DESTINATION import
+    FILES_MATCHING PATTERN "*.d")
 
 install(FILES
     "${LASERD_REPOSITORY_ROOT}/README.md"

@@ -221,6 +221,12 @@ The following traits are absent:
 There is no runtime reflection. Traits operate only on compiler-known
 information.
 
+The distributed `std.traits` module is correspondingly a tested subset of
+Phobos rather than a promise that every upstream trait is available.
+`std.typecons` is not distributed because a small implementation without its
+central Tuple, nullable, and ownership behavior would overstate compatibility.
+Library availability does not restore a rejected language feature.
+
 ## Interoperability differences
 
 ImportC accepts the reviewed, preprocessed C11 baseline. GNU-compatible

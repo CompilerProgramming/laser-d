@@ -74,6 +74,17 @@ Allocation failure is returned as `null` from creation/copying and as
 The `core.stdc` modules do not produce a library archive because they contain
 declarations only; programs link those APIs directly to the platform C runtime.
 
+`std.traits` is a deliberately reduced Phobos-compatible module. Its tested
+surface contains common type-category predicates, function/field inspection,
+basic qualifier constructors, and several simple type helpers. The module
+lists deferred upstream groups in comments so later imports have an explicit
+review queue. Its library test is an ordinary program adapted from upstream
+unittest ideas, since Laser-D has no unittest blocks.
+
+`std.typecons` is not currently distributed. Its central facilities depend on
+language or runtime features outside Laser-D, and exporting only a small,
+materially incompatible Tuple would overstate Phobos compatibility.
+
 The vendored Foundation library is built as `laserd_foundation`. The initial
 reviewed interface deliberately exposes only `laserd.foundation.base64` and
 `laserd.foundation.hash`. These operations are portable, stateless,

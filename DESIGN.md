@@ -696,6 +696,28 @@ with native adapter sources below `laserd/c`. All standard-library and native
 interop tests live under `library/test`; `compiler/test/laser-d` is reserved
 for language and compiler conformance tests.
 
+The first Phobos-derived module is a reduced, source-compatible subset of
+`std.traits`. It is maintained as a small Laser-D module rather than a
+wholesale copy of the upstream file: the upstream module depends on other
+parts of Phobos and contains facilities based on classes, destructors,
+postblits, unsupported qualifiers, rejected types, or unreviewed recursive
+adaptation. The reduced module contains a commented inventory of deferred
+upstream groups so omissions remain visible during review.
+
+`std.traits` initially covers tested qualifier construction for `const` and
+`immutable`, function return and parameter inspection, field inspection,
+member detection, common type-category predicates, pointer/key/value helpers,
+implicit-conversion testing, selection, and mangled-name inspection. A reduced
+`std.typecons` is not distributed: without upstream Tuple indexing, named
+fields, nullable and ownership wrappers, and other central facilities, the
+remaining declarations would overstate compatibility with the Phobos module.
+
+Tests under `library/test` adapt upstream unittest assertions into ordinary
+`extern(C) int main()` programs because Laser-D rejects D unittest blocks and
+the `-unittest` switch. An upstream declaration is supported only after such
+a test is present; unextracted declarations remain outside the library
+surface even when their implementation might happen to compile.
+
 The CMake helper compiling Laser-D executables requests a Make-compatible
 dependency file from the compiler and registers it with CMake. Changes to
 transitively imported `.d` modules therefore rebuild each affected executable
