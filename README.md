@@ -69,6 +69,12 @@ facilities, including:
 Laser-D aims to be readable and easy to learn, with fewer concepts.
 The syntax is less cluttered with annotations and qualifiers.
 
+Laser-D source cannot declare mutable global or static data. Manifest
+constants and deeply immutable static data remain available, while ImportC may
+declare global storage owned by C code. This removes mutation of Laser-D global
+state, but functions remain conservatively impure because pointers, foreign
+calls, I/O, and ImportC globals can still produce externally visible effects.
+
 Laser-D is not a memory-safe language. Pointers, manual storage,
 and implicitly `@system` code remain available. The objective is instead to
 make programs smaller in semantic surface area and easier to audit: calls,
