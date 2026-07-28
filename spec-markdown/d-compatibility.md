@@ -1,7 +1,7 @@
 ---
 title: D compatibility notes
 status: restricted
-source: ../FEATURE_STATUS.md
+decision-record: ../FEATURE_STATUS.md
 ---
 
 # D compatibility notes

@@ -1,7 +1,7 @@
 ---
 title: Attributes and declaration modifiers
 status: restricted
-source: ../spec/attribute.dd
+review-sources: ../spec/attribute.dd
 ---
 
 # Attributes and declaration modifiers

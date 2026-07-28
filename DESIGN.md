@@ -2,8 +2,8 @@
 
 The working inventory and review status of individual language features is in
 [`FEATURE_STATUS.md`](FEATURE_STATUS.md). Language decisions recorded there
-must remain consistent with this design, the specification under `spec/`, and
-the tests under `compiler/test/laser-d`.
+must remain consistent with this design, the normative Markdown specification
+under `spec-markdown/`, and the tests under `compiler/test/laser-d`.
 
 ## Mandatory BetterC mode
 
@@ -906,19 +906,44 @@ are built and tested independently on Windows, Linux, and macOS.
 
 ## Specification organization
 
-The Markdown specification describes Laser-D directly. Retained language
+The Markdown specification under `spec-markdown/` is the sole normative
+language specification and describes Laser-D directly. Retained language
 chapters define only constructs which exist in Laser-D and avoid repeatedly
 annotating the broader D language. Differences relevant to readers and source
 migration are consolidated in `spec-markdown/d-compatibility.md`. Chapters
 devoted entirely to absent D features are removed from the Markdown
 specification once their decisions have been preserved in that compatibility
-document. The historical Ddoc sources remain under `spec/` during the
-transition.
+document.
 
 The Markdown specification is authoritative and is not regenerated from the
-historical Ddoc files. CI runs `tools/check_markdown_docs.py` without modifying
-the tree; it verifies chapter metadata, historical-source references, local
-links, and index coverage.
+historical Ddoc files. The Ddoc files under `spec/` remain non-normative
+upstream review sources: they help identify features and provide provenance for
+decisions, but no text in them becomes a Laser-D guarantee unless it is stated
+in the Markdown specification. CI runs `tools/check_markdown_docs.py` without
+modifying the tree; it verifies chapter metadata, review-source references,
+local links, and index coverage.
+
+## Language decision traceability
+
+Language review follows a four-part traceability chain:
+
+1. An upstream D document under `spec/` identifies the source feature or
+   behavior being reviewed. This is review provenance, not specification.
+2. `FEATURE_STATUS.md` records the Laser-D decision and separately names both
+   the normative Laser-D specification and the upstream review source.
+3. The applicable chapter under `spec-markdown/` defines the accepted,
+   restricted, or rejected Laser-D behavior.
+4. Tests under `compiler/test/laser-d` provide executable evidence for the
+   language boundary. Library behavior is tested separately under
+   `library/test`.
+
+Reviewers must preserve those roles. A `.dd` reference belongs in an
+**Upstream review source** field or chapter `review-sources` metadata; it must
+not appear as the normative specification for a decided feature. Conversely,
+the Markdown specification should describe Laser-D directly rather than
+annotating or incorporating the whole upstream chapter. When a review discovers
+an untested behavior, it remains **Undecided** until its intended status,
+normative wording, and test evidence have been established.
 
 The expression specification follows that organization by documenting only
 the reviewed Laser-D core: scalar operators, assignment, explicit calls,

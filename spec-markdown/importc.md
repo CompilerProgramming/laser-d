@@ -1,7 +1,7 @@
 ---
 title: ImportC
 status: restricted
-source: ../spec/importc.dd
+review-sources: ../spec/importc.dd
 ---
 
 # ImportC

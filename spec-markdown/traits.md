@@ -1,7 +1,7 @@
 ---
 title: Traits
 status: restricted
-source: ../spec/traits.dd
+review-sources: ../spec/traits.dd
 ---
 
 # Traits

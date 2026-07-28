@@ -1,7 +1,7 @@
 ---
 title: Error handling
 status: restricted
-source: ../spec/errors.dd
+review-sources: ../spec/errors.dd
 ---
 
 # Error handling

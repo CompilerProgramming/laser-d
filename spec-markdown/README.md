@@ -8,20 +8,16 @@ which Laser-D does not have. Readers migrating D code should use
 [D compatibility notes](d-compatibility.md) for a consolidated description of
 the differences.
 
-The older Ddoc sources remain under [`spec/`](../spec) while the Markdown
-specification becomes authoritative. During this transition, a reviewed
-Markdown chapter may intentionally differ from its historical Ddoc source.
+This Markdown specification is the sole normative language specification.
+The older Ddoc sources under [`spec/`](../spec) are retained only as
+non-normative review material. A Markdown chapter may intentionally differ
+from those upstream sources.
 
 ## Language
 
 - [Lexical analysis](lex.md)
 - [Modules](module.md)
-- [Declarations](declaration.md)
-- [Types](type.md)
-- [Type qualifiers](const3.md)
-- [Enums](enum.md)
-- [Structs and unions](struct.md)
-- [Arrays and slices](arrays.md)
+- [Declarations and types](types.md)
 - [Functions](function.md)
 - [Attributes](attribute.md)
 - [Expressions](expression.md)

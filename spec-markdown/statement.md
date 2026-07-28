@@ -1,7 +1,7 @@
 ---
 title: Statements
 status: restricted
-source: ../spec/statement.dd
+review-sources: ../spec/statement.dd
 ---
 
 # Statements
@@ -49,7 +49,7 @@ A block is a lexical sequence of statements enclosed by braces. Names declared
 within the block follow lexical scope.
 
 A declaration statement introduces a supported local declaration. Its syntax
-and meaning are specified in [Declarations](declaration.md).
+and meaning are specified in [Declarations](types.md#declarations).
 
 An expression followed by `;` is evaluated for its side effects. The empty
 statement is a single `;`.

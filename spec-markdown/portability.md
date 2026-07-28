@@ -1,7 +1,7 @@
 ---
 title: Portability
 status: restricted
-source: ../spec/portability.dd
+review-sources: ../spec/portability.dd
 ---
 
 # Portability Guide

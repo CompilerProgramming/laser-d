@@ -1,7 +1,7 @@
 ---
 title: Properties
 status: restricted
-source: ../spec/property.dd
+review-sources: ../spec/property.dd
 ---
 
 # Compiler-provided properties
@@ -161,7 +161,7 @@ Fixed arrays and slices provide read-only `.length` and `.ptr`.
   view.
 
 The pointer does not own or extend the lifetime of the backing storage. See
-[Arrays](arrays.md) for the slice lifetime and mutation rules.
+[Arrays](types.md#arrays-and-slices) for the slice lifetime and mutation rules.
 
 ## Delegates
 
@@ -172,4 +172,4 @@ allocate. A non-capturing delegate has a null context pointer.
 ## Enums
 
 An enum provides `.init`, `.min`, `.max`, `.sizeof`, and `.alignof` according
-to its declaration and base type. See [Enums](enum.md).
+to its declaration and base type. See [Enums](types.md#enums).

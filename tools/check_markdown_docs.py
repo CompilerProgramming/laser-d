@@ -59,7 +59,7 @@ def main() -> int:
                     key, separator, value = line.partition(":")
                     if separator:
                         fields[key.strip()] = value.strip()
-                for required in ("title", "status", "source"):
+                for required in ("title", "status"):
                     if not fields.get(required):
                         errors.append(
                             f"{path.relative_to(ROOT)} has no {required} front-matter field"
@@ -69,12 +69,16 @@ def main() -> int:
                         f"{path.relative_to(ROOT)} has invalid status "
                         f"{fields.get('status')!r}"
                     )
-                source = fields.get("source")
-                if source:
-                    source_path = (path.parent / source).resolve()
-                    if not source_path.is_file():
+                review_sources = fields.get("review-sources")
+                if review_sources:
+                    for source in review_sources.split(","):
+                        source = source.strip()
+                        source_path = (path.parent / source).resolve()
+                        if source_path.is_file():
+                            continue
                         errors.append(
-                            f"{path.relative_to(ROOT)} references missing source {source}"
+                            f"{path.relative_to(ROOT)} references missing "
+                            f"review source {source}"
                         )
 
         for link in LINK_RE.finditer(text):

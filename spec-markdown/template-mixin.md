@@ -1,7 +1,7 @@
 ---
 title: Template mixins
 status: supported
-source: ../spec/template-mixin.dd
+review-sources: ../spec/template-mixin.dd
 ---
 
 # Template mixins

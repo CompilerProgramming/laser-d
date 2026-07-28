@@ -1,7 +1,7 @@
 ---
 title: Conditional compilation
 status: restricted
-source: ../spec/version.dd
+review-sources: ../spec/version.dd
 ---
 
 # Conditional compilation

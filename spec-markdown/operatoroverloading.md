@@ -1,7 +1,7 @@
 ---
 title: Operator overloading
 status: restricted
-source: ../spec/operatoroverloading.dd
+review-sources: ../spec/operatoroverloading.dd
 ---
 
 # Operator overloading

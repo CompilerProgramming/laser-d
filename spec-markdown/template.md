@@ -1,7 +1,7 @@
 ---
 title: Templates
 status: supported
-source: ../spec/template.dd
+review-sources: ../spec/template.dd
 ---
 
 # Templates

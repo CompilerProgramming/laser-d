@@ -1,7 +1,7 @@
 ---
 title: Modules
 status: restricted
-source: ../spec/module.dd
+review-sources: ../spec/module.dd
 ---
 
 # Modules

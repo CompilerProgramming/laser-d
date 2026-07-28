@@ -1,7 +1,7 @@
 ---
 title: Functions
 status: restricted
-source: ../spec/function.dd
+review-sources: ../spec/function.dd
 ---
 
 # Functions

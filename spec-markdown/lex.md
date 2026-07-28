@@ -1,7 +1,7 @@
 ---
 title: Lexical analysis
 status: supported
-source: ../spec/lex.dd
+review-sources: ../spec/lex.dd
 ---
 
 # Lexical
@@ -554,9 +554,9 @@ OctalDigit:
 | `\v` | Vertical tab (U+000B). |
 | `\x`*nn* | Byte value in hexadecimal, where *nn* is specified as two hexadecimal digits. For example: `\xFF` represents the character with the value 255.  See also: conv. |
 | `\`*n* `\`*nn* `\`*nnn* | Byte value in octal. For example: `\101` represents the character with the value 65 (`'A'`). Analogous to hexadecimal characters, the largest byte value is `\377` (= `\xFF` in hexadecimal or `255` in decimal)  See also: conv. |
-| `\u`*nnnn* | Unicode character U+*nnnn*, where *nnnn* are four hexadecimal digits. For example, `\u03B3` represents the Unicode character γ (U+03B3 - GREEK SMALL LETTER GAMMA). |
+| `\u`*nnnn* | Unicode character U+*nnnn*, where *nnnn* are four hexadecimal digits. For example, `\u03B3` represents the Unicode character Î³ (U+03B3 - GREEK SMALL LETTER GAMMA). |
 | `\U`*nnnnnnnn* | Unicode character U+*nnnnnnnn*, where *nnnnnnnn* are 8 hexadecimal digits. For example, `\U0001F603` represents the Unicode character U+1F603 (SMILING FACE WITH OPEN MOUTH). |
-| `\`*name* | Named character entity from the HTML5 specification. These names begin with & and end with `;`, e.g., `€`. See NamedCharacterEntity. |
+| `\`*name* | Named character entity from the HTML5 specification. These names begin with & and end with `;`, e.g., `â‚¬`. See NamedCharacterEntity. |
 
 ## <a id="characterliteral"></a>Character Literals
 
@@ -580,7 +580,7 @@ single quotes.
 
 A character literal resolves to one
     of type `char`, `wchar`, or `dchar`
-    (see [Basic Data Types](type.md#basic-data-types)).
+    (see [Basic Data Types](types.md#basic-data-types)).
 
 - If the literal is a `\u` escape sequence, it resolves to type `wchar`.
 - If the literal is a `\U` escape sequence, it resolves to type `dchar`.

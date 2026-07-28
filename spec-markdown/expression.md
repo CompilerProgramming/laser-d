@@ -1,7 +1,7 @@
 ---
 title: Expressions
 status: restricted
-source: ../spec/expression.dd
+review-sources: ../spec/expression.dd
 ---
 
 # Expressions
@@ -153,7 +153,7 @@ slice. The backing storage must remain alive for every use of that slice.
 
 Structs may provide one-dimensional and multidimensional indexing, slicing,
 assignment, compound assignment, unary mutation, and `$` through the modern
-operator hooks. See [Arrays](arrays.md) and
+operator hooks. See [Arrays](types.md#arrays-and-slices) and
 [Operator overloading](operatoroverloading.md).
 
 ## Primary expressions
@@ -210,7 +210,7 @@ lifetime.
 
 String literals occupy immutable, compiler-provided static storage and are
 viewed through non-owning character slices. Their operations are specified in
-[Arrays](arrays.md).
+[Arrays](types.md#arrays-and-slices).
 
 ### Function literals
 
