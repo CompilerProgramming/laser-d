@@ -1465,6 +1465,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
 
             case TOK.return_:
             {
+                error(token.loc, "`return` function qualifiers are not supported in Laser-D; receiver lifetime relationships are inferred");
                 stc = STC.return_;
                 TOK next = peekNext();
                 if (next == TOK.scope_)     // recognize the `return scope` pair
@@ -1483,6 +1484,7 @@ class Parser(AST, Lexer = dmd.lexer.Lexer) : Lexer
             }
 
             case TOK.scope_:
+                error(token.loc, "`scope` function qualifiers are not supported in Laser-D; receiver lifetime relationships are inferred");
                 stc = STC.scope_;
                 break;
 

@@ -42,9 +42,19 @@ annotations. Laser-D rejects `scope`, `lazy`, `return`, `auto ref`, and `final`
 parameter annotations. Functions and function literals cannot return by `ref`;
 return values are ordinary values, and an explicitly `ref`-annotated
 constructor is rejected. The frontend's internal in-place constructor return
-does not constitute a source annotation. This removes lifetime annotations,
-lazy thunks, inferred reference passing, and reference-return aliasing from
-function boundaries.
+does not constitute a source annotation. Postfix `return` and `scope`
+member-function qualifiers are also rejected. This removes source-written
+lifetime annotations, lazy thunks, inferred reference passing, and
+reference-return aliasing from function boundaries.
+
+The frontend nevertheless retains its internal receiver-lifetime inference for
+templated aggregate methods. When such a method returns a pointer derived from
+its receiver, the inferred relationship prevents that pointer from escaping a
+shorter-lived receiver. This requires no Laser-D syntax and is intentionally a
+narrow diagnostic guarantee: equivalent non-template methods are not promised
+the same analysis, and Laser-D does not otherwise provide borrow checking.
+`receiver_lifetime_qualifiers_rejected.d` fixes the source surface, while
+`receiver_lifetime_inference.d` proves the retained escape diagnostic.
 
 Every function type in Laser-D is implicitly `nothrow`, `@nogc`, and `@system`.
 These are language invariants rather than optional annotations: they apply to
@@ -63,8 +73,9 @@ therefore always expose the fixed attributes to the type system.
 The `@safe` and `@trusted` subsets are not part of Laser-D. Explicit `@safe`,
 `@trusted`, and `@system` are all rejected: the first two conflict with the
 fixed safety model, while spelling `@system` is redundant. Laser-D therefore
-provides no compiler-checked memory-safety boundary; memory correctness remains
-the program's responsibility.
+provides no general compiler-checked memory-safety boundary. Apart from the
+narrow templated receiver-lifetime inference described above, memory
+correctness remains the program's responsibility.
 
 The experimental `@live` ownership and borrowing analysis is also rejected.
 `@live` cannot be attached to a declaration or function type, and no valid

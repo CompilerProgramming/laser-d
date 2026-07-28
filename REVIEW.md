@@ -359,3 +359,16 @@ annotation, and documented and tested accordingly, or rejected for consistency
 with the parameter rule at the cost of losing the only escape checking
 available. Retaining them appears preferable, since library types which hand out
 interior pointers depend on that diagnosis.
+
+**Response (2026-07-28): resolved with inference and without qualifier
+syntax.** Laser-D now rejects postfix `return` and `scope` member-function
+qualifiers as well as the existing parameter forms. The frontend's inferred
+receiver relationship for templated aggregates remains active, so
+`laserd.result` continues to receive the escape diagnostic without adding
+qualifiers to `result.d`. `receiver_lifetime_qualifiers_rejected.d` fixes the
+source-language restriction and `receiver_lifetime_inference.d` proves that a
+pointer returned by a template method cannot escape its local receiver.
+DESIGN.md, FEATURE_STATUS.md, and the function and compatibility specifications
+now describe this as a narrow inference guarantee rather than general lifetime
+or memory-safety checking. Equivalent non-template methods remain outside that
+guarantee.

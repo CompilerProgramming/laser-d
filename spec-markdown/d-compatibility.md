@@ -113,6 +113,7 @@ The following D function facilities are absent:
 - `pure` and `@live`;
 - reference return values;
 - `lazy`, `scope`, `return`, `inout`, `auto ref`, and `final` parameter forms;
+- postfix `return` and `scope` member-function qualifiers;
 - capturing delegates and closures;
 - named nested functions;
 - D runtime variadic functions and typesafe runtime variadics;
@@ -125,7 +126,9 @@ The following D function facilities are absent:
 Parameters may use `in`, `out`, or `ref`. C ABI variadic functions remain
 available for C interoperability. Non-capturing function literals, function
 pointers, non-capturing delegates, and delegates to struct methods remain
-available.
+available. Template aggregate methods retain inferred receiver-lifetime
+checking without source qualifiers; this can reject an interior pointer that
+would escape a local receiver, but is not a general borrow-checking guarantee.
 
 ## Declarations, attributes, and lifecycle
 

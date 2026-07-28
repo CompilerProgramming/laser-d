@@ -177,6 +177,36 @@ delegates are returned according to their value representation. Returning a
 pointer, slice, or delegate does not transfer ownership or extend the lifetime
 of referenced context or storage.
 
+Source-written lifetime annotations are not part of Laser-D. The `return` and
+`scope` keywords are rejected as parameter annotations and as postfix
+member-function qualifiers.
+
+For a method of a templated aggregate, the compiler may infer that a returned
+pointer is derived from the receiver. A caller cannot return that pointer beyond
+the lifetime of a shorter-lived receiver:
+
+```d
+struct Box(T)
+{
+    T value;
+
+    T* pointer()
+    {
+        return &value;
+    }
+}
+
+int* invalidEscape()
+{
+    Box!int box;
+    return box.pointer(); // Error: the pointer escapes box.
+}
+```
+
+This rule introduces no qualifier syntax. It is a narrow guarantee for inferred
+templated receiver relationships, not general lifetime or ownership checking;
+the same analysis is not guaranteed for a non-template aggregate method.
+
 ### Inferred result type
 
 `auto` infers a value result type from reachable return expressions:
