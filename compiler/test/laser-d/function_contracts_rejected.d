@@ -52,11 +52,9 @@ TEST_OUTPUT:
 ---
 laser-d/function_contracts_rejected.d(4): Error: `in` function contracts are not supported in Laser-D
 laser-d/function_contracts_rejected.d(10): Error: `in` function contracts are not supported in Laser-D
-laser-d/function_contracts_rejected.d(12): Error: runtime `assert` expressions are not supported in Laser-D; use explicit error handling or `static assert` for compile-time checks
 laser-d/function_contracts_rejected.d(14): Error: contract-style `do` function bodies are not supported in Laser-D; use `{ ... }`
 laser-d/function_contracts_rejected.d(20): Error: `out` function contracts are not supported in Laser-D
 laser-d/function_contracts_rejected.d(26): Error: `out` function contracts are not supported in Laser-D
-laser-d/function_contracts_rejected.d(28): Error: runtime `assert` expressions are not supported in Laser-D; use explicit error handling or `static assert` for compile-time checks
 laser-d/function_contracts_rejected.d(30): Error: contract-style `do` function bodies are not supported in Laser-D; use `{ ... }`
 laser-d/function_contracts_rejected.d(36): Error: contract-style `do` function bodies are not supported in Laser-D; use `{ ... }`
 laser-d/function_contracts_rejected.d(44): Error: `in` function contracts are not supported in Laser-D
