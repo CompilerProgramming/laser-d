@@ -102,6 +102,20 @@ In short:
 > Laser-D is D's compile-time power with a smaller, more explicit, C-like
 > runtime language.
 
+## Standard Library
+
+Laser-D does not include Phobos or the D Runtime. It will eventually have its own
+standard library. By design the standard library is compiled and built using CMake.
+This is to allow easy integration of existing good quality C libraries such as:
+
+* [rpmalloc](https://github.com/mjansson/rpmalloc)
+* [foundation_lib](https://github.com/mjansson/rpmalloc)
+* [nsync](https://github.com/google/nsync)
+
+Additional libraries will be added in due course.
+
+See [`library`](library) for most up to date information on available libraries.
+
 ## Specification and tests
 
 The current design rationale is recorded in [DESIGN.md](DESIGN.md), and the
