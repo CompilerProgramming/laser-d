@@ -66,7 +66,7 @@ The `rpmalloc` component is the first production C-backed library. It builds
 rpmalloc 2.0.1 as `laserd_rpmalloc`, without replacing the process-wide C
 allocator, and enables both its general allocation API and its explicit,
 single-thread-owned heap API. Laser-D programs import the
-implementation-neutral `laserd.memory` module. Its public names include
+`laserd.rpmalloc` module. Its public names include
 `Heap`, `allocate`, `free`, `acquireHeap`, and `allocateFromHeap`; native
 rpmalloc names remain private ABI details. The CTest integration program
 exercises both API families.
@@ -104,7 +104,7 @@ A fidelity test checks the original numeric, C-string, case-insensitive, and
 incremental hash algorithms against vectors produced by the C source.
 Comparison callbacks and iteration may rebuild the table; searches detect the
 changed rebuild counter, discard cached entry locations, and retry.
-A caller supplies and retains ownership of a `laserd.memory.Heap`; a table uses
+A caller supplies and retains ownership of a `laserd.rpmalloc.Heap`; a table uses
 that heap for its own allocation and growth but never clears or releases it.
 Numeric, C-string, and ASCII case-insensitive C-string policies are predefined,
 and callers may supply compatible hash and comparison function pointers.

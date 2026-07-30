@@ -12,7 +12,7 @@ module laserd.hash;
 
 import core.stdc.stddef : size_t;
 import core.stdc.string : memcpy, memset, strcmp, strlen;
-import laserd.memory : Heap, allocateFromHeap, freeFromHeap;
+import laserd.rpmalloc : Heap, allocateFromHeap, freeFromHeap;
 
 alias st_data_t = size_t;
 alias st_index_t = size_t;

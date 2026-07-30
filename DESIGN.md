@@ -437,7 +437,7 @@ case-insensitive FNV hash, probing sequence, single-pass insertion reservation,
 and rebuild/retry handling around reentrant comparison and iteration callbacks
 are retained from the C implementation.
 
-Every table borrows a caller-supplied `laserd.memory.Heap*` for its entire
+Every table borrows a caller-supplied `laserd.rpmalloc.Heap*` for its entire
 lifetime. It allocates, grows, compacts, copies, and frees its own table storage
 through that heap, but never releases the heap or calls
 `freeAllFromHeap`. The caller must initialize memory, keep the heap
@@ -778,7 +778,7 @@ without treating entire import roots as dependencies.
 The first production C-backed component is rpmalloc 2.0.1. CMake compiles the
 vendored C11 source as `laserd_rpmalloc`, explicitly disables process-wide C
 allocator replacement (`ENABLE_OVERRIDE=0`), and enables first-class heaps
-(`RPMALLOC_FIRST_CLASS_HEAPS=1`). The reviewed `laserd.memory` import module
+(`RPMALLOC_FIRST_CLASS_HEAPS=1`). The reviewed `laserd.rpmalloc` import module
 exposes both the general allocator and explicit heap APIs using
 implementation-neutral names such as `Heap`, `allocate`, and `free`. Native
 rpmalloc symbol and type names remain private ABI details. The public `Config`

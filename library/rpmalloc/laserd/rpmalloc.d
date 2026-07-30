@@ -4,7 +4,7 @@
  * The native library is built without process-wide malloc replacement and
  * with the first-class heap API enabled.
  */
-module laserd.memory;
+module laserd.rpmalloc;
 
 import core.stdc.stddef : size_t;
 

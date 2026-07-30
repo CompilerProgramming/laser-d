@@ -2,7 +2,7 @@ import core.stdc.stddef : size_t;
 import core.stdc.stdlib : EXIT_FAILURE, EXIT_SUCCESS;
 import core.stdc.string : strcmp;
 import laserd.hash;
-import laserd.memory;
+import laserd.rpmalloc;
 
 private int require(bool condition)
 {

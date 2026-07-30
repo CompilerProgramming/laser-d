@@ -40,13 +40,13 @@ laserd_add_executable(result_test
     IMPORT_DIRECTORIES "${CMAKE_SOURCE_DIR}")
 add_test(NAME result COMMAND "${result_test_EXECUTABLE}")
 
-laserd_add_executable(memory_test
-    SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/memory.d"
+laserd_add_executable(rpmalloc_test
+    SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/rpmalloc.d"
     IMPORT_DIRECTORIES ${laserd_library_import_directories}
     LINK_LIBRARIES
         laserd_rpmalloc
         ${laserd_allocator_platform_libraries})
-add_test(NAME rpmalloc_c_interop COMMAND "${memory_test_EXECUTABLE}")
+add_test(NAME rpmalloc_c_interop COMMAND "${rpmalloc_test_EXECUTABLE}")
 
 laserd_add_executable(hash_test
     SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/hash.d"

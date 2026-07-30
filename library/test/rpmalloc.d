@@ -1,6 +1,6 @@
 import core.stdc.stdlib : EXIT_FAILURE, EXIT_SUCCESS;
 import core.stdc.stddef : size_t;
-import laserd.memory;
+import laserd.rpmalloc;
 
 extern(C) int main()
 {

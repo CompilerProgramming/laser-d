@@ -372,3 +372,38 @@ DESIGN.md, FEATURE_STATUS.md, and the function and compatibility specifications
 now describe this as a narrow inference guarantee rather than general lifetime
 or memory-safety checking. Equivalent non-template methods remain outside that
 guarantee.
+
+## Memory facade and rpmalloc module rename review (2026-07-29)
+
+The rpmalloc binding rename and the new `laserd.memory` facade were reviewed
+from the working tree. The renamed low-level binding, its integration test, and
+the hash-table consumer compile successfully in focused checks.
+
+1. **The facade compilation findings are resolved.** `laserd.memory` now
+   imports `size_t` and the public `laserd.rpmalloc` aliases
+   `zeroAllocate`, `allocateArray`, `reallocate`, and `free`. A focused
+   compilation of the facade succeeds. The `alloc` operation's
+   zero-initialization is deliberate.
+
+2. **Allocator-table validation is deferred to the native assertion work.**
+   The current methods select the callback path using `ctx`. Until constructor
+   validation is added, a non-null context with any null callback can call
+   null, while callbacks which validly require no context select the rpmalloc
+   fallback instead. The intended contract is an all-or-none callback table;
+   mixing custom allocation with rpmalloc reallocation or freeing is unsafe.
+   The follow-up assertion work must enforce that contract independently of
+   release or check-mode options.
+
+3. **Memory-facade integration coverage is intentionally deferred.** The
+   former `library/test/memory.d` is now `library/test/rpmalloc.d` and tests
+   the renamed low-level binding. After native assertions are implemented, add
+   a separate `library/test` program covering compilation, zero-initialized
+   default allocation, default reallocation/freeing, custom callbacks, the
+   null-context case, and rejection of invalid or partial callback tables.
+
+4. **The public-boundary documentation is corrected.** `DESIGN.md`,
+   `FEATURE_STATUS.md`, and `library/README.md` now place the reviewed native
+   binding and hash heap type under `laserd.rpmalloc`. The generic
+   `laserd.memory.Arena` remains to be documented and classified after its
+   callback validity, ownership, copying, null-context, allocator-family, and
+   zero-initialization contracts are settled and tested.
