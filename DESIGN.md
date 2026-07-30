@@ -126,8 +126,10 @@ Every accessor in that module is total. Laser-D cannot compel a caller to
 inspect a result: `@disable` is rejected, so construction cannot be routed
 through a checked path, and destructors are rejected, so an unexamined value
 cannot be detected when it leaves scope. A checked-access design would therefore
-have to trap misuse at run time, and runtime assertions are also rejected. The
-module instead guarantees that no accessor is undefined on the absent side,
+have to trap misuse at run time. Although mandatory runtime assertions are
+available, this general-purpose result convention does not abort on an
+unchecked accessor. The module instead guarantees that no accessor is
+undefined on the absent side,
 supplying a documented fallback or a null pointer. Transformations take ordinary
 function pointers, with context passed explicitly, because capturing delegates
 are rejected.
@@ -503,8 +505,9 @@ must be discovered with `__traits(getUnitTests)` and called by user code.
 Laser-D instead uses explicit test functions and an explicit C `main`, following
 the same visible execution model as ordinary programs. The `-unittest` option
 and `__traits(getUnitTests)` are rejected, and the predefined `unittest`
-version is never enabled. Runtime assertions are rejected separately, while
-compiler-only `static assert` remains supported.
+version is never enabled. Runtime assertions remain available independently of
+the rejected unit-test framework, while compiler-only `static assert` remains
+supported.
 
 Function contracts are rejected. This includes expression and block forms of
 `in` preconditions and `out` postconditions, named postcondition results, and
@@ -591,13 +594,16 @@ template declarations, template instances, and CTFE. In particular, templates
 and CTFE cannot restore string mixins, GC-backed arrays, associative arrays,
 classes, capturing delegates, or any other rejected construct.
 
-Runtime `assert` expressions are rejected, including message forms,
-`assert(0)`, and assertions written in functions intended for CTFE. Their
-failure paths require druntime assertion hooks, ordinary assertions may be
-removed by `-release`, and `assert(0)` changes lowering according to the check
-mode. Laser-D uses explicit runtime conditions and error propagation instead.
-`static assert` remains supported as a compiler-only check with no runtime
-dependency. ImportC retains C `_Static_assert`.
+Runtime `assert` expressions are supported, including message forms,
+`assert(0)`, and assertions in CTFE-capable functions. Laser-D always emits
+runtime assertions: `-release`, `-check=assert=off`, and `-checkaction` cannot
+remove or redirect them. A false condition calls the existing platform C
+runtime assertion-failure entry point directly; it does not use druntime or
+the configuration-dependent C `assert` macro. `assert(0)` follows the same
+failure path and remains a non-returning expression. During CTFE, an executed
+assertion is checked by the compiler. `static assert` remains supported as a
+compiler-only check with no runtime dependency, and ImportC retains C
+`_Static_assert`.
 
 Compile-time introspection mechanisms such as individual `__traits` operations,
 `is` expressions, and `typeof` are documented and tested in their own feature
@@ -786,6 +792,16 @@ structure retains rpmalloc's Linux/Android-only field so its layout matches
 the native header on every supported platform. Integration testing covers
 ordinary allocation, reallocation, aligned allocation, heap ownership, heap
 reallocation, zeroed heap allocation, bulk heap cleanup, and finalization.
+
+The `laserd.memory.Arena` facade provides one allocation interface over either
+the general rpmalloc API or a caller-supplied callback table. Its default value
+uses rpmalloc and zero-initializes `alloc` results. A constructed custom arena
+requires all four allocation, array-allocation, reallocation, and free
+callbacks together; a mandatory runtime assertion rejects a partial table.
+Callback selection is independent of the context pointer, so a custom
+allocator may validly use a null context. Allocations must be reallocated and
+freed through the same arena.
+
 The vendored source omits rpmalloc's separate `malloc.c` override
 implementation; its include is therefore conditional on `ENABLE_OVERRIDE`, as
 is the override functionality itself.
@@ -973,8 +989,9 @@ Laser-D APIs use visible status values, output parameters, or result
 aggregates; foreign functions retain their documented C error conventions.
 Callers propagate failure through ordinary conditions and returns, while
 `scope(exit)` provides deterministic lexical cleanup. The upstream discussion
-of exception objects, unwinding, default handlers, and runtime assertions is
-not part of the active Laser-D specification.
+of exception objects, unwinding, and default handlers is not part of the active
+Laser-D specification. Mandatory runtime assertions are specified separately
+as non-recoverable C-runtime-backed checks, not as error propagation.
 
 The properties specification is limited to reviewed compiler-provided
 metadata and representation views: initialization, size and alignment, source

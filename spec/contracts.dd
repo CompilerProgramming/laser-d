@@ -25,9 +25,10 @@ are unavailable because classes and interfaces are rejected.)
 
 $(H2 $(LNAME2 assertions, Assertions))
 
-$(P Runtime $(D assert) expressions are rejected independently of contracts.
-Compile-time $(D static assert) remains supported for conditions evaluated by
-the compiler.)
+$(P Runtime $(D assert) expressions remain available independently of
+contracts. They are explicitly written mandatory checks and do not restore
+contract syntax, inheritance, or hidden contract calls. Compile-time
+$(D static assert) remains supported for conditions evaluated by the compiler.)
 
 $(H2 $(LNAME2 alternatives, Explicit Validation))
 

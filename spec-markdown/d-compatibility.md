@@ -156,7 +156,6 @@ Tests are ordinary programs with explicit calls and an explicit C entry point.
 The following D expressions are absent:
 
 - every use of `new`;
-- runtime `assert`;
 - `typeid`;
 - `super`;
 - interpolated expression sequences;
@@ -168,6 +167,9 @@ The following D expressions are absent:
 `__rvalue` and its related return-on-stack inspection facility are also absent.
 Compile-time evaluation remains available for compiler-known values, but it
 cannot read source-selected files or emit user-selected `pragma(msg)` output.
+Runtime `assert` is retained with Laser-D-specific mandatory semantics: it is
+never removed by release or check options and its failure calls the platform C
+runtime assertion-failure entry point without druntime.
 
 Template mixins remain available because they inject declarations which were
 parsed normally; they do not reparse text as source.

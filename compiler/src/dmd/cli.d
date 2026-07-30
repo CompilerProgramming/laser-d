@@ -210,7 +210,8 @@ struct Usage
             "enable or disable specific checks",
             q"{Overrides default, `-boundscheck`, `-release` and `-unittest` options to enable or disable specific checks.
                 $(UL
-                    $(LI $(B assert): assertion checking)
+                    $(LI $(B assert): accepted for compatibility; Laser-D
+                    assertion checking is always enabled)
                     $(LI $(B bounds): array bounds)
                     $(LI $(B in): in contracts)
                     $(LI $(B invariant): class/struct invariants)
@@ -226,9 +227,11 @@ struct Usage
             "list information on all available checks"
         ),
         Option("checkaction=[D|C|halt|context]",
-            "behavior on assert/boundscheck/finalswitch failure",
+            "accepted for compatibility; Laser-D always uses the C failure action",
             `Sets behavior when an assert or an array bounds check fails,
              or a $(D final switch) errors.
+             Laser-D accepts these values for command-line compatibility but
+             always selects the C runtime failure action.
                 $(UL
                     $(LI $(B D): Default behavior, which throws an unrecoverable $(D AssertError).)
                     $(LI $(B C): Calls the C runtime library assert failure function.)
@@ -839,11 +842,11 @@ dmd -cov -unittest myprog.d
             `,
         ),
         Option("release",
-            "contracts and asserts are not emitted, and bounds checking is performed only in @safe functions",
+            "contracts are not emitted and bounds checking is performed only in @safe functions; Laser-D assertions remain enabled",
             `Compile release version, which means not emitting run-time
-            checks for contracts and asserts. Array bounds checking is not
-            done for system and trusted functions, and assertion failures
-            are undefined behaviour.`
+             contract checks. Array bounds checking is not done for system and
+             trusted functions. Laser-D runtime assertions remain mandatory
+             and retain their C runtime failure action.`
         ),
         Option("revert=<name>",
             "revert language change identified by <name>",
@@ -1162,7 +1165,8 @@ struct CLIUsage
     enum previewUsage = generateFeatureUsage(Usage.previews, "preview", "upcoming language changes");
 
     /// Options supported by -checkaction=
-    enum checkActionUsage = "Behavior on assert/boundscheck/finalswitch failure:
+    enum checkActionUsage = "Compatibility options for assert/boundscheck/finalswitch failure.
+Laser-D always uses the C runtime failure action:
   =[h|help|?]    List information on all available choices
   =D             Usual D behavior of throwing an AssertError
   =C             Call the C runtime library assert failure function
@@ -1173,7 +1177,7 @@ struct CLIUsage
     /// Options supported by -check
     enum checkUsage = "Enable or disable specific checks:
   =[h|help|?]           List information on all available choices
-  =assert[=[on|off]]    Assertion checking
+  =assert[=[on|off]]    Accepted; Laser-D assertions remain enabled
   =bounds[=[on|off]]    Array bounds checking
   =in[=[on|off]]        Generate In contracts
   =invariant[=[on|off]] Class/struct invariants
@@ -1182,7 +1186,7 @@ struct CLIUsage
   =nullderef[=[on|off]] Null dereference error
   =on                   Enable all assertion checking
                         (default for non-release builds)
-  =off                  Disable all assertion checking
+  =off                  Disable configurable checks; Laser-D assertions remain enabled
 ";
 
     /// Options supported by -extern-std

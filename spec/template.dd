@@ -379,7 +379,7 @@ $(LI compile-time import expressions or other compile-time file I/O,)
 $(LI classes, interfaces, associative arrays, vectors, or rejected scalar
 types,)
 $(LI GC-backed allocation, array growth, or capturing delegates,)
-$(LI exceptions, runtime assertions, contracts, or unit-test blocks,)
+$(LI exceptions, contracts, or unit-test blocks,)
 $(LI user-defined attributes, rejected qualifiers, or rejected parameter and
 return annotations,)
 $(LI runtime type metadata, module lifecycle, global mutable state, threading

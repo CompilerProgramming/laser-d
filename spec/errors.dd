@@ -11,11 +11,13 @@ propagate errors explicitly, for example through return values or C APIs.
 
 $(H2 Runtime Assertions)
 
-$(LASER_REJECTED Runtime $(D assert) expressions are rejected. Their failure
-paths require D runtime hooks and their removal under release settings would
-make program behavior depend on compiler configuration. Use explicit
-conditions and explicit error propagation. The compiler-only
-$(D static assert) declaration remains supported.)
+$(LASER_SUPPORTED Runtime $(D assert) expressions are mandatory
+non-recoverable invariant checks. A false assertion calls the platform C
+runtime assertion-failure entry point directly and does not return. Release,
+check, and check-action options cannot remove or redirect assertions. Expected
+operational failures continue to use explicit conditions and explicit error
+propagation. The compiler-only $(D static assert) declaration remains
+supported.)
 
 $(BLOCKQUOTE_BY Julius C'ster,
 I came, I coded, I crashed.

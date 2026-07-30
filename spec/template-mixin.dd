@@ -143,7 +143,7 @@ $(LI mutable global or static storage, module lifecycle functions, or
 threading features,)
 $(LI GC-backed arrays, associative arrays, allocation, or rejected types and
 qualifiers,)
-$(LI contracts, runtime assertions, exceptions, unit-test blocks, inline
+$(LI contracts, exceptions, unit-test blocks, inline
 assembly, or rejected attributes,)
 $(LI any other declaration excluded by the Laser-D specification.)
 )

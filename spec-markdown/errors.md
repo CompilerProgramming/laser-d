@@ -201,3 +201,15 @@ order and transfer behavior are specified in [Statements](statement.md).
 `static assert` validates compiler-known requirements and stops compilation
 when its condition is false. It does not represent or handle a failure that
 occurs while the program is running.
+
+## Runtime assertions
+
+Runtime `assert` provides a mandatory non-recoverable check for violated
+program invariants. A false assertion calls the platform C runtime
+assertion-failure entry point and does not return. Assertions remain enabled in
+release builds and cannot be disabled or redirected by check options.
+
+An assertion is not an error-propagation mechanism: callers cannot recover
+from it or inspect it as returned data. Expected operational failures should
+continue to use status values, result aggregates, or documented foreign error
+conventions.

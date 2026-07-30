@@ -1136,8 +1136,11 @@ void reconcileCommands(ref Param params, ref Target target)
             params.useNullCheck = CHECKENABLE.off;
     }
 
-    if (params.checkAction != CHECKACTION.halt)
-        params.checkAction = CHECKACTION.C;
+    // Laser-D assertions are a mandatory language check. They always emit and
+    // use the existing BetterC C-runtime failure path, regardless of release,
+    // check, or checkaction command-line options.
+    params.useAssert = CHECKENABLE.on;
+    params.checkAction = CHECKACTION.C;
 
     params.useModuleInfo = false;
     params.useTypeInfo = false;

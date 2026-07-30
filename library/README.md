@@ -71,6 +71,14 @@ single-thread-owned heap API. Laser-D programs import the
 rpmalloc names remain private ABI details. The CTest integration program
 exercises both API families.
 
+The `laserd.memory` module provides the higher-level `Arena` facade. A
+default-initialized arena uses rpmalloc, and its `alloc` operation returns
+zero-initialized storage. A custom arena supplies allocation, array-allocation,
+reallocation, and free callbacks as one complete table. Construction asserts
+that the table is either entirely present or entirely absent. Callbacks may use
+a null context pointer, and memory must be reallocated or freed through the
+arena which allocated it.
+
 `laserd.result` provides the pure Laser-D value types `Optional` and `Result`.
 Laser-D has no exceptions, because D's exception hierarchy is built on classes,
 so a fallible operation reports failure as ordinary returned data. `Optional`

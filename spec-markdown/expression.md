@@ -260,6 +260,28 @@ SpecialKeyword:
 These keywords provide compile-time source-location or symbol information.
 They require no runtime service.
 
+## Runtime assertions
+
+```text
+AssertExpression:
+    assert ( AssignExpression )
+    assert ( AssignExpression , AssignExpression )
+```
+
+A runtime assertion evaluates its condition exactly once whenever execution
+reaches it. If the condition is false, Laser-D calls the supported platform C
+runtime assertion-failure entry point and does not return. The optional message
+is supplied to that failure path. `assert(0)` is an unconditional,
+non-returning assertion failure.
+
+Runtime assertions are mandatory. `-release`, `-check=assert=off`, and
+`-checkaction` do not remove them or change their failure action. Laser-D calls
+the C runtime failure function directly rather than using the C `assert` macro,
+so C `NDEBUG` settings do not affect them.
+
+When a function is executed during CTFE, an executed assertion is evaluated by
+the compiler and a false condition stops compilation.
+
 ## Compile-time assertions
 
 ```text

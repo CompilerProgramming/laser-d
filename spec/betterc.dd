@@ -105,7 +105,8 @@ $(H2 $(LNAME2 retained, Retained Features))
     $(LI Memory safety protections)
     $(LI $(DDLINK spec/cpp_interface, Interfacing to C++, Interfacing to C++))
     $(LI COM classes and C++ classes)
-    $(LI `assert` failures are directed to the C runtime library)
+    $(LI `assert` failures are directed to the C runtime library and assertions
+    are always emitted)
     $(LI `switch` with strings)
     $(LI `final switch`)
     $(LI `unittest`)
@@ -135,7 +136,11 @@ $(GT) dmd -betterC -unittest -run test.d
 dmd_runpezoXK: foo.d:3: Assertion `0' failed.
 )
 
-However, in `-betterC`, `assert` expressions don't use Druntime's assert and are directed to `assert` from the C runtime library instead.
+Laser-D always emits `assert` expressions, including under `-release` or
+`-check=assert=off`, and always uses the C failure action regardless of
+`-checkaction`. The compiler calls the platform C runtime assertion-failure
+entry point directly rather than using Druntime or the C `assert` macro, so
+`NDEBUG` does not affect Laser-D assertions.
 
 $(H2 $(LNAME2 consequences, Unavailable Features))
 

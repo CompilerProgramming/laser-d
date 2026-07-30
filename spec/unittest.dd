@@ -47,9 +47,10 @@ This requires neither ModuleInfo nor druntime.)
 
 $(H2 $(LNAME2 assertions, Assertions))
 
-$(P Runtime $(D assert) expressions are rejected independently of the built-in
-unit-test framework. Compiler-only $(D static assert) declarations remain
-supported.)
+$(P Runtime $(D assert) expressions remain supported independently of the
+rejected built-in unit-test framework. Ordinary explicit test programs may use
+mandatory runtime assertions. Compiler-only $(D static assert) declarations
+also remain supported.)
 
 $(SPEC_SUBNAV_PREV_NEXT errors, Error Handling, garbage, Garbage Collection)
 )

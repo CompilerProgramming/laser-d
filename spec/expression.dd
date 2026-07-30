@@ -469,6 +469,26 @@ $(GNAME SpecialKeyword):
 $(P These keywords produce compile-time source-location and symbol strings or
 the current source line. They allocate no runtime storage.)
 
+$(H2 $(LNAME2 assert_expressions, Assertions))
+$(H3 $(LNAME2 AssertExpression, Runtime Assert Expression Grammar))
+$(LASER_SUPPORTED Runtime $(D assert(condition)), message forms, and
+$(D assert(0)) are supported. The condition is evaluated exactly once when
+execution reaches the assertion. A false condition calls the platform C
+runtime assertion-failure entry point directly and does not return. Laser-D
+does not use druntime or the C $(D assert) macro for this failure path.)
+
+$(P Runtime assertions are mandatory. $(TT -release),
+$(TT -check=assert=off), and $(TT -checkaction) cannot remove them or redirect
+their failure action. $(D assert(0)) is an unconditional non-returning
+assertion. During CTFE, an executed assertion is evaluated by the compiler and
+a false condition stops compilation.)
+
+$(H3 $(LNAME2 assert-ct, Compile-Time Assertions))
+$(LASER_SUPPORTED $(D static assert(condition)) and
+$(D static assert(condition, message)) are supported. They are evaluated by
+the compiler and produce no runtime code. ImportC retains C
+$(D _Static_assert).)
+
 $(H2 $(LNAME2 excluded_primary, Excluded Primary Expressions))
 
 $(H3 $(LNAME2 array_literals, Array Literals (Excluded)))
@@ -509,21 +529,6 @@ $(H3 $(LNAME2 throw_expression, Throw Expressions (Excluded)))
 $(LASER_EXCLUDED Throw expressions are rejected with D exception handling.)
 
 $(H2 $(LNAME2 expressions_under_review, Expressions Under Review))
-
-$(H3 $(LNAME2 assert_expressions, Assert Expressions))
-$(H4 $(LNAME2 AssertExpression, Assert Expression Grammar))
-$(LASER_REJECTED Runtime $(D assert(condition)), message forms, and
-$(D assert(0)) are rejected. Laser-D does not provide the druntime assertion
-failure hooks, and runtime checks do not disappear according to release or
-check-action compiler options. Programs use explicit conditions, return
-values, or C-compatible error reporting.)
-
-$(H4 $(LNAME2 assert-ct, Compile-Time Assertions))
-$(LASER_SUPPORTED $(D static assert(condition)) and
-$(D static assert(condition, message)) are supported. They are evaluated by
-the compiler and produce no runtime code. An ordinary runtime $(D assert)
-inside a CTFE-capable function remains rejected; CTFE does not change its
-source-language classification. ImportC retains C $(D _Static_assert).)
 
 $(H3 $(LNAME2 interpolation_expressions, Interpolation Expressions))
 $(LASER_REJECTED Interpolation expression sequences are rejected in all lexical
