@@ -25,6 +25,7 @@ DeclarationBlock:
 
 DeclarationModifier:
     ImportVisibility
+    PrivateVisibility
     PackageVisibility
     const
     immutable
@@ -114,6 +115,37 @@ public import public_api;
 
 An import without an explicit visibility modifier is private. The modules
 chapter defines lookup and re-export behavior.
+
+## Private declaration visibility
+
+```text
+PrivateVisibility:
+    private
+```
+
+At module or aggregate scope, `private` restricts a declaration to its defining
+module. It may modify one declaration, a declaration block, or the remainder of
+a declaration list:
+
+```d
+private int helper(int value);
+
+private
+{
+    struct Implementation;
+    enum code = 7;
+}
+
+private:
+int anotherHelper();
+```
+
+For an aggregate member, the boundary is still the module rather than the
+individual aggregate. Other code in the defining module may access a private
+field, method, template, or constructor; code in another module may not.
+
+`private` is not valid on a local declaration. Private imports are governed by
+the distinct import-visibility rules above.
 
 ## Package visibility
 

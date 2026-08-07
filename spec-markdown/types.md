@@ -1366,6 +1366,12 @@ union Word
 Construction initializes storage already provided by a declaration, enclosing
 aggregate, caller, or foreign allocation API.
 
+A parameterized constructor may be `private`. It can then be invoked only from
+its defining module, allowing module functions to provide selected construction
+paths. This does not suppress ordinary struct default initialization or access
+to the type's `.init` value. Laser-D rejects `@disable this()`, so constructor
+privacy alone cannot make a struct nonconstructible.
+
 ### Value copying and assignment
 
 An aggregate whose fields are value-copyable has ordinary field-wise value

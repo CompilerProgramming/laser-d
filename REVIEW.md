@@ -453,3 +453,31 @@ fit Laser-D without a garbage collector, runtime metadata, or backend changes.
    `FEATURE_STATUS.md`, and the module and attribute specifications state the
    same intended rules. Only mismatched package-module names lack a committed
    negative test because the current frontend incorrectly accepts them.
+
+## Private declaration review (2026-08-07)
+
+General `private` declaration visibility was reviewed independently of private
+imports and package visibility. It is a compile-time access rule with no runtime
+or backend cost and is supported in Laser-D.
+
+1. **The access boundary is the defining module.** Private module declarations
+   and private aggregate fields, methods, templates, and constructors are
+   available to code anywhere in the same module and unavailable from another
+   module. Aggregate privacy is therefore not per-struct friendship.
+
+2. **All declaration-list forms are supported.** `private` may modify a single
+   declaration, a `{ ... }` declaration block, or the remainder of a module or
+   aggregate declaration list through `private:`. It is not valid on a local
+   variable, where the parser rejects it as a statement.
+
+3. **Constructor privacy does not disable instances.** A private parameterized
+   constructor prevents another module from invoking that overload and permits
+   a factory function in the defining module. The struct remains default
+   initializable and its `.init` value remains available. D permits a
+   zero-argument struct constructor declaration only as `@disable this();`, and
+   Laser-D rejects `@disable`; consequently private visibility cannot create a
+   nonconstructible Laser-D value type.
+
+4. **`public` remains separate.** This review does not classify explicit
+   `public` declaration attributes. The former combined ledger entry has been
+   split so private declarations can be supported without deciding that syntax.

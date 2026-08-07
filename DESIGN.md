@@ -262,6 +262,15 @@ explicit `@disable` are rejected. Constructors initialize fields directly, and
 Laser-D does not provide attribute-driven nonconstructible or noncopyable value
 types.
 
+Private declarations are supported at module and aggregate scope. Their access
+boundary is the defining module, including for struct and union fields, methods,
+templates, and constructors; `private` is not a per-type friendship boundary.
+Code elsewhere in the same module may access a private aggregate member, while
+another module may not. A private parameterized constructor can route that
+construction form through module functions, but it does not disable a struct's
+ordinary default initialization or `.init`. Laser-D rejects `@disable this()`,
+so private visibility does not provide a nonconstructible value type.
+
 Aggregate `invariant` declarations are rejected. They introduce implicitly
 invoked checking functions and runtime behavior around constructors,
 destructors, and public methods. Laser-D programs use ordinary validation
