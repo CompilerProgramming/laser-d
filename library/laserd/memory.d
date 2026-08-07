@@ -1,6 +1,7 @@
 module laserd.memory;
 
 import core.stdc.stddef;
+import core.stdc.string : memset;
 import laserd.rpmalloc :
     zeroAllocate, allocateArray, reallocate,
     alignedZeroAllocate, alignedAllocateArray, alignedReallocate,
@@ -9,7 +10,8 @@ import laserd.rpmalloc :
 
 alias AllocFn = void *function(void *ctx, size_t size);
 alias CallocFn = void *function(void *ctx, size_t count, size_t size);
-alias ReallocFn = void *function(void *ctx, void *pointer, size_t size);
+alias ReallocFn = void *function(
+    void *ctx, void *pointer, size_t size, size_t oldSize);
 alias AlignedAllocFn = void *function(void *ctx, size_t alignment, size_t size);
 alias AlignedCallocFn = void* function(void *ctx, size_t alignment, size_t count, size_t size);
 alias AlignedReallocFn = void* function(void *ctx, void* pointer, size_t alignment, size_t size, size_t old_size);
@@ -34,21 +36,37 @@ private void *rpmalloc_calloc(void *ctx, size_t count, size_t size)
 {
     return allocateArray(count, size);
 }
-private void *rpmalloc_realloc(void *ctx, void *pointer, size_t size)
+private void zeroReallocatedTail(void *pointer, size_t size, size_t oldSize)
 {
-    return reallocate(pointer, size);
+    if (pointer !is null && size > oldSize)
+        memset(cast(ubyte*) pointer + oldSize, 0, size - oldSize);
+}
+private void *rpmalloc_realloc(
+    void *ctx, void *pointer, size_t size, size_t oldSize)
+{
+    void *result = reallocate(pointer, size);
+    zeroReallocatedTail(result, size, oldSize);
+    return result;
 }
 private void *rpmalloc_aligned_alloc(void *ctx, size_t alignment, size_t size)
 {
+    if (alignment < (void*).sizeof)
+        alignment = (void*).sizeof;
     return alignedZeroAllocate(alignment, size);
 }
 private void *rpmalloc_aligned_calloc(void *ctx, size_t alignment, size_t count, size_t size)
 {
+    if (alignment < (void*).sizeof)
+        alignment = (void*).sizeof;
     return alignedAllocateArray(alignment, count, size);
 }
 private void *rpmalloc_aligned_realloc(void *ctx, void* pointer, size_t alignment, size_t size, size_t old_size)
 {
-    return alignedReallocate(pointer, alignment, size, old_size, 0);
+    if (alignment < (void*).sizeof)
+        alignment = (void*).sizeof;
+    void *result = alignedReallocate(pointer, alignment, size, old_size, 0);
+    zeroReallocatedTail(result, size, old_size);
+    return result;
 }
 private void rpmalloc_free(void *ctx, void *pointer)
 {
@@ -79,10 +97,10 @@ struct Arena
         if (vtable is null) return null;
         return vtable.callocImpl(ctx, count, size);
     }
-    void* realloc(void* pointer, size_t size)
+    void* realloc(void* pointer, size_t size, size_t oldSize)
     {
         if (vtable is null) return null;
-        return vtable.reallocImpl(ctx, pointer, size);
+        return vtable.reallocImpl(ctx, pointer, size, oldSize);
     }
     void *aligned_alloc(size_t alignment, size_t size)
     {
@@ -105,6 +123,48 @@ struct Arena
             vtable.freeImpl(ctx, pointer);
     }
 
+    T *alloc(T)()
+    {
+        return cast(T*) aligned_alloc(T.alignof, T.sizeof);
+    }
+    T[] allocArray(T)(size_t count)
+    {
+        if (count == 0)
+            return null;
+        if (count > size_t.max / T.sizeof)
+            return null;
+        T* values = cast(T*) aligned_calloc(T.alignof, count, T.sizeof);
+        if (values is null)
+            return null;
+        return values[0..count];
+    }
+    T[] expandArray(T)(T[] original, size_t newCount)
+    {
+        if (newCount <= original.length)
+            return original;
+
+        if (newCount > size_t.max / T.sizeof)
+            return null;
+
+        size_t oldSize = original.length * T.sizeof;
+        size_t newSize = newCount * T.sizeof;
+
+        T* expanded = cast(T*) aligned_realloc(
+            original.ptr,
+            T.alignof,
+            newSize,
+            oldSize);
+
+        if (expanded is null)
+            return null;
+
+        return expanded[0 .. newCount];
+    }
+    void freeArray(T)(T[] ary)
+    {
+        if (ary.ptr !is null)
+            free(ary.ptr);
+    }
     private:
 
     void *ctx;

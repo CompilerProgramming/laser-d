@@ -810,14 +810,17 @@ the native header on every supported platform. Integration testing covers
 ordinary allocation, reallocation, aligned allocation, heap ownership, heap
 reallocation, zeroed heap allocation, bulk heap cleanup, and finalization.
 
-The `laserd.memory.Arena` facade provides one allocation interface over either
-the general rpmalloc API or a caller-supplied callback table. Its default value
-uses rpmalloc and zero-initializes `alloc` results. A constructed custom arena
-requires all four allocation, array-allocation, reallocation, and free
-callbacks together; a mandatory runtime assertion rejects a partial table.
-Callback selection is independent of the context pointer, so a custom
-allocator may validly use a null context. Allocations must be reallocated and
-freed through the same arena.
+The `laserd.memory.Arena` facade is created and destroyed explicitly around a
+private rpmalloc-backed callback table. Raw and typed allocation and array
+allocation return zeroed storage; typed operations request the type's required
+alignment while the rpmalloc bridge raises sub-pointer requests to rpmalloc's
+minimum accepted alignment. Reallocation callbacks receive both logical old
+and new byte sizes. On successful growth they preserve the old region and zero
+the newly exposed byte range; on failure the original allocation remains
+valid. Typed array allocation rejects size multiplication overflow and returns
+a null, zero-length slice for a zero count. Allocations must be expanded and
+freed through the same arena, and only complete slices returned by that arena
+may be expanded or freed.
 
 The vendored source omits rpmalloc's separate `malloc.c` override
 implementation; its include is therefore conditional on `ENABLE_OVERRIDE`, as
