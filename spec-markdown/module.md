@@ -258,6 +258,33 @@ imports can therefore provide a stable facade over a collection of modules.
 Visibility affects re-export, not the initialization or compilation order of a
 module.
 
+## Package modules
+
+A package module is a module stored in a file named `package.d`. Its declared
+module name must be the fully qualified name of the containing package. It can
+be imported using that package name and commonly provides a facade through
+public imports:
+
+```d
+// geometry/package.d
+module geometry;
+
+public import geometry.matrix;
+public import geometry.vector;
+```
+
+```d
+import geometry;
+```
+
+Package modules may be nested. For example,
+`geometry/transform/package.d` declares `module geometry.transform;` and is
+imported as `geometry.transform`.
+
+A `package.d` file whose declared module name does not match its containing
+package is rejected. Package modules affect module lookup and re-export only;
+they do not create runtime package objects or initialization behavior.
+
 ## Name lookup
 
 For an unqualified name, lookup first searches lexical declarations from the

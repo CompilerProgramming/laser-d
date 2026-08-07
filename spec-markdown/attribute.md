@@ -25,6 +25,7 @@ DeclarationBlock:
 
 DeclarationModifier:
     ImportVisibility
+    PackageVisibility
     const
     immutable
     auto
@@ -113,6 +114,44 @@ public import public_api;
 
 An import without an explicit visibility modifier is private. The modules
 chapter defines lookup and re-export behavior.
+
+## Package visibility
+
+```text
+PackageVisibility:
+    package
+    package ( Packages )
+
+Packages:
+    Identifier
+    Packages . Identifier
+```
+
+`package` on a declaration makes it visible to modules in the declaration's
+package and to modules in descendant packages. It does not expose the
+declaration to unrelated packages.
+
+```d
+module geometry.internal.matrix;
+
+package int internalValue();
+```
+
+Here `internalValue` is visible from `geometry.internal` and its descendants.
+
+The qualified form names an ancestor package and uses that package as the
+visibility boundary:
+
+```d
+module geometry.internal.matrix;
+
+package(geometry) int sharedValue();
+```
+
+Here `sharedValue` is also visible to sibling modules elsewhere beneath
+`geometry`. The named package must be the current package or one of its
+ancestors. Package visibility is compile-time access control and requires no
+runtime support.
 
 ## Type qualification
 

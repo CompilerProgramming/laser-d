@@ -423,3 +423,33 @@ reconciliation and the existing BetterC backend lowering.
 4. Runnable compiler tests exercise ordinary assertions, message forms,
    `assert(0)` compilation, CTFE use, single evaluation, and survival under
    release and attempted check/check-action overrides.
+
+## Package feature review (2026-08-07)
+
+Package modules and package visibility were reviewed independently from source
+lookup through semantic access checking. Both are compile-time facilities and
+fit Laser-D without a garbage collector, runtime metadata, or backend changes.
+
+1. **Package-module facades work, but required-name validation is defective.**
+   Root and nested package modules import successfully and can provide stable
+   facades through public imports. However, importing
+   `invalid_package_feature/package.d` also succeeds when that file declares
+   the unrelated name `wrong_package_name`. The intended rule requires the
+   fully qualified name of the containing package, so FEATURE_STATUS records
+   this as an implementation defect. A negative conformance test should land
+   with the fix.
+
+2. **Package visibility is supported.** An unqualified `package` declaration
+   is available within its declaration's package and descendant packages.
+   `package(name)` can widen that boundary to a named ancestor package. Access
+   from an unrelated package is rejected, as is access from a sibling outside
+   the default package boundary. Ordinary `private` declarations remain
+   module-only.
+
+3. **The decisions are now explicit.** Focused positive and negative tests
+   cover facades, nested package modules, default and qualified package
+   boundaries, descendants, siblings, unrelated packages, module-private
+   declarations, and invalid qualified boundaries. `DESIGN.md`,
+   `FEATURE_STATUS.md`, and the module and attribute specifications state the
+   same intended rules. Only mismatched package-module names lack a committed
+   negative test because the current frontend incorrectly accepts them.

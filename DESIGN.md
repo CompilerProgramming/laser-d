@@ -677,8 +677,16 @@ module namespace and import behavior does not require them. Module lifecycle
 constructors and destructors (`static this()` and `static ~this()`) are also
 rejected, including declarations nested in aggregates or templates; these are
 still module startup and shutdown hooks. Shared lifecycle forms are rejected by
-both this rule and the cross-cutting rejection of `shared`. Package modules and
-visibility, module deprecation, and edition-qualified modules remain undecided.
+both this rule and the cross-cutting rejection of `shared`.
+
+Package modules are supported as compile-time namespace facades. A
+`package.d` file declares the fully qualified name of its containing package
+and may publicly re-export modules from that package. Package modules may be
+nested. Package visibility is also supported: an unqualified `package`
+declaration is visible within its declaration's package and descendants, while
+`package(name)` selects a named ancestor package as that boundary. These
+facilities affect lookup only and introduce no runtime state or metadata.
+Module deprecation and edition-qualified modules remain undecided.
 
 ## Runtime type information
 
