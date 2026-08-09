@@ -481,3 +481,80 @@ or backend cost and is supported in Laser-D.
 4. **`public` remains separate.** This review does not classify explicit
    `public` declaration attributes. The former combined ledger entry has been
    split so private declarations can be supported without deciding that syntax.
+
+## Fixed-region allocator WIP review (2026-08-08)
+
+The initial `FixedRegionAllocator` implementation in `laserd.memory` was
+reviewed as an incomplete bump-allocation primitive. No implementation fixes
+were applied.
+
+1. **The allocator does not compile.** `fixed_region_allocate` refers to bare
+   `size` and `memory` identifiers instead of `allocator.size` and
+   `allocator.memory`. The current compiler reports these at the remaining-size
+   calculation, returned pointer calculation, and offset update.
+
+2. **The cursor update uses the wrong size.** The intended update is the aligned
+   offset plus `alloc_size`. Updating it by the whole region size would exhaust
+   the allocator after the first allocation and can overflow after alignment
+   padding.
+
+3. **Bounds arithmetic can wrap.** `allocator.offset + alignment - 1` can
+   overflow, and `allocator.size - offset` underflows when the aligned offset is
+   beyond the region. Alignment must be validated before the bit-mask formula:
+   it must be nonzero after defaulting and a power of two. Bounds should first
+   establish `offset <= allocator.size`, then compare `alloc_size` with
+   `allocator.size - offset`.
+
+4. **Offset alignment alone does not align the returned address.** It works only
+   when the backing `memory` pointer already meets every requested alignment.
+   The current rpmalloc backing allocation guarantees natural 16-byte
+   alignment, not every larger type alignment. Either align the absolute
+   address, over-allocate and retain the original pointer for destruction, or
+   explicitly limit the allocator's supported alignment.
+
+5. **Creation lacks failure cleanup.** A null allocator-header allocation is
+   dereferenced immediately. If the buffer allocation fails, the header is
+   leaked and the returned object contains a null region. Zero-sized regions
+   also need an explicit policy. Creation should validate both allocations and
+   release the header on buffer failure.
+
+6. **Lifecycle and chaining are incomplete.** There is no destroy/reset
+   operation, `next` is never traversed or released, and the allocator is not
+   connected to an `Arena_FunctionTable`. Before integration, the design must
+   decide whether this type represents one fixed borrowed region or an owned
+   chain of dynamically acquired chunks; those models have different ownership
+   and destruction contracts.
+
+7. **The implementation is thread-confined.** Every allocation mutates
+   `offset` without synchronization. This is appropriate for a bump allocator,
+   but the eventual Arena-kind documentation must state that its concurrency
+   contract differs from the rpmalloc-backed arena.
+
+### Slice-based revision follow-up
+
+Replacing the separate `size` field with `byte[] memory` removes duplicated
+region-size state, and advancing `offset` by `alloc_size` fixes the earlier
+cursor bug. The revised implementation still has these issues:
+
+1. **The slice conversion does not compile.** `cast(byte[0..size])` treats the
+   range as part of a type. Store the allocated `byte*`, check it, and form the
+   slice from the pointer expression with `ptr[0 .. size]`.
+
+2. **Creation still needs failure handling.** Check the allocator-header
+   allocation before dereferencing it. If the backing allocation fails, free
+   the header rather than returning an invalid allocator or leaking it.
+
+3. **The remaining-space calculation can underflow.** Alignment may produce an
+   `offset` greater than `memory.length`; establish `offset <= memory.length`
+   before calculating `memory.length - offset`.
+
+4. **Alignment arithmetic is still unchecked.** Rounding can overflow and the
+   mask formula requires a power-of-two alignment. Validate alignment and use
+   checked bounds arithmetic.
+
+5. **Backing-address alignment is still relevant.** Aligning only the relative
+   offset cannot satisfy an alignment greater than that of `memory.ptr`. Either
+   constrain supported alignment or align using the absolute address.
+
+The focused compilation stopped at the invalid slice conversion, before tests
+could run. No implementation fixes were applied.

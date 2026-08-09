@@ -184,3 +184,67 @@ void Arena_destroy(Arena *arena)
 {
     rpfree(arena);
 }
+
+
+struct FixedRegionAllocator
+{
+    byte[] memory;  // buffer to use for memory allocations
+	size_t offset; // Current position up to which memory is allocated
+    FixedRegionAllocator *next; // for chaining
+}
+
+private union Value
+{
+    void *ptr;
+    double d;
+    long l;
+}
+
+enum DEFAULT_ALIGNMENT = Value.alignof;
+
+FixedRegionAllocator *FixedRegionAllocator_create(size_t size)
+{
+    FixedRegionAllocator *allocator;
+
+    allocator = cast(FixedRegionAllocator *) zeroAllocate(FixedRegionAllocator.sizeof);
+    if (allocator is null)
+        return null;
+    byte *memory = cast(byte *) zeroAllocate(size);
+    if (memory is null) 
+    {
+        rpfree(allocator);
+        return null;
+    }
+    allocator.memory = memory[0..size];
+    allocator.offset = 0;
+    allocator.next = null;
+
+    return allocator;
+}
+
+void FixedRegionAllocator_destroy(FixedRegionAllocator *allocator)
+{
+    if (allocator is null)
+        return;
+    rpfree(allocator.memory.ptr);
+    rpfree(allocator);
+}
+
+private void *fixed_region_allocate(void *ctx, size_t alignment, size_t alloc_size)
+{
+    if (ctx is null) return null;
+    FixedRegionAllocator *allocator = cast(FixedRegionAllocator *)ctx;
+
+    if (alloc_size == 0) return null;
+    if (alignment == 0) alignment = DEFAULT_ALIGNMENT;
+    // get aligned offset
+    auto offset = (allocator.offset + alignment - 1u) & ~(alignment - 1u);
+    // do we have enough room?
+    auto remaining = allocator.memory.length - offset;
+    if (remaining < alloc_size)
+        return null;
+    void *ptr = cast(void *) &allocator.memory.ptr[offset];
+    allocator.offset = offset + alloc_size;
+    return ptr;
+}
+
