@@ -237,23 +237,23 @@ alias PRIORITY_ABOVE_NORMAL = THREAD_PRIORITY_ABOVE_NORMAL;
 alias PRIORITY_HIGHEST = THREAD_PRIORITY_HIGHEST;
 alias PRIORITY_TIME_CRITICAL = THREAD_PRIORITY_TIME_CRITICAL;
 
-alias initializeMutex = nsync_mu_init;
-alias lock = nsync_mu_lock;
-alias unlock = nsync_mu_unlock;
-alias tryLock = nsync_mu_trylock;
-alias lockShared = nsync_mu_rlock;
-alias unlockShared = nsync_mu_runlock;
-alias tryLockShared = nsync_mu_rtrylock;
-alias assertLocked = nsync_mu_assert_held;
-alias assertLockedShared = nsync_mu_rassert_held;
-alias isLockedShared = nsync_mu_is_reader;
+alias Mutex_init = nsync_mu_init;
+alias Mutex_lock = nsync_mu_lock;
+alias Mutex_unlock = nsync_mu_unlock;
+alias Mutex_try_lock = nsync_mu_trylock;
+alias Mutex_lock_shared = nsync_mu_rlock;
+alias Mutex_unlock_shared = nsync_mu_runlock;
+alias Mutex_try_lock_shared = nsync_mu_rtrylock;
+alias Mutex_assert_locked = nsync_mu_assert_held;
+alias Mutex_assert_locked_shared = nsync_mu_rassert_held;
+alias Mutex_is_locked_shared = nsync_mu_is_reader;
 
-alias initializeCondition = nsync_cv_init;
-alias signal = nsync_cv_signal;
-alias broadcast = nsync_cv_broadcast;
-alias wait = nsync_cv_wait;
+alias Condition_init = nsync_cv_init;
+alias Condition_signal = nsync_cv_signal;
+alias Condition_broadcast = nsync_cv_broadcast;
+alias Condition_wait = nsync_cv_wait;
 
-Thread* create(
+Thread* Thread_create(
     ThreadFunction function_,
     void* data,
     const(char)[] name,
@@ -264,52 +264,52 @@ Thread* create(
         function_, data, name.ptr, name.length, priority, stackSize);
 }
 
-void destroy(Thread* thread)
+void Thread_destroy(Thread* thread)
 {
     thread_deallocate(thread);
 }
 
-bool start(Thread* thread)
+bool Thread_start(Thread* thread)
 {
     return thread_start(thread);
 }
 
-void* join(Thread* thread)
+void* Thread_join(Thread* thread)
 {
     return thread_join(thread);
 }
 
-bool isStarted(const(Thread)* thread)
+bool Thread_is_started(const(Thread)* thread)
 {
     return thread_is_started(thread);
 }
 
-bool isRunning(const(Thread)* thread)
+bool Thread_is_running(const(Thread)* thread)
 {
     return thread_is_running(thread);
 }
 
-bool isFinished(const(Thread)* thread)
+bool Thread_is_finished(const(Thread)* thread)
 {
     return thread_is_finished(thread);
 }
 
-bool isMain()
+bool Thread_is_main()
 {
     return thread_is_main();
 }
 
-uint64_t currentId()
+uint64_t Thread_current_id()
 {
     return thread_id();
 }
 
-void sleep(uint milliseconds)
+void Thread_sleep(uint milliseconds)
 {
     thread_sleep(milliseconds);
 }
 
-void yield()
+void Thread_yield()
 {
     thread_yield();
 }

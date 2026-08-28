@@ -10,15 +10,15 @@ import laserd.foundation.lifecycle : finalize, initialize, isInitialized;
 import laserd.thread :
     PRIORITY_NORMAL,
     Thread,
-    create,
-    currentId,
-    destroy,
-    isFinished,
-    isMain,
-    isStarted,
-    join,
-    start,
-    yield;
+    Thread_create,
+    Thread_current_id,
+    Thread_destroy,
+    Thread_is_finished,
+    Thread_is_main,
+    Thread_is_started,
+    Thread_join,
+    Thread_start,
+    Thread_yield;
 
 struct ThreadTestData
 {
@@ -31,8 +31,8 @@ extern(C) void* foundationThreadTest(void* argument)
 {
     auto data = cast(ThreadTestData*) argument;
     data.value = 42;
-    data.hasThreadId = currentId() != 0;
-    data.isWorkerMain = isMain();
+    data.hasThreadId = Thread_current_id() != 0;
+    data.isWorkerMain = Thread_is_main();
     return argument;
 }
 
@@ -47,7 +47,7 @@ extern(C) int main()
 
     ThreadTestData threadData;
     enum threadName = "laser-d-test";
-    Thread* thread = create(
+    Thread* thread = Thread_create(
         &foundationThreadTest,
         &threadData,
         threadName,
@@ -55,19 +55,19 @@ extern(C) int main()
         0);
     if (thread is null)
         return EXIT_FAILURE;
-    if (!start(thread)) {
-        destroy(thread);
+    if (!Thread_start(thread)) {
+        Thread_destroy(thread);
         return EXIT_FAILURE;
     }
-    void* threadResult = join(thread);
+    void* threadResult = Thread_join(thread);
     bool threadPassed =
         threadResult == &threadData &&
-        isStarted(thread) &&
-        isFinished(thread) &&
+        Thread_is_started(thread) &&
+        Thread_is_finished(thread) &&
         threadData.value == 42 &&
         threadData.hasThreadId &&
         !threadData.isWorkerMain;
-    destroy(thread);
+    Thread_destroy(thread);
     if (!threadPassed)
         return EXIT_FAILURE;
 

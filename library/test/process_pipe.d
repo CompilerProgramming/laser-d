@@ -22,7 +22,7 @@ import laserd.system :
     standardOutput,
     wait,
     write;
-import laserd.thread : sleep;
+import laserd.thread : Thread_sleep;
 
 enum childArgument = "--laser-d-process-child";
 enum childMessage = "laser-d-process-child-output";
@@ -101,7 +101,7 @@ extern(C) int main(int argc, char** argv)
         exitCode = wait(process);
         if (exitCode != STILL_ACTIVE)
             break;
-        sleep(1);
+        Thread_sleep(1);
     }
     if (exitCode != EXIT_SUCCESS) {
         puts("foundation_process_pipe: child wait failed");
