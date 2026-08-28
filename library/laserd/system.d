@@ -175,83 +175,83 @@ alias WAIT_FAILED = PROCESS_WAIT_FAILED;
 alias SYSTEM_CALL_FAILED = PROCESS_SYSTEM_CALL_FAILED;
 alias STILL_ACTIVE = PROCESS_STILL_ACTIVE;
 
-alias standardOutput = process_stdout;
-alias standardError = process_stderr;
-alias standardInput = process_stdin;
+alias Process_standard_output = process_stdout;
+alias Process_standard_error = process_stderr;
+alias Process_standard_input = process_stdin;
 
-Process* createProcess()
+Process* Process_create()
 {
     return process_allocate();
 }
 
-void destroyProcess(Process* process)
+void Process_destroy(Process* process)
 {
     process_deallocate(process);
 }
 
-void setWorkingDirectory(Process* process, const(char)[] path)
+void Process_set_working_directory(Process* process, const(char)[] path)
 {
     process_set_working_directory(process, path.ptr, path.length);
 }
 
-void setExecutable(Process* process, const(char)[] path)
+void Process_set_executable(Process* process, const(char)[] path)
 {
     process_set_executable_path(process, path.ptr, path.length);
 }
 
-void setArguments(
+void Process_set_arguments(
     Process* process,
     const(Argument)[] arguments)
 {
     process_set_arguments(process, arguments.ptr, arguments.length);
 }
 
-void setFlags(Process* process, uint flags)
+void Process_set_flags(Process* process, uint flags)
 {
     process_set_flags(process, flags);
 }
 
-int spawn(Process* process)
+int Process_spawn(Process* process)
 {
     return process_spawn(process);
 }
 
-int wait(Process* process)
+int Process_wait(Process* process)
 {
     return process_wait(process);
 }
 
-bool kill(Process* process)
+bool Process_kill(Process* process)
 {
     return process_kill(process);
 }
 
-Stream* createPipe()
+Stream* Process_create_pipe()
 {
     return pipe_allocate();
 }
 
-void closeRead(Stream* pipe)
+void Stream_close_read(Stream* pipe)
 {
     pipe_close_read(pipe);
 }
 
-void closeWrite(Stream* pipe)
+void Stream_close_write(Stream* pipe)
 {
     pipe_close_write(pipe);
 }
 
-size_t read(Stream* stream, ubyte[] destination)
+size_t Stream_read(Stream* stream, ubyte[] destination)
 {
     return stream_read(stream, destination.ptr, destination.length);
 }
 
-size_t write(Stream* stream, const(ubyte)[] source)
+size_t Stream_write(Stream* stream, const(ubyte)[] source)
 {
     return stream_write(stream, source.ptr, source.length);
 }
 
-void destroyStream(Stream* stream)
+void Stream_destroy(Stream* stream)
 {
     stream_deallocate(stream);
 }

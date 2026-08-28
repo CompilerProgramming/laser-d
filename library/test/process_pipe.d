@@ -10,18 +10,18 @@ import laserd.system :
     REDIRECT_STREAMS,
     STILL_ACTIVE,
     Stream,
-    createProcess,
-    createPipe,
-    destroyProcess,
-    destroyStream,
-    read,
-    setArguments,
-    setExecutable,
-    setFlags,
-    spawn,
-    standardOutput,
-    wait,
-    write;
+    Process_create,
+    Process_create_pipe,
+    Process_destroy,
+    Stream_destroy,
+    Stream_read,
+    Process_set_arguments,
+    Process_set_executable,
+    Process_set_flags,
+    Process_spawn,
+    Process_standard_output,
+    Process_wait,
+    Stream_write;
 import laserd.thread : Thread_sleep;
 
 enum childArgument = "--laser-d-process-child";
@@ -39,7 +39,7 @@ extern(C) int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    Stream* pipe = createPipe();
+    Stream* pipe = Process_create_pipe();
     if (pipe is null) {
         puts("foundation_process_pipe: pipe allocation failed");
         finalize();
@@ -49,8 +49,8 @@ extern(C) int main(int argc, char** argv)
     enum pipeMessage = "pipe";
     auto pipeBytes = cast(const(ubyte)[]) pipeMessage;
     ubyte[4] pipeResult;
-    size_t pipeWritten = write(pipe, pipeBytes);
-    size_t pipeRead = read(pipe, pipeResult[]);
+    size_t pipeWritten = Stream_write(pipe, pipeBytes);
+    size_t pipeRead = Stream_read(pipe, pipeResult[]);
     bool passed =
         pipeWritten == pipeBytes.length &&
         pipeRead == pipeResult.length;
@@ -61,31 +61,31 @@ extern(C) int main(int argc, char** argv)
             puts("foundation_process_pipe: standalone pipe data mismatch");
             passed = false;
         }
-    destroyStream(pipe);
+    Stream_destroy(pipe);
 
-    Process* process = createProcess();
+    Process* process = Process_create();
     if (process is null) {
         puts("foundation_process_pipe: process allocation failed");
         finalize();
         return EXIT_FAILURE;
     }
 
-    setExecutable(process, argv[0][0 .. stringLength(argv[0])]);
+    Process_set_executable(process, argv[0][0 .. stringLength(argv[0])]);
     Argument[1] arguments;
     arguments[0].data = childArgument.ptr;
     arguments[0].length = childArgument.length;
-    setArguments(process, arguments[]);
-    setFlags(process, DETACHED | REDIRECT_STREAMS);
+    Process_set_arguments(process, arguments[]);
+    Process_set_flags(process, DETACHED | REDIRECT_STREAMS);
 
-    if (spawn(process) != STILL_ACTIVE) {
+    if (Process_spawn(process) != STILL_ACTIVE) {
         puts("foundation_process_pipe: process spawn failed");
-        destroyProcess(process);
+        Process_destroy(process);
         finalize();
         return EXIT_FAILURE;
     }
 
     ubyte[64] output;
-    size_t outputLength = read(standardOutput(process), output[]);
+    size_t outputLength = Stream_read(Process_standard_output(process), output[]);
     if (outputLength < childMessage.length) {
         puts("foundation_process_pipe: child output was too short");
         passed = false;
@@ -98,7 +98,7 @@ extern(C) int main(int argc, char** argv)
 
     int exitCode = STILL_ACTIVE;
     foreach (i; 0 .. 1000) {
-        exitCode = wait(process);
+        exitCode = Process_wait(process);
         if (exitCode != STILL_ACTIVE)
             break;
         Thread_sleep(1);
@@ -108,7 +108,7 @@ extern(C) int main(int argc, char** argv)
         passed = false;
     }
 
-    destroyProcess(process);
+    Process_destroy(process);
     finalize();
     return passed ? EXIT_SUCCESS : EXIT_FAILURE;
 }
