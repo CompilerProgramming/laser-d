@@ -581,3 +581,19 @@ over the vendored C API. The aliases were removed and the original rpmalloc
 symbols made public. Production consumers and integration tests now use names
 such as `rpmalloc`, `rpfree`, `rpmalloc_heap_t`, and `rpmalloc_heap_alloc`.
 The higher-level `laserd.memory.Arena` retains its backend-neutral operations.
+
+## Bump arena backend (2026-08-28)
+
+`laserd.memory` now includes a thread-confined bump backend whose context owns
+an intrusive list of `FixedRegionAllocator` nodes. It acquires zero-initialized
+8 KiB regions lazily and appends a new ordinary region after exhaustion. A
+request larger than 8 KiB is served by a dedicated region sized for the request
+plus worst-case alignment padding without displacing the current ordinary
+region. Individual free operations are no-ops. Growing reallocations preserve
+the old bytes, failed growth leaves the old allocation valid, and arena
+destruction walks and releases the full region list.
+
+Focused coverage exercises multiple ordinary regions, a 256-byte-aligned large
+dedicated allocation, subsequent reuse of ordinary-region capacity, the no-op
+free contract, alignment-size overflow rejection, generic typed allocation and
+growth, and destruction through the common `Arena` interface.

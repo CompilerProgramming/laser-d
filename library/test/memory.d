@@ -2,7 +2,9 @@ import core.stdc.stddef : size_t;
 import core.stdc.stdlib :
     EXIT_FAILURE, EXIT_SUCCESS;
 import core.stdc.stdio : puts;
-import laserd.memory : Arena, Arena_create_rpmalloc, Arena_create_fixedregion, Arena_destroy;
+import laserd.memory :
+    Arena, Arena_create_rpmalloc, Arena_create_fixedregion,
+    Arena_create_bump, Arena_destroy;
 import laserd.rpmalloc : rpmalloc_finalize, rpmalloc_initialize;
 
 
@@ -112,6 +114,54 @@ private int test_fixedregion_boundaries()
     return EXIT_SUCCESS;
 }
 
+private int test_bump_growth()
+{
+    Arena *arena = Arena_create_bump();
+    if (arena is null)
+        return EXIT_FAILURE;
+    scope(exit) Arena_destroy(arena);
+
+    ubyte *first = cast(ubyte*) arena.alloc(5 * 1024);
+    ubyte *second = cast(ubyte*) arena.alloc(5 * 1024);
+    if (first is null || second is null)
+        return EXIT_FAILURE;
+    first[0] = 41;
+    second[0] = 42;
+
+    ubyte *large = cast(ubyte*) arena.aligned_alloc(256, 12 * 1024);
+    if (large is null || (cast(size_t) large & 255) != 0)
+        return EXIT_FAILURE;
+    if (large[0] != 0 || large[12 * 1024 - 1] != 0)
+        return EXIT_FAILURE;
+    large[0] = 43;
+
+    ubyte *third = cast(ubyte*) arena.alloc(1024);
+    if (third is null)
+        return EXIT_FAILURE;
+    if (first[0] != 41 || second[0] != 42 || large[0] != 43)
+        return EXIT_FAILURE;
+
+    arena.free(first);
+    if (first[0] != 41)
+        return EXIT_FAILURE;
+
+    size_t huge_alignment = size_t.max / 2 + 1;
+    if (arena.aligned_alloc(huge_alignment, huge_alignment + 1) !is null)
+        return EXIT_FAILURE;
+
+    ubyte *preserved = cast(ubyte*) arena.alloc(8);
+    if (preserved is null)
+        return EXIT_FAILURE;
+    preserved[0] = 44;
+    if (arena.aligned_realloc(
+            preserved, huge_alignment, huge_alignment + 1, 8) !is null)
+        return EXIT_FAILURE;
+    if (preserved[0] != 44)
+        return EXIT_FAILURE;
+
+    return EXIT_SUCCESS;
+}
+
 extern(C) int main()
 {
     if (rpmalloc_initialize(null) != 0)
@@ -125,5 +175,10 @@ extern(C) int main()
     rc = test_memory(Arena_create_fixedregion(512));
     if (rc == EXIT_FAILURE) return rc;
     rc = test_fixedregion_boundaries();
+    if (rc == EXIT_FAILURE) return rc;
+    puts("testing bump arena\n");
+    rc = test_memory(Arena_create_bump());
+    if (rc == EXIT_FAILURE) return rc;
+    rc = test_bump_growth();
     return rc;
 }

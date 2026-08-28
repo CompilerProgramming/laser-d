@@ -1098,3 +1098,13 @@ power of two; zero requests the backend default. Aligned array allocation also
 requires the element size to be a multiple of the requested alignment so that
 every element, rather than only the first, is correctly aligned. Size
 multiplication and alignment padding are checked before advancing the cursor.
+
+The bump arena owns a linked list of fixed regions and also treats individual
+frees as no-ops. Regions are acquired lazily. Ordinary requests consume 8 KiB
+regions, with another region added when the current one is exhausted. A request
+larger than 8 KiB receives a dedicated region large enough for that allocation
+and its worst-case alignment padding; the dedicated region does not replace the
+current ordinary region. Reallocation that grows allocates fresh space,
+preserves the old bytes, and relies on the zero-initialized region for the new
+tail. Destroying the bump arena walks and releases every owned region. The list
+and allocation cursor are mutable, so the bump arena is thread-confined.

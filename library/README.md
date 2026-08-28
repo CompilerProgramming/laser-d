@@ -73,13 +73,16 @@ constants, keeping direct allocator use obvious. The CTest integration program
 exercises both API families.
 
 The `laserd.memory` module provides the higher-level `Arena` facade. An arena is
-created and destroyed explicitly and uses a private rpmalloc-backed callback
-table. Raw and typed allocation return zeroed storage, and typed arrays reject
+created and destroyed explicitly and selects a private backend callback table.
+Raw and typed allocation return zeroed storage, and typed arrays reject
 byte-size overflow. Reallocation receives the allocation's logical old size;
 successful growth preserves existing bytes and zeroes the newly exposed range,
 while failure leaves the original allocation valid. Memory must be expanded or
 freed through the arena which allocated it, using the complete returned slice
-rather than a subslice.
+rather than a subslice. The fixed-region backend owns one bounded region. The
+bump backend lazily owns a list of 8 KiB fixed regions, uses dedicated regions
+for larger requests, does not reclaim individual allocations, and releases all
+regions on destruction.
 
 `laserd.result` provides the pure Laser-D value types `Optional` and `Result`.
 Laser-D has no exceptions, because D's exception hierarchy is built on classes,
