@@ -35,12 +35,11 @@ module laserd.thread;
 import core.stdc.stddef : size_t;
 import core.stdc.stdint : uint64_t;
 
-private:
-
 struct thread_t
 {
 }
 
+alias Thread = thread_t;
 alias ThreadFunction = extern(C) void* function(void*);
 alias ThreadPriority = int;
 
@@ -50,6 +49,8 @@ enum ThreadPriority THREAD_PRIORITY_NORMAL = 2;
 enum ThreadPriority THREAD_PRIORITY_ABOVE_NORMAL = 3;
 enum ThreadPriority THREAD_PRIORITY_HIGHEST = 4;
 enum ThreadPriority THREAD_PRIORITY_TIME_CRITICAL = 5;
+
+private:
 
 /**
  * A mutex is valid and unlocked when zero initialized. It may be held by one
@@ -225,17 +226,8 @@ void nsync_cv_wait(nsync_cv* condition, nsync_mu* mutex);
 public:
 extern(D):
 
-alias Thread = thread_t;
 alias Mutex = nsync_mu;
 alias Condition = nsync_cv;
-alias Priority = ThreadPriority;
-
-alias PRIORITY_LOW = THREAD_PRIORITY_LOW;
-alias PRIORITY_BELOW_NORMAL = THREAD_PRIORITY_BELOW_NORMAL;
-alias PRIORITY_NORMAL = THREAD_PRIORITY_NORMAL;
-alias PRIORITY_ABOVE_NORMAL = THREAD_PRIORITY_ABOVE_NORMAL;
-alias PRIORITY_HIGHEST = THREAD_PRIORITY_HIGHEST;
-alias PRIORITY_TIME_CRITICAL = THREAD_PRIORITY_TIME_CRITICAL;
 
 alias Mutex_init = nsync_mu_init;
 alias Mutex_lock = nsync_mu_lock;
@@ -257,59 +249,30 @@ Thread* Thread_create(
     ThreadFunction function_,
     void* data,
     const(char)[] name,
-    Priority priority,
+    ThreadPriority priority,
     uint stackSize)
 {
     return thread_allocate(
         function_, data, name.ptr, name.length, priority, stackSize);
 }
 
-void Thread_destroy(Thread* thread)
-{
-    thread_deallocate(thread);
-}
-
-bool Thread_start(Thread* thread)
-{
-    return thread_start(thread);
-}
-
-void* Thread_join(Thread* thread)
-{
-    return thread_join(thread);
-}
-
-bool Thread_is_started(const(Thread)* thread)
-{
-    return thread_is_started(thread);
-}
-
-bool Thread_is_running(const(Thread)* thread)
-{
-    return thread_is_running(thread);
-}
-
-bool Thread_is_finished(const(Thread)* thread)
-{
-    return thread_is_finished(thread);
-}
-
-bool Thread_is_main()
-{
-    return thread_is_main();
-}
-
-uint64_t Thread_current_id()
-{
-    return thread_id();
-}
-
-void Thread_sleep(uint milliseconds)
-{
-    thread_sleep(milliseconds);
-}
-
-void Thread_yield()
-{
-    thread_yield();
-}
+/** Deallocate a thread. */
+alias Thread_destroy = thread_deallocate;
+/** Start a thread. */
+alias Thread_start = thread_start;
+/** Join a thread and return its callback result. */
+alias Thread_join = thread_join;
+/** Return whether a thread has started. */
+alias Thread_is_started = thread_is_started;
+/** Return whether a thread is running. */
+alias Thread_is_running = thread_is_running;
+/** Return whether a thread has finished and can be joined. */
+alias Thread_is_finished = thread_is_finished;
+/** Return whether the calling thread is the main thread. */
+alias Thread_is_main = thread_is_main;
+/** Return the calling thread's system identifier. */
+alias Thread_current_id = thread_id;
+/** Sleep the calling thread for a number of milliseconds. */
+alias Thread_sleep = thread_sleep;
+/** Yield the calling thread's remaining time slice. */
+alias Thread_yield = thread_yield;

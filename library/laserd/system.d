@@ -9,8 +9,6 @@ module laserd.system;
 
 import core.stdc.stddef : size_t;
 
-private:
-
 struct stream_t
 {
 }
@@ -18,6 +16,9 @@ struct stream_t
 struct process_t
 {
 }
+
+alias Stream = stream_t;
+alias Process = process_t;
 
 struct ProcessArgument
 {
@@ -37,6 +38,7 @@ enum int PROCESS_WAIT_FAILED = 0x7FFF_FFF3;
 enum int PROCESS_SYSTEM_CALL_FAILED = 0x7FFF_FFF4;
 enum int PROCESS_STILL_ACTIVE = 0x7FFF_FFFF;
 
+private:
 extern(C):
 
 /**
@@ -159,35 +161,17 @@ void stream_flush(stream_t* stream);
 public:
 extern(D):
 
-alias Stream = stream_t;
-alias Process = process_t;
-alias Argument = ProcessArgument;
-
-alias ATTACHED = PROCESS_ATTACHED;
-alias DETACHED = PROCESS_DETACHED;
-alias CONSOLE = PROCESS_CONSOLE;
-alias REDIRECT_STREAMS = PROCESS_STDSTREAMS;
-
-alias INVALID_ARGUMENTS = PROCESS_INVALID_ARGS;
-alias TERMINATED_BY_SIGNAL = PROCESS_TERMINATED_SIGNAL;
-alias WAIT_INTERRUPTED = PROCESS_WAIT_INTERRUPTED;
-alias WAIT_FAILED = PROCESS_WAIT_FAILED;
-alias SYSTEM_CALL_FAILED = PROCESS_SYSTEM_CALL_FAILED;
-alias STILL_ACTIVE = PROCESS_STILL_ACTIVE;
-
+/** Get the borrowed, read-only standard output stream. */
 alias Process_standard_output = process_stdout;
+/** Get the borrowed, read-only standard error stream. */
 alias Process_standard_error = process_stderr;
+/** Get the borrowed, write-only standard input stream. */
 alias Process_standard_input = process_stdin;
 
-Process* Process_create()
-{
-    return process_allocate();
-}
-
-void Process_destroy(Process* process)
-{
-    process_deallocate(process);
-}
+/** Allocate a process object. */
+alias Process_create = process_allocate;
+/** Deallocate a process object. */
+alias Process_destroy = process_deallocate;
 
 void Process_set_working_directory(Process* process, const(char)[] path)
 {
@@ -201,45 +185,26 @@ void Process_set_executable(Process* process, const(char)[] path)
 
 void Process_set_arguments(
     Process* process,
-    const(Argument)[] arguments)
+    const(ProcessArgument)[] arguments)
 {
     process_set_arguments(process, arguments.ptr, arguments.length);
 }
 
-void Process_set_flags(Process* process, uint flags)
-{
-    process_set_flags(process, flags);
-}
+/** Set process execution flags from the `PROCESS_*` definitions. */
+alias Process_set_flags = process_set_flags;
+/** Spawn a configured process. */
+alias Process_spawn = process_spawn;
+/** Wait for process termination and return its exit code. */
+alias Process_wait = process_wait;
+/** Kill a process. */
+alias Process_kill = process_kill;
 
-int Process_spawn(Process* process)
-{
-    return process_spawn(process);
-}
-
-int Process_wait(Process* process)
-{
-    return process_wait(process);
-}
-
-bool Process_kill(Process* process)
-{
-    return process_kill(process);
-}
-
-Stream* Process_create_pipe()
-{
-    return pipe_allocate();
-}
-
-void Stream_close_read(Stream* pipe)
-{
-    pipe_close_read(pipe);
-}
-
-void Stream_close_write(Stream* pipe)
-{
-    pipe_close_write(pipe);
-}
+/** Allocate an unnamed, blocking, sequential pipe stream. */
+alias Stream_create_pipe = pipe_allocate;
+/** Close the read end of a pipe. */
+alias Stream_close_read = pipe_close_read;
+/** Close the write end of a pipe. */
+alias Stream_close_write = pipe_close_write;
 
 size_t Stream_read(Stream* stream, ubyte[] destination)
 {
@@ -251,7 +216,5 @@ size_t Stream_write(Stream* stream, const(ubyte)[] source)
     return stream_write(stream, source.ptr, source.length);
 }
 
-void Stream_destroy(Stream* stream)
-{
-    stream_deallocate(stream);
-}
+/** Deallocate an owned stream. */
+alias Stream_destroy = stream_deallocate;

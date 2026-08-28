@@ -930,6 +930,15 @@ streams required by both are grouped in `laserd.system`. This keeps backing
 library names out of the application-facing module structure while retaining
 the native C symbol names at the ABI boundary.
 
+The public thread and system APIs use `Type_operation` names to make the
+object being operated on explicit at call sites. A public name is an alias of
+the native C function when its signature already expresses the intended API;
+a Laser-D wrapper is retained only when it converts a slice to a native
+pointer-and-length pair. Native process flags, status values, and thread
+priority constants are exposed directly rather than duplicated under a second
+set of aliases. Anonymous pipe allocation is a `Stream` operation because the
+new pipe is independent of any process object.
+
 Foundation mutexes, semaphores, and beacons remain private implementation
 details. Timed waits, cancellation, counters, once execution, wait sets, and
 conditional critical sections require separate review before being included

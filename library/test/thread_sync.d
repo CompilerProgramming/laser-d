@@ -3,7 +3,7 @@ import laserd.foundation.lifecycle : finalize, initialize;
 import laserd.thread :
     Condition,
     Mutex,
-    PRIORITY_NORMAL,
+    THREAD_PRIORITY_NORMAL,
     Thread,
     Condition_broadcast,
     Thread_create,
@@ -52,7 +52,7 @@ extern(C) int main()
         &nsyncWorker,
         &data,
         workerName,
-        PRIORITY_NORMAL,
+        THREAD_PRIORITY_NORMAL,
         0);
     if (worker is null)
         return EXIT_FAILURE;

@@ -8,7 +8,7 @@ import laserd.foundation.base64 :
 import laserd.foundation.hash : hash, hashBytes;
 import laserd.foundation.lifecycle : finalize, initialize, isInitialized;
 import laserd.thread :
-    PRIORITY_NORMAL,
+    THREAD_PRIORITY_NORMAL,
     Thread,
     Thread_create,
     Thread_current_id,
@@ -51,7 +51,7 @@ extern(C) int main()
         &foundationThreadTest,
         &threadData,
         threadName,
-        PRIORITY_NORMAL,
+        THREAD_PRIORITY_NORMAL,
         0);
     if (thread is null)
         return EXIT_FAILURE;

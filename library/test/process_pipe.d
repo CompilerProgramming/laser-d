@@ -4,15 +4,15 @@ import core.stdc.stdlib : EXIT_FAILURE, EXIT_SUCCESS;
 import core.stdc.string : strcmp;
 import laserd.foundation.lifecycle : finalize, initialize;
 import laserd.system :
-    Argument,
-    DETACHED,
+    ProcessArgument,
+    PROCESS_DETACHED,
+    PROCESS_STDSTREAMS,
+    PROCESS_STILL_ACTIVE,
     Process,
-    REDIRECT_STREAMS,
-    STILL_ACTIVE,
     Stream,
     Process_create,
-    Process_create_pipe,
     Process_destroy,
+    Stream_create_pipe,
     Stream_destroy,
     Stream_read,
     Process_set_arguments,
@@ -39,7 +39,7 @@ extern(C) int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    Stream* pipe = Process_create_pipe();
+    Stream* pipe = Stream_create_pipe();
     if (pipe is null) {
         puts("foundation_process_pipe: pipe allocation failed");
         finalize();
@@ -71,13 +71,13 @@ extern(C) int main(int argc, char** argv)
     }
 
     Process_set_executable(process, argv[0][0 .. stringLength(argv[0])]);
-    Argument[1] arguments;
+    ProcessArgument[1] arguments;
     arguments[0].data = childArgument.ptr;
     arguments[0].length = childArgument.length;
     Process_set_arguments(process, arguments[]);
-    Process_set_flags(process, DETACHED | REDIRECT_STREAMS);
+    Process_set_flags(process, PROCESS_DETACHED | PROCESS_STDSTREAMS);
 
-    if (Process_spawn(process) != STILL_ACTIVE) {
+    if (Process_spawn(process) != PROCESS_STILL_ACTIVE) {
         puts("foundation_process_pipe: process spawn failed");
         Process_destroy(process);
         finalize();
@@ -96,10 +96,10 @@ extern(C) int main(int argc, char** argv)
                 passed = false;
             }
 
-    int exitCode = STILL_ACTIVE;
+    int exitCode = PROCESS_STILL_ACTIVE;
     foreach (i; 0 .. 1000) {
         exitCode = Process_wait(process);
-        if (exitCode != STILL_ACTIVE)
+        if (exitCode != PROCESS_STILL_ACTIVE)
             break;
         Thread_sleep(1);
     }
