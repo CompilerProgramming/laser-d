@@ -81,6 +81,37 @@ private int test_memory(Arena *arena)
     return EXIT_SUCCESS;
 }
 
+private int test_fixedregion_boundaries()
+{
+    Arena *arena = Arena_create_fixedregion(512);
+    if (arena is null)
+        return EXIT_FAILURE;
+    scope(exit) Arena_destroy(arena);
+
+    void *aligned = arena.aligned_alloc(256, 1);
+    if (aligned is null || (cast(size_t) aligned & 255) != 0)
+        return EXIT_FAILURE;
+
+    if (arena.aligned_alloc(8, 0) !is null)
+        return EXIT_FAILURE;
+
+    if (arena.aligned_calloc(8, size_t.max / 8 + 1, 8) !is null)
+        return EXIT_FAILURE;
+
+    Arena *small = Arena_create_fixedregion(16);
+    if (small is null)
+        return EXIT_FAILURE;
+    scope(exit) Arena_destroy(small);
+
+    if (small.alloc(16) is null)
+        return EXIT_FAILURE;
+    if (small.alloc(1) !is null)
+        return EXIT_FAILURE;
+
+    Arena_destroy(null);
+    return EXIT_SUCCESS;
+}
+
 extern(C) int main()
 {
     if (initialize(null) != 0)
@@ -92,5 +123,7 @@ extern(C) int main()
     if (rc == EXIT_FAILURE) return rc;
     puts("testing fixedregion arena\n");
     rc = test_memory(Arena_create_fixedregion(512));
+    if (rc == EXIT_FAILURE) return rc;
+    rc = test_fixedregion_boundaries();
     return rc;
 }

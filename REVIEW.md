@@ -558,3 +558,18 @@ cursor bug. The revised implementation still has these issues:
 
 The focused compilation stopped at the invalid slice conversion, before tests
 could run. No implementation fixes were applied.
+
+### Arena integration follow-up (2026-08-28)
+
+The integrated fixed-region backend was reviewed after its first focused test
+run failed at the alignment assertion. The power-of-two condition was inverted:
+valid power-of-two alignments make `alignment & (alignment - 1)` zero.
+
+The follow-up also identified relative-offset alignment, unchecked array-size
+multiplication, partial construction, nullable destruction, and unused chaining
+state. The implementation now aligns the absolute backing address, uses
+bounds-first padding arithmetic, rejects multiplication overflow, cleans up a
+failed outer arena construction, accepts null destruction, and defines the
+backend as one owned thread-confined region rather than an unimplemented chain.
+Focused tests cover absolute over-alignment, zero-size allocation, array-size
+overflow, exhaustion without cursor overrun, and null destruction.

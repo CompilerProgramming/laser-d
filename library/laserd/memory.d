@@ -205,11 +205,18 @@ Arena* Arena_create_fixedregion(size_t fixed_region_size)
         return null;
     arena.vtable = &fixedregion_function_table;
     arena.ctx = fixed_region_arena_create(fixed_region_size);
+    if (arena.ctx is null)
+    {
+        rpfree(arena);
+        return null;
+    }
     return arena;
 }
 
 void Arena_destroy(Arena *arena)
 {
+    if (arena is null)
+        return;
     if (arena.vtable)
         arena.vtable.destroyImpl(arena.ctx);
     rpfree(arena);
@@ -221,7 +228,7 @@ void Arena_destroy(Arena *arena)
 struct FixedRegionAllocator
 {
     byte[] memory;  // buffer to use for memory allocations
-	size_t offset; // Current position up to which memory is allocated
+    size_t offset; // Current position up to which memory is allocated
     FixedRegionAllocator *next; // for chaining
 }
 
@@ -268,18 +275,24 @@ private void *fixed_region_aligned_alloc(void *ctx, size_t alignment, size_t all
     if (ctx is null) return null;
     FixedRegionAllocator *allocator = cast(FixedRegionAllocator *)ctx;
 
-    assert((alignment == 0) || (alignment & (alignment - 1)) == 0); // assert alignment is power of two
     if (alloc_size == 0) return null;
     if (alignment == 0) alignment = DEFAULT_ALIGNMENT;
-    // get aligned offset
-    auto offset = (allocator.offset + alignment - 1u) & ~(alignment - 1u);
-    // do we have enough room?
-    if (offset > allocator.memory.length)
+    assert((alignment & (alignment - 1)) == 0); // alignment is a power of two
+
+    if (allocator.offset > allocator.memory.length)
         return null;
-    auto remaining = allocator.memory.length - offset;
-    if (remaining < alloc_size)
+
+    size_t remaining = allocator.memory.length - allocator.offset;
+    byte *current = allocator.memory.ptr + allocator.offset;
+    size_t padding = (0 - cast(size_t) current) & (alignment - 1);
+    if (padding > remaining)
         return null;
-    void *ptr = cast(void *) &allocator.memory.ptr[offset];
+    remaining -= padding;
+    if (alloc_size > remaining)
+        return null;
+
+    size_t offset = allocator.offset + padding;
+    void *ptr = cast(void *)(allocator.memory.ptr + offset);
     allocator.offset = offset + alloc_size;
     return ptr;
 }
@@ -288,6 +301,8 @@ private void *fixed_region_aligned_calloc(void *ctx, size_t alignment, size_t co
 {
     // Every array element must begin at an address satisfying `alignment`.
     assert(alignment == 0 || (object_size % alignment) == 0);
+    if (object_size != 0 && count > size_t.max / object_size)
+        return null;
     return fixed_region_aligned_alloc(ctx, alignment, count * object_size);
 }
 
@@ -297,7 +312,8 @@ private void *fixed_region_aligned_realloc(void *ctx, void* pointer, size_t alig
     FixedRegionAllocator *allocator = cast(FixedRegionAllocator *)ctx;
 
     if (alloc_size == 0) return null;
-    if (alloc_size < old_size) return pointer;
+    if (alloc_size <= old_size) return pointer;
+    assert(pointer !is null || old_size == 0);
     auto new_pointer = fixed_region_aligned_alloc(ctx, alignment, alloc_size);
     if (new_pointer == null) return null;
     memcpy(new_pointer, pointer, old_size);
@@ -311,6 +327,8 @@ private void *fixed_region_alloc(void *ctx, size_t size)
 }
 private void *fixed_region_calloc(void *ctx, size_t count, size_t object_size)
 {
+    if (object_size != 0 && count > size_t.max / object_size)
+        return null;
     return fixed_region_aligned_alloc(ctx, 0, count * object_size);
 }
 private void *fixed_region_realloc(void *ctx, void* pointer, size_t alloc_size, size_t old_size)

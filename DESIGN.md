@@ -1071,3 +1071,21 @@ record the difference from D.
 Laser-D rejects 32-bit targets during option processing. Both `-m32` and the
 deprecated `-m32mscoff` alias fail on every host; `-m64` remains the supported
 x86-64 target selection.
+
+## Arena allocation backends
+
+`laserd.memory.Arena` provides a common allocation interface with backend-
+specific lifetime and concurrency contracts. The rpmalloc-backed arena uses
+rpmalloc's allocation and cross-thread-free behavior.
+
+The fixed-region arena owns one zero-initialized backing region and allocates
+from it monotonically. Individual frees are no-ops; destroying the arena
+releases the complete region. It does not grow or chain additional regions,
+and exhaustion returns null without changing existing allocations. Its mutable
+allocation cursor is thread-confined and must not be used concurrently.
+
+Aligned allocations align the absolute returned address. Alignment must be a
+power of two; zero requests the backend default. Aligned array allocation also
+requires the element size to be a multiple of the requested alignment so that
+every element, rather than only the first, is correctly aligned. Size
+multiplication and alignment padding are checked before advancing the cursor.
