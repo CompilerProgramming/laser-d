@@ -3,7 +3,7 @@ import core.stdc.stdlib :
     EXIT_FAILURE, EXIT_SUCCESS;
 import core.stdc.stdio : puts;
 import laserd.memory : Arena, Arena_create_rpmalloc, Arena_create_fixedregion, Arena_destroy;
-import laserd.rpmalloc : finalize, initialize;
+import laserd.rpmalloc : rpmalloc_finalize, rpmalloc_initialize;
 
 
 private int test_memory(Arena *arena)
@@ -114,9 +114,9 @@ private int test_fixedregion_boundaries()
 
 extern(C) int main()
 {
-    if (initialize(null) != 0)
+    if (rpmalloc_initialize(null) != 0)
         return EXIT_FAILURE;
-    scope(exit) finalize();
+    scope(exit) rpmalloc_finalize();
     
     puts("testing rpmalloc\n");
     int rc = test_memory(Arena_create_rpmalloc());

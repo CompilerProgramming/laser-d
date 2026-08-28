@@ -380,8 +380,7 @@ from the working tree. The renamed low-level binding, its integration test, and
 the hash-table consumer compile successfully in focused checks.
 
 1. **The facade compilation findings are resolved.** `laserd.memory` now
-   imports `size_t` and the public `laserd.rpmalloc` aliases
-   `zeroAllocate`, `allocateArray`, `reallocate`, and `free`. A focused
+   imports `size_t` and the public `laserd.rpmalloc` allocation functions. A focused
    compilation of the facade succeeds. The `alloc` operation's
    zero-initialization is deliberate.
 
@@ -573,3 +572,12 @@ failed outer arena construction, accepts null destruction, and defines the
 backend as one owned thread-confined region rather than an unimplemented chain.
 Focused tests cover absolute over-alignment, zero-size allocation, array-size
 overflow, exhaustion without cursor overrun, and null destruction.
+
+## Native rpmalloc binding names (2026-08-28)
+
+The D-specific function, type, and constant aliases in `laserd.rpmalloc` hid
+the allocator identity at direct call sites and created a second naming surface
+over the vendored C API. The aliases were removed and the original rpmalloc
+symbols made public. Production consumers and integration tests now use names
+such as `rpmalloc`, `rpfree`, `rpmalloc_heap_t`, and `rpmalloc_heap_alloc`.
+The higher-level `laserd.memory.Arena` retains its backend-neutral operations.

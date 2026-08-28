@@ -148,7 +148,7 @@ private int test_hash_vectors()
     return 0;
 }
 
-private int test_reentrant_callbacks(Heap* heap)
+private int test_reentrant_callbacks(rpmalloc_heap_t* heap)
 {
     immutable st_hash_type policy =
         st_hash_type(&reentrant_compare, &reentrant_hash);
@@ -201,7 +201,7 @@ private int test_reentrant_callbacks(Heap* heap)
     return 0;
 }
 
-private int test_storage_representations(Heap* heap)
+private int test_storage_representations(rpmalloc_heap_t* heap)
 {
     st_table* table = st_init_numtable(heap);
     if (require(table !is null &&
@@ -276,7 +276,7 @@ private int test_storage_representations(Heap* heap)
     return 0;
 }
 
-private int test_collisions(Heap* heap)
+private int test_collisions(rpmalloc_heap_t* heap)
 {
     immutable st_hash_type collision_policy =
         st_hash_type(&word_compare, &constant_hash);
@@ -318,7 +318,7 @@ private int test_collisions(Heap* heap)
     return 0;
 }
 
-private int test_strings(Heap* heap)
+private int test_strings(rpmalloc_heap_t* heap)
 {
     st_table* table = st_init_strtable(heap);
     if (require(table !is null))
@@ -378,7 +378,7 @@ private int test_strings(Heap* heap)
     return 0;
 }
 
-private int test_numbers(Heap* heap)
+private int test_numbers(rpmalloc_heap_t* heap)
 {
     if (require(st_init_numtable_with_size(heap, size_t.max) is null))
         return 1;
@@ -430,7 +430,7 @@ private int test_numbers(Heap* heap)
     return 0;
 }
 
-private int test_case_insensitive(Heap* heap)
+private int test_case_insensitive(rpmalloc_heap_t* heap)
 {
     st_table* table = st_init_strcasetable(heap);
     if (require(table !is null))
@@ -454,9 +454,9 @@ private int test_case_insensitive(Heap* heap)
 
 extern(C) int main()
 {
-    if (initialize(null) != 0)
+    if (rpmalloc_initialize(null) != 0)
         return EXIT_FAILURE;
-    Heap* heap = acquireHeap();
+    rpmalloc_heap_t* heap = rpmalloc_heap_acquire();
     if (heap is null)
         return EXIT_FAILURE;
 
@@ -471,13 +471,13 @@ extern(C) int main()
 
     // This unrelated allocation proves that freeing tables does not clear the
     // caller-owned heap.
-    void* unrelated = allocateFromHeap(heap, 64);
+    void* unrelated = rpmalloc_heap_alloc(heap, 64);
     if (unrelated is null)
         result = 1;
     else
-        freeFromHeap(heap, unrelated);
+        rpmalloc_heap_free(heap, unrelated);
 
-    releaseHeap(heap);
-    finalize();
+    rpmalloc_heap_release(heap);
+    rpmalloc_finalize();
     return result == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

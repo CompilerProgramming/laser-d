@@ -448,10 +448,10 @@ case-insensitive FNV hash, probing sequence, single-pass insertion reservation,
 and rebuild/retry handling around reentrant comparison and iteration callbacks
 are retained from the C implementation.
 
-Every table borrows a caller-supplied `laserd.rpmalloc.Heap*` for its entire
+Every table borrows a caller-supplied `laserd.rpmalloc.rpmalloc_heap_t*` for its entire
 lifetime. It allocates, grows, compacts, copies, and frees its own table storage
 through that heap, but never releases the heap or calls
-`freeAllFromHeap`. The caller must initialize memory, keep the heap
+`rpmalloc_heap_free_all`. The caller must initialize memory, keep the heap
 alive until `st_free_table` returns, and serialize access. Creation and copying
 report allocation failure with `null`; operations that may grow the table
 report `ST_ERROR` without discarding the existing table. The table does not own
@@ -802,11 +802,11 @@ The first production C-backed component is rpmalloc 2.0.1. CMake compiles the
 vendored C11 source as `laserd_rpmalloc`, explicitly disables process-wide C
 allocator replacement (`ENABLE_OVERRIDE=0`), and enables first-class heaps
 (`RPMALLOC_FIRST_CLASS_HEAPS=1`). The reviewed `laserd.rpmalloc` import module
-exposes both the general allocator and explicit heap APIs using
-implementation-neutral names such as `Heap`, `allocate`, and `free`. Native
-rpmalloc symbol and type names remain private ABI details. The public `Config`
-structure retains rpmalloc's Linux/Android-only field so its layout matches
-the native header on every supported platform. Integration testing covers
+exposes the general allocator, explicit heap API, types, and constants under
+their native rpmalloc names. It deliberately adds no D aliases: direct use of
+this allocator remains visible at each call site. The public
+`rpmalloc_config_t` structure retains rpmalloc's Linux/Android-only field so
+its layout matches the native header on every supported platform. Integration testing covers
 ordinary allocation, reallocation, aligned allocation, heap ownership, heap
 reallocation, zeroed heap allocation, bulk heap cleanup, and finalization.
 

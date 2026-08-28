@@ -12,7 +12,8 @@ module laserd.hash;
 
 import core.stdc.stddef : size_t;
 import core.stdc.string : memcpy, memset, strcmp, strlen;
-import laserd.rpmalloc : Heap, allocateFromHeap, freeFromHeap;
+import laserd.rpmalloc :
+    rpmalloc_heap_t, rpmalloc_heap_alloc, rpmalloc_heap_free;
 
 alias st_data_t = size_t;
 alias st_index_t = size_t;
@@ -93,7 +94,7 @@ struct st_table
     ubyte entry_power;
     ubyte bin_power;
     ubyte size_ind;
-    Heap* heap;
+    rpmalloc_heap_t* heap;
     const(st_hash_type)* type;
     st_index_t num_entries;
     st_index_t entries_start;
@@ -443,7 +444,7 @@ private st_table_entry* allocate_storage(st_table* table)
      */
     if (!valid_storage_size(table))
         return null;
-    return cast(st_table_entry*) allocateFromHeap(
+    return cast(st_table_entry*) rpmalloc_heap_alloc(
         table.heap,
         entries_size(table) + bins_size(table));
 }
@@ -519,7 +520,7 @@ private int rebuild(st_table* table)
     replacement.rebuilds_num = table.rebuilds_num + 1;
     build_bins(&replacement);
 
-    freeFromHeap(table.heap, table.entries);
+    rpmalloc_heap_free(table.heap, table.entries);
     table.entry_power = replacement.entry_power;
     table.bin_power = replacement.bin_power;
     table.size_ind = replacement.size_ind;
@@ -538,7 +539,7 @@ private int ensure_insert_capacity(st_table* table)
 }
 
 private st_table* allocate_table(
-    Heap* heap,
+    rpmalloc_heap_t* heap,
     const(st_hash_type)* type,
     st_index_t requested_size)
 {
@@ -547,7 +548,7 @@ private st_table* allocate_table(
         return null;
 
     st_table* table = cast(st_table*)
-        allocateFromHeap(heap, st_table.sizeof);
+        rpmalloc_heap_alloc(heap, st_table.sizeof);
     if (table is null)
         return null;
     memset(table, 0, st_table.sizeof);
@@ -555,13 +556,13 @@ private st_table* allocate_table(
     table.type = type;
     if (set_features(table, requested_size) == ST_ERROR)
     {
-        freeFromHeap(heap, table);
+        rpmalloc_heap_free(heap, table);
         return null;
     }
     table.entries = allocate_storage(table);
     if (table.entries is null)
     {
-        freeFromHeap(heap, table);
+        rpmalloc_heap_free(heap, table);
         return null;
     }
     initialize_bins(table);
@@ -569,14 +570,14 @@ private st_table* allocate_table(
 }
 
 st_table* st_init_table(
-    Heap* heap,
+    rpmalloc_heap_t* heap,
     const(st_hash_type)* type)
 {
     return allocate_table(heap, type, 0);
 }
 
 st_table* st_init_table_with_size(
-    Heap* heap,
+    rpmalloc_heap_t* heap,
     const(st_hash_type)* type,
     st_index_t size)
 {
@@ -655,37 +656,37 @@ immutable st_hash_type st_hashtype_str =
 immutable st_hash_type st_hashtype_strcase =
     st_hash_type(&string_case_compare, &string_case_hash);
 
-st_table* st_init_numtable(Heap* heap)
+st_table* st_init_numtable(rpmalloc_heap_t* heap)
 {
     return st_init_table(heap, &st_hashtype_num);
 }
 
 st_table* st_init_numtable_with_size(
-    Heap* heap,
+    rpmalloc_heap_t* heap,
     st_index_t size)
 {
     return st_init_table_with_size(heap, &st_hashtype_num, size);
 }
 
-st_table* st_init_strtable(Heap* heap)
+st_table* st_init_strtable(rpmalloc_heap_t* heap)
 {
     return st_init_table(heap, &st_hashtype_str);
 }
 
 st_table* st_init_strtable_with_size(
-    Heap* heap,
+    rpmalloc_heap_t* heap,
     st_index_t size)
 {
     return st_init_table_with_size(heap, &st_hashtype_str, size);
 }
 
-st_table* st_init_strcasetable(Heap* heap)
+st_table* st_init_strcasetable(rpmalloc_heap_t* heap)
 {
     return st_init_table(heap, &st_hashtype_strcase);
 }
 
 st_table* st_init_strcasetable_with_size(
-    Heap* heap,
+    rpmalloc_heap_t* heap,
     st_index_t size)
 {
     return st_init_table_with_size(heap, &st_hashtype_strcase, size);
@@ -1205,9 +1206,9 @@ void st_free_table(st_table* table)
 {
     if (table is null)
         return;
-    Heap* heap = table.heap;
-    freeFromHeap(heap, table.entries);
-    freeFromHeap(heap, table);
+    rpmalloc_heap_t* heap = table.heap;
+    rpmalloc_heap_free(heap, table.entries);
+    rpmalloc_heap_free(heap, table);
 }
 
 int st_numcmp(st_data_t left, st_data_t right)

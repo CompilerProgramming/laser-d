@@ -3,9 +3,8 @@ module laserd.memory;
 import core.stdc.stddef;
 import core.stdc.string : memset, memcpy;
 import laserd.rpmalloc :
-    zeroAllocate, allocateArray, reallocate,
-    alignedZeroAllocate, alignedAllocateArray, alignedReallocate,
-    rpfree = free;
+    rpzalloc, rpcalloc, rprealloc,
+    rpaligned_zalloc, rpaligned_calloc, rpaligned_realloc, rpfree;
     
 
 alias AllocFn = void *function(void *ctx, size_t size);
@@ -32,11 +31,11 @@ private struct Arena_FunctionTable
 
 private void *arena_rpmalloc_alloc(void *ctx, size_t size)
 {
-    return zeroAllocate(size);
+    return rpzalloc(size);
 }
 private void *arena_rpmalloc_calloc(void *ctx, size_t count, size_t size)
 {
-    return allocateArray(count, size);
+    return rpcalloc(count, size);
 }
 private void zero_reallocated_tail(void *pointer, size_t size, size_t oldSize)
 {
@@ -46,7 +45,7 @@ private void zero_reallocated_tail(void *pointer, size_t size, size_t oldSize)
 private void *arena_rpmalloc_realloc(
     void *ctx, void *pointer, size_t size, size_t oldSize)
 {
-    void *result = reallocate(pointer, size);
+    void *result = rprealloc(pointer, size);
     zero_reallocated_tail(result, size, oldSize);
     return result;
 }
@@ -54,19 +53,19 @@ private void *arena_rpmalloc_aligned_alloc(void *ctx, size_t alignment, size_t s
 {
     if (alignment < (void*).sizeof)
         alignment = (void*).sizeof;
-    return alignedZeroAllocate(alignment, size);
+    return rpaligned_zalloc(alignment, size);
 }
 private void *arena_rpmalloc_aligned_calloc(void *ctx, size_t alignment, size_t count, size_t size)
 {
     if (alignment < (void*).sizeof)
         alignment = (void*).sizeof;
-    return alignedAllocateArray(alignment, count, size);
+    return rpaligned_calloc(alignment, count, size);
 }
 private void *arena_rpmalloc_aligned_realloc(void *ctx, void* pointer, size_t alignment, size_t size, size_t old_size)
 {
     if (alignment < (void*).sizeof)
         alignment = (void*).sizeof;
-    void *result = alignedReallocate(pointer, alignment, size, old_size, 0);
+    void *result = rpaligned_realloc(pointer, alignment, size, old_size, 0);
     zero_reallocated_tail(result, size, old_size);
     return result;
 }
@@ -191,7 +190,7 @@ struct Arena
 
 Arena* Arena_create_rpmalloc()
 {
-    Arena *arena = cast(Arena*) zeroAllocate(Arena.sizeof);
+    Arena *arena = cast(Arena*) rpzalloc(Arena.sizeof);
     if (arena is null)
         return null;
     arena.vtable = &rpmalloc_function_table;
@@ -200,7 +199,7 @@ Arena* Arena_create_rpmalloc()
 
 Arena* Arena_create_fixedregion(size_t fixed_region_size)
 {
-    Arena *arena = cast(Arena*) zeroAllocate(Arena.sizeof);
+    Arena *arena = cast(Arena*) rpzalloc(Arena.sizeof);
     if (arena is null)
         return null;
     arena.vtable = &fixedregion_function_table;
@@ -245,10 +244,10 @@ private FixedRegionAllocator *fixed_region_arena_create(size_t size)
 {
     FixedRegionAllocator *allocator;
 
-    allocator = cast(FixedRegionAllocator *) zeroAllocate(FixedRegionAllocator.sizeof);
+    allocator = cast(FixedRegionAllocator *) rpzalloc(FixedRegionAllocator.sizeof);
     if (allocator is null)
         return null;
-    byte *memory = cast(byte *) zeroAllocate(size);
+    byte *memory = cast(byte *) rpzalloc(size);
     if (memory is null) 
     {
         rpfree(allocator);
