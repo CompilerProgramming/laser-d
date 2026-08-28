@@ -1,17 +1,13 @@
 import core.stdc.stddef : size_t;
 import core.stdc.stdlib :
     EXIT_FAILURE, EXIT_SUCCESS;
-import laserd.memory : Arena, Arena_create, Arena_destroy;
+import core.stdc.stdio : puts;
+import laserd.memory : Arena, Arena_create_rpmalloc, Arena_create_fixedregion, Arena_destroy;
 import laserd.rpmalloc : finalize, initialize;
 
 
-extern(C) int main()
+private int test_memory(Arena *arena)
 {
-    if (initialize(null) != 0)
-        return EXIT_FAILURE;
-    scope(exit) finalize();
-
-    Arena *arena = Arena_create();
     if (arena is null)
         return EXIT_FAILURE;
     scope(exit) { Arena_destroy(arena); }
@@ -83,4 +79,18 @@ extern(C) int main()
         return EXIT_FAILURE;
 
     return EXIT_SUCCESS;
+}
+
+extern(C) int main()
+{
+    if (initialize(null) != 0)
+        return EXIT_FAILURE;
+    scope(exit) finalize();
+    
+    puts("testing rpmalloc\n");
+    int rc = test_memory(Arena_create_rpmalloc());
+    if (rc == EXIT_FAILURE) return rc;
+    puts("testing fixedregion arena\n");
+    rc = test_memory(Arena_create_fixedregion(512));
+    return rc;
 }
