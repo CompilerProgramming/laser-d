@@ -597,3 +597,17 @@ Focused coverage exercises multiple ordinary regions, a 256-byte-aligned large
 dedicated allocation, subsequent reuse of ordinary-region capacity, the no-op
 free contract, alignment-size overflow rejection, generic typed allocation and
 growth, and destruction through the common `Arena` interface.
+
+## Hash Arena migration (2026-08-28)
+
+`laserd.hash` now borrows a caller-owned `laserd.memory.Arena` instead of an
+rpmalloc first-class heap. Table headers and combined entries-and-bins storage
+are allocated and released through the Arena interface. Tables never destroy
+their Arena, and callers must retain it through `st_free_table`. Reclamation on
+table release is deliberately backend-specific; a bump Arena retains that
+storage until whole-Arena destruction.
+
+The hash integration suite runs against both `Arena_create_rpmalloc` and
+`Arena_create_bump`. Immediate-free and deferred whole-Arena reclamation are
+therefore both exercised along with the existing hash behavior, rebuild,
+copying, and allocation-failure paths.

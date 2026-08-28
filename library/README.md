@@ -117,9 +117,11 @@ A fidelity test checks the original numeric, C-string, case-insensitive, and
 incremental hash algorithms against vectors produced by the C source.
 Comparison callbacks and iteration may rebuild the table; searches detect the
 changed rebuild counter, discard cached entry locations, and retry.
-A caller supplies and retains ownership of a
-`laserd.rpmalloc.rpmalloc_heap_t`; a table uses
-that heap for its own allocation and growth but never clears or releases it.
+A caller supplies and retains ownership of a `laserd.memory.Arena`; a table
+uses that Arena for its own allocation and growth but never destroys it.
+`st_free_table` releases table storage through the Arena, so immediate memory
+reclamation depends on the selected backend; bump and fixed-region storage is
+reclaimed when the caller destroys the Arena.
 Numeric, C-string, and ASCII case-insensitive C-string policies are predefined,
 and callers may supply compatible hash and comparison function pointers.
 Allocation failure is returned as `null` from creation/copying and as

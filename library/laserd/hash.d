@@ -5,15 +5,15 @@
  * values are machine words, so either may hold an integer or a pointer on
  * Laser-D's supported 64-bit targets.
  *
- * A table borrows its rpmalloc heap. The caller must keep the heap alive until
- * st_free_table has returned. The table frees only its own allocations.
+ * A table borrows its Arena. The caller must keep the Arena alive until
+ * st_free_table has returned. The table releases only its own allocations
+ * through that Arena and never destroys the Arena.
  */
 module laserd.hash;
 
 import core.stdc.stddef : size_t;
 import core.stdc.string : memcpy, memset, strcmp, strlen;
-import laserd.rpmalloc :
-    rpmalloc_heap_t, rpmalloc_heap_alloc, rpmalloc_heap_free;
+import laserd.memory : Arena;
 
 alias st_data_t = size_t;
 alias st_index_t = size_t;
@@ -94,7 +94,7 @@ struct st_table
     ubyte entry_power;
     ubyte bin_power;
     ubyte size_ind;
-    rpmalloc_heap_t* heap;
+    Arena* arena;
     const(st_hash_type)* type;
     st_index_t num_entries;
     st_index_t entries_start;
@@ -440,12 +440,11 @@ private st_table_entry* allocate_storage(st_table* table)
     /*
      * The entries array is immediately followed by the packed bins. Keep the
      * original single-allocation layout while allocating from the borrowed
-     * rpmalloc heap.
+     * Arena.
      */
     if (!valid_storage_size(table))
         return null;
-    return cast(st_table_entry*) rpmalloc_heap_alloc(
-        table.heap,
+    return cast(st_table_entry*) table.arena.alloc(
         entries_size(table) + bins_size(table));
 }
 
@@ -500,7 +499,7 @@ private int rebuild(st_table* table)
 
     st_table replacement;
     memset(&replacement, 0, st_table.sizeof);
-    replacement.heap = table.heap;
+    replacement.arena = table.arena;
     replacement.type = table.type;
     if (set_features(&replacement, 2 * table.num_entries - 1) ==
         ST_ERROR)
@@ -520,7 +519,7 @@ private int rebuild(st_table* table)
     replacement.rebuilds_num = table.rebuilds_num + 1;
     build_bins(&replacement);
 
-    rpmalloc_heap_free(table.heap, table.entries);
+    table.arena.free(table.entries);
     table.entry_power = replacement.entry_power;
     table.bin_power = replacement.bin_power;
     table.size_ind = replacement.size_ind;
@@ -539,30 +538,29 @@ private int ensure_insert_capacity(st_table* table)
 }
 
 private st_table* allocate_table(
-    rpmalloc_heap_t* heap,
+    Arena* arena,
     const(st_hash_type)* type,
     st_index_t requested_size)
 {
-    if (heap is null || type is null ||
+    if (arena is null || type is null ||
         type.compare is null || type.hash is null)
         return null;
 
-    st_table* table = cast(st_table*)
-        rpmalloc_heap_alloc(heap, st_table.sizeof);
+    st_table* table = cast(st_table*) arena.alloc(st_table.sizeof);
     if (table is null)
         return null;
     memset(table, 0, st_table.sizeof);
-    table.heap = heap;
+    table.arena = arena;
     table.type = type;
     if (set_features(table, requested_size) == ST_ERROR)
     {
-        rpmalloc_heap_free(heap, table);
+        arena.free(table);
         return null;
     }
     table.entries = allocate_storage(table);
     if (table.entries is null)
     {
-        rpmalloc_heap_free(heap, table);
+        arena.free(table);
         return null;
     }
     initialize_bins(table);
@@ -570,18 +568,18 @@ private st_table* allocate_table(
 }
 
 st_table* st_init_table(
-    rpmalloc_heap_t* heap,
+    Arena* arena,
     const(st_hash_type)* type)
 {
-    return allocate_table(heap, type, 0);
+    return allocate_table(arena, type, 0);
 }
 
 st_table* st_init_table_with_size(
-    rpmalloc_heap_t* heap,
+    Arena* arena,
     const(st_hash_type)* type,
     st_index_t size)
 {
-    return allocate_table(heap, type, size);
+    return allocate_table(arena, type, size);
 }
 
 private extern(C) int numeric_compare(st_data_t left, st_data_t right)
@@ -656,40 +654,40 @@ immutable st_hash_type st_hashtype_str =
 immutable st_hash_type st_hashtype_strcase =
     st_hash_type(&string_case_compare, &string_case_hash);
 
-st_table* st_init_numtable(rpmalloc_heap_t* heap)
+st_table* st_init_numtable(Arena* arena)
 {
-    return st_init_table(heap, &st_hashtype_num);
+    return st_init_table(arena, &st_hashtype_num);
 }
 
 st_table* st_init_numtable_with_size(
-    rpmalloc_heap_t* heap,
+    Arena* arena,
     st_index_t size)
 {
-    return st_init_table_with_size(heap, &st_hashtype_num, size);
+    return st_init_table_with_size(arena, &st_hashtype_num, size);
 }
 
-st_table* st_init_strtable(rpmalloc_heap_t* heap)
+st_table* st_init_strtable(Arena* arena)
 {
-    return st_init_table(heap, &st_hashtype_str);
+    return st_init_table(arena, &st_hashtype_str);
 }
 
 st_table* st_init_strtable_with_size(
-    rpmalloc_heap_t* heap,
+    Arena* arena,
     st_index_t size)
 {
-    return st_init_table_with_size(heap, &st_hashtype_str, size);
+    return st_init_table_with_size(arena, &st_hashtype_str, size);
 }
 
-st_table* st_init_strcasetable(rpmalloc_heap_t* heap)
+st_table* st_init_strcasetable(Arena* arena)
 {
-    return st_init_table(heap, &st_hashtype_strcase);
+    return st_init_table(arena, &st_hashtype_strcase);
 }
 
 st_table* st_init_strcasetable_with_size(
-    rpmalloc_heap_t* heap,
+    Arena* arena,
     st_index_t size)
 {
-    return st_init_table_with_size(heap, &st_hashtype_strcase, size);
+    return st_init_table_with_size(arena, &st_hashtype_strcase, size);
 }
 
 st_index_t st_table_size(const(st_table)* table)
@@ -929,7 +927,7 @@ void st_clear(st_table* table)
 st_table* st_copy(st_table* old_table)
 {
     st_table* table = allocate_table(
-        old_table.heap,
+        old_table.arena,
         old_table.type,
         allocated_entries(old_table) - 1);
     if (table is null)
@@ -1206,9 +1204,9 @@ void st_free_table(st_table* table)
 {
     if (table is null)
         return;
-    rpmalloc_heap_t* heap = table.heap;
-    rpmalloc_heap_free(heap, table.entries);
-    rpmalloc_heap_free(heap, table);
+    Arena* arena = table.arena;
+    arena.free(table.entries);
+    arena.free(table);
 }
 
 int st_numcmp(st_data_t left, st_data_t right)

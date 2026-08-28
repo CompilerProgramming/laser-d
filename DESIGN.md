@@ -448,14 +448,16 @@ case-insensitive FNV hash, probing sequence, single-pass insertion reservation,
 and rebuild/retry handling around reentrant comparison and iteration callbacks
 are retained from the C implementation.
 
-Every table borrows a caller-supplied `laserd.rpmalloc.rpmalloc_heap_t*` for its entire
-lifetime. It allocates, grows, compacts, copies, and frees its own table storage
-through that heap, but never releases the heap or calls
-`rpmalloc_heap_free_all`. The caller must initialize memory, keep the heap
-alive until `st_free_table` returns, and serialize access. Creation and copying
-report allocation failure with `null`; operations that may grow the table
-report `ST_ERROR` without discarding the existing table. The table does not own
-pointer-valued keys or values, including C-string key storage.
+Every table borrows a caller-supplied `laserd.memory.Arena*` for its entire
+lifetime. It allocates, grows, compacts, copies, and releases its own table
+storage through that Arena, but never destroys the Arena. The caller must keep
+the Arena alive until `st_free_table` returns and obey the selected backend's
+thread-safety contract. Immediate reclamation by `st_free_table` is backend-
+dependent: region and bump arenas retain released storage until Arena
+destruction. Creation and copying report allocation failure with `null`;
+operations that may grow the table report `ST_ERROR` without discarding the
+existing table. The table does not own pointer-valued keys or values, including
+C-string key storage.
 
 All `new` expressions are rejected, including scalar, struct, placement, class,
 and array forms. Laser-D has no source-level implicit allocation operation.

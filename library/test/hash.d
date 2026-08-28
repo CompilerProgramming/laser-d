@@ -2,7 +2,9 @@ import core.stdc.stddef : size_t;
 import core.stdc.stdlib : EXIT_FAILURE, EXIT_SUCCESS;
 import core.stdc.string : strcmp;
 import laserd.hash;
-import laserd.rpmalloc;
+import laserd.memory :
+    Arena, Arena_create_bump, Arena_create_rpmalloc, Arena_destroy;
+import laserd.rpmalloc : rpmalloc_finalize, rpmalloc_initialize;
 
 private int require(bool condition)
 {
@@ -148,7 +150,7 @@ private int test_hash_vectors()
     return 0;
 }
 
-private int test_reentrant_callbacks(rpmalloc_heap_t* heap)
+private int test_reentrant_callbacks(Arena* arena)
 {
     immutable st_hash_type policy =
         st_hash_type(&reentrant_compare, &reentrant_hash);
@@ -159,7 +161,7 @@ private int test_reentrant_callbacks(rpmalloc_heap_t* heap)
     foreach (size_t index; 0 .. extras.length)
         extras[index] = ReentrantKey(&context, index + 10);
 
-    st_table* table = st_init_table(heap, &policy);
+    st_table* table = st_init_table(arena, &policy);
     if (require(table !is null))
         return 1;
     context.table = table;
@@ -178,7 +180,7 @@ private int test_reentrant_callbacks(rpmalloc_heap_t* heap)
         return 1;
     st_free_table(table);
 
-    table = st_init_numtable(heap);
+    table = st_init_numtable(arena);
     if (require(table !is null))
         return 1;
     foreach (st_data_t key; 0 .. 16)
@@ -201,9 +203,9 @@ private int test_reentrant_callbacks(rpmalloc_heap_t* heap)
     return 0;
 }
 
-private int test_storage_representations(rpmalloc_heap_t* heap)
+private int test_storage_representations(Arena* arena)
 {
-    st_table* table = st_init_numtable(heap);
+    st_table* table = st_init_numtable(arena);
     if (require(table !is null &&
             table.entry_power == 2 &&
             table.bin_power == 3 &&
@@ -215,7 +217,7 @@ private int test_storage_representations(rpmalloc_heap_t* heap)
         return 1;
     st_free_table(table);
 
-    table = st_init_numtable_with_size(heap, 15);
+    table = st_init_numtable_with_size(arena, 15);
     if (require(table !is null &&
             table.entry_power == 4 &&
             st_memsize(table) ==
@@ -223,7 +225,7 @@ private int test_storage_representations(rpmalloc_heap_t* heap)
         return 1;
     st_free_table(table);
 
-    table = st_init_numtable_with_size(heap, 16);
+    table = st_init_numtable_with_size(arena, 16);
     if (require(table !is null &&
             table.entry_power == 5 &&
             table.bin_power == 6 &&
@@ -233,7 +235,7 @@ private int test_storage_representations(rpmalloc_heap_t* heap)
         return 1;
     st_free_table(table);
 
-    table = st_init_numtable_with_size(heap, 128);
+    table = st_init_numtable_with_size(arena, 128);
     if (require(table !is null &&
             table.entry_power == 8 &&
             table.bin_power == 9 &&
@@ -245,7 +247,7 @@ private int test_storage_representations(rpmalloc_heap_t* heap)
         return 1;
     st_free_table(table);
 
-    table = st_init_numtable_with_size(heap, 32_768);
+    table = st_init_numtable_with_size(arena, 32_768);
     if (require(table !is null &&
             table.entry_power == 16 &&
             table.bin_power == 17 &&
@@ -253,7 +255,7 @@ private int test_storage_representations(rpmalloc_heap_t* heap)
         return 1;
     st_free_table(table);
 
-    table = st_init_numtable_with_size(heap, 31);
+    table = st_init_numtable_with_size(arena, 31);
     if (require(table !is null && table.entry_power == 5))
         return 1;
     foreach (st_data_t key; 0 .. 32)
@@ -276,11 +278,11 @@ private int test_storage_representations(rpmalloc_heap_t* heap)
     return 0;
 }
 
-private int test_collisions(rpmalloc_heap_t* heap)
+private int test_collisions(Arena* arena)
 {
     immutable st_hash_type collision_policy =
         st_hash_type(&word_compare, &constant_hash);
-    st_table* table = st_init_table(heap, &collision_policy);
+    st_table* table = st_init_table(arena, &collision_policy);
     if (require(table !is null))
         return 1;
 
@@ -318,9 +320,9 @@ private int test_collisions(rpmalloc_heap_t* heap)
     return 0;
 }
 
-private int test_strings(rpmalloc_heap_t* heap)
+private int test_strings(Arena* arena)
 {
-    st_table* table = st_init_strtable(heap);
+    st_table* table = st_init_strtable(arena);
     if (require(table !is null))
         return 1;
     if (require(st_insert(table, cast(st_data_t) "a".ptr, 10) == 0))
@@ -378,12 +380,12 @@ private int test_strings(rpmalloc_heap_t* heap)
     return 0;
 }
 
-private int test_numbers(rpmalloc_heap_t* heap)
+private int test_numbers(Arena* arena)
 {
-    if (require(st_init_numtable_with_size(heap, size_t.max) is null))
+    if (require(st_init_numtable_with_size(arena, size_t.max) is null))
         return 1;
 
-    st_table* table = st_init_numtable(heap);
+    st_table* table = st_init_numtable(arena);
     if (require(table !is null))
         return 1;
 
@@ -430,9 +432,9 @@ private int test_numbers(rpmalloc_heap_t* heap)
     return 0;
 }
 
-private int test_case_insensitive(rpmalloc_heap_t* heap)
+private int test_case_insensitive(Arena* arena)
 {
-    st_table* table = st_init_strcasetable(heap);
+    st_table* table = st_init_strcasetable(arena);
     if (require(table !is null))
         return 1;
     if (require(st_insert(
@@ -452,32 +454,44 @@ private int test_case_insensitive(rpmalloc_heap_t* heap)
     return 0;
 }
 
+private int test_hash_arena(Arena* arena)
+{
+    if (arena is null)
+        return 1;
+
+    int result =
+        test_hash_vectors() |
+        test_reentrant_callbacks(arena) |
+        test_storage_representations(arena) |
+        test_collisions(arena) |
+        test_strings(arena) |
+        test_numbers(arena) |
+        test_case_insensitive(arena);
+
+    // This unrelated allocation proves that freeing tables does not clear the
+    // caller-owned Arena.
+    void* unrelated = arena.alloc(64);
+    if (unrelated is null)
+        result = 1;
+    else
+        arena.free(unrelated);
+
+    return result;
+}
+
 extern(C) int main()
 {
     if (rpmalloc_initialize(null) != 0)
         return EXIT_FAILURE;
-    rpmalloc_heap_t* heap = rpmalloc_heap_acquire();
-    if (heap is null)
-        return EXIT_FAILURE;
 
-    int result =
-        test_hash_vectors() |
-        test_reentrant_callbacks(heap) |
-        test_storage_representations(heap) |
-        test_collisions(heap) |
-        test_strings(heap) |
-        test_numbers(heap) |
-        test_case_insensitive(heap);
+    Arena* arena = Arena_create_rpmalloc();
+    int result = test_hash_arena(arena);
+    Arena_destroy(arena);
 
-    // This unrelated allocation proves that freeing tables does not clear the
-    // caller-owned heap.
-    void* unrelated = rpmalloc_heap_alloc(heap, 64);
-    if (unrelated is null)
-        result = 1;
-    else
-        rpmalloc_heap_free(heap, unrelated);
+    arena = Arena_create_bump();
+    result |= test_hash_arena(arena);
 
-    rpmalloc_heap_release(heap);
+    Arena_destroy(arena);
     rpmalloc_finalize();
     return result == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
