@@ -141,6 +141,20 @@ unittest ideas, since Laser-D has no unittest blocks.
 language or runtime features outside Laser-D, and exporting only a small,
 materially incompatible Tuple would overstate Phobos compatibility.
 
+`laserd.typedesc` provides opt-in compile-time descriptions as ordinary struct
+values. Its initial surface covers primitive types, pointers, function types,
+structs, static arrays, non-owning slices, and strings, including typed
+traversal of pointer targets, function signatures, array and slice elements,
+and named struct fields. Character slices receive the specific string
+description. Description construction does not use Druntime `TypeInfo`,
+`typeid`, allocation, or hidden compiler metadata.
+
+The focused JSON demonstration serializes a described struct into
+caller-provided storage and reconstructs string storage using a caller-provided
+`Arena`. Its containing struct uses fixed-size arrays of primitives and structs.
+The demonstration covers only the grammar needed to show recursive description
+traversal and is not a public general-purpose JSON module.
+
 The vendored Foundation library is built as `laserd_foundation`. The initial
 reviewed interface deliberately exposes only `laserd.foundation.base64` and
 `laserd.foundation.hash`. These operations are portable, stateless,

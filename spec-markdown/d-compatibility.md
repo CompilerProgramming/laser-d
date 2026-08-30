@@ -37,6 +37,16 @@ An executable defines either `extern(C) int main()` or
 immutable static storage, caller-provided storage, or storage returned by an
 explicit foreign API. Ownership and release are explicit.
 
+The absence of compiler-generated runtime reflection does not prevent explicit
+compile-time description. The `laserd.typedesc` library module provides
+`TypeDescription_of!T()`, which produces an ordinary struct value for supported
+primitive, pointer, function, struct, static-array, non-owning slice, and string
+types. Character slices receive the specific string description. Relationships
+such as pointer targets, function signatures, array and slice elements, and
+struct fields remain statically typed and are exposed through template members.
+This facility neither defines Druntime's `TypeInfo` classes nor makes `typeid`
+available.
+
 ## Types
 
 The following D type families are absent:

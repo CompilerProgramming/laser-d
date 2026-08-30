@@ -35,6 +35,19 @@ laserd_add_executable(traits_test
     IMPORT_DIRECTORIES "${CMAKE_SOURCE_DIR}")
 add_test(NAME std_traits COMMAND "${traits_test_EXECUTABLE}")
 
+laserd_add_executable(typedesc_test
+    SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/typedesc.d"
+    IMPORT_DIRECTORIES "${CMAKE_SOURCE_DIR}")
+add_test(NAME compile_time_type_description COMMAND "${typedesc_test_EXECUTABLE}")
+
+laserd_add_executable(typedesc_json_test
+    SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/typedesc_json.d"
+    IMPORT_DIRECTORIES ${laserd_library_import_directories}
+    LINK_LIBRARIES
+        laserd_rpmalloc
+        ${laserd_allocator_platform_libraries})
+add_test(NAME type_description_json_demo COMMAND "${typedesc_json_test_EXECUTABLE}")
+
 laserd_add_executable(result_test
     SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/result.d"
     IMPORT_DIRECTORIES "${CMAKE_SOURCE_DIR}")

@@ -710,6 +710,25 @@ This does not restrict compile-time inspection through `typeof`, `is`, or the
 supported read-only `__traits` operations. Those mechanisms operate directly
 in the frontend and do not create runtime metadata objects.
 
+`laserd.typedesc` builds explicit, ordinary struct values from that supported
+compile-time inspection. `TypeDescription_of!T()` describes primitive,
+pointer, function, struct, static-array, non-owning slice, and string types.
+Character slices receive the more specific string description. Pointer
+targets, function returns and parameters, static-array and slice elements, and
+struct fields retain their concrete
+description types, so consumers can inspect them without a class hierarchy,
+allocation, hidden compiler objects, or type erasure. Struct field descriptions
+include declared names and byte offsets. This is user-instantiated library
+data, not the rejected Druntime `TypeInfo` protocol, and it does not change the
+meaning or availability of `typeid`.
+
+The library test `typedesc_json.d` demonstrates generated traversal by
+serializing and deserializing a struct containing a string, a fixed-size integer
+array, and a fixed-size array of structs. Serialization writes into
+caller-provided storage; deserialization allocates string storage from a
+caller-provided `Arena`. Its deliberately restricted JSON grammar is
+demonstration code rather than a supported general JSON interface.
+
 ## User-defined attributes
 
 User-defined attributes are rejected throughout Laser-D source. This includes

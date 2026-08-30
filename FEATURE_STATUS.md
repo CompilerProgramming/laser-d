@@ -395,6 +395,7 @@ Each chapter should be split into individual features as it is investigated.
 | Feature | Status | Decision | Tests |
 | --- | --- | --- | --- |
 | `TypeInfo` | Rejected | Laser-D does not expose Druntime's `TypeInfo` hierarchy or generate runtime type descriptors. | `runtime_metadata_absent.d` |
+| Compile-time type descriptions | Supported | `laserd.typedesc.TypeDescription_of!T()` constructs ordinary value-type descriptions for primitive, pointer, function, struct, static-array, non-owning slice, and string types. Character slices receive the specific string description. This library facility uses templates and read-only traits; it does not enable compiler-generated runtime `TypeInfo` or `typeid`. | `library/test/typedesc.d`, `library/test/typedesc_json.d` |
 | `typeid` expressions | Rejected | Both type and expression forms of `typeid` are rejected, including during CTFE; compile-time type inspection remains available through `typeof`, `is`, and supported `__traits`. | `typeid_rejected.d`, `runtime_metadata_absent.d` |
 | `ModuleInfo` | Rejected | No runtime module descriptors are generated or exposed. This does not affect module namespace, import, or separate-compilation behavior. | `runtime_metadata_absent.d`, `modules_accepted.d` |
 
