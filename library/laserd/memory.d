@@ -17,6 +17,19 @@ alias AlignedReallocFn = void* function(void *ctx, void* pointer, size_t alignme
 alias FreeFn = void function(void *ctx, void *pointer);
 alias DestroyFn = void function(void *ctx);
 
+// Alignment applied when a caller requests zero, and the floor every backend
+// raises sub-pointer requests to. This is rpmalloc's minimum accepted
+// alignment; Laser-D targets 64-bit platforms only, so it is also wide enough
+// for pointer, long and double payloads.
+enum DEFAULT_ALIGNMENT = (void*).sizeof;
+
+// Zero is accepted and means DEFAULT_ALIGNMENT; anything else must be a power
+// of two so that the `(0 - address) & (alignment - 1)` padding is meaningful.
+private bool valid_alignment(size_t alignment)
+{
+    return alignment == 0 || (alignment & (alignment - 1)) == 0;
+}
+
 private struct Arena_FunctionTable
 {
     AllocFn allocImpl;
@@ -51,20 +64,20 @@ private void *arena_rpmalloc_realloc(
 }
 private void *arena_rpmalloc_aligned_alloc(void *ctx, size_t alignment, size_t size)
 {
-    if (alignment < (void*).sizeof)
-        alignment = (void*).sizeof;
+    if (alignment < DEFAULT_ALIGNMENT)
+        alignment = DEFAULT_ALIGNMENT;
     return rpaligned_zalloc(alignment, size);
 }
 private void *arena_rpmalloc_aligned_calloc(void *ctx, size_t alignment, size_t count, size_t size)
 {
-    if (alignment < (void*).sizeof)
-        alignment = (void*).sizeof;
+    if (alignment < DEFAULT_ALIGNMENT)
+        alignment = DEFAULT_ALIGNMENT;
     return rpaligned_calloc(alignment, count, size);
 }
 private void *arena_rpmalloc_aligned_realloc(void *ctx, void* pointer, size_t alignment, size_t size, size_t old_size)
 {
-    if (alignment < (void*).sizeof)
-        alignment = (void*).sizeof;
+    if (alignment < DEFAULT_ALIGNMENT)
+        alignment = DEFAULT_ALIGNMENT;
     void *result = rpaligned_realloc(pointer, alignment, size, old_size, 0);
     zero_reallocated_tail(result, size, old_size);
     return result;
@@ -133,16 +146,27 @@ struct Arena
     }
     void *aligned_alloc(size_t alignment, size_t size)
     {
+        assert(valid_alignment(alignment),
+            "alignment must be zero or a power of two");
         if (vtable is null) return null;
         return vtable.alignedAllocImpl(ctx, alignment, size);
     }
     void *aligned_calloc(size_t alignment, size_t count, size_t size)
     {
+        assert(valid_alignment(alignment),
+            "alignment must be zero or a power of two");
+        // Only the first element is placed by the backend, so every element
+        // begins at an aligned address exactly when the stride is a multiple
+        // of the requested alignment.
+        assert(alignment == 0 || (size % alignment) == 0,
+            "aligned_calloc element size must be a multiple of alignment");
         if (vtable is null) return null;
         return vtable.alignedCallocImpl(ctx, alignment, count, size);
     }
     void *aligned_realloc(void* pointer, size_t alignment, size_t size, size_t old_size)
     {
+        assert(valid_alignment(alignment),
+            "alignment must be zero or a power of two");
         if (vtable is null) return null;
         return vtable.alignedReallocImpl(ctx, pointer, alignment, size, old_size);
     }
@@ -167,6 +191,12 @@ struct Arena
             return null;
         return values[0..count];
     }
+    /**
+     * Grows `original` to `newCount` elements, preserving the existing
+     * elements and zeroing the newly exposed tail. Returns null on failure,
+     * leaving `original` valid. This only ever grows: a `newCount` at or
+     * below the current length returns `original` unshortened.
+     */
     T[] expandArray(T)(T[] original, size_t newCount)
     {
         if (newCount <= original.length)
@@ -246,8 +276,15 @@ void Arena_destroy(Arena *arena)
 {
     if (arena is null)
         return;
-    if (arena.vtable)
-        arena.vtable.destroyImpl(arena.ctx);
+    // Clear the facade first: every Arena entry point checks `vtable`, so a
+    // stale Arena* that has not yet been recycled fails closed rather than
+    // dispatching through a released backend.
+    immutable(Arena_FunctionTable) *vtable = arena.vtable;
+    void *ctx = arena.ctx;
+    arena.vtable = null;
+    arena.ctx = null;
+    if (vtable !is null)
+        vtable.destroyImpl(ctx);
     rpfree(arena);
 }
 
@@ -270,15 +307,6 @@ struct BumpAllocator
     FixedRegionAllocator *tail;
     FixedRegionAllocator *current;
 }
-
-private union Value
-{
-    void *ptr;
-    double d;
-    long l;
-}
-
-enum DEFAULT_ALIGNMENT = Value.alignof;
 
 private FixedRegionAllocator *fixed_region_arena_create(size_t size)
 {
@@ -315,8 +343,8 @@ private void *fixed_region_aligned_alloc(void *ctx, size_t alignment, size_t all
     FixedRegionAllocator *allocator = cast(FixedRegionAllocator *)ctx;
 
     if (alloc_size == 0) return null;
+    assert(valid_alignment(alignment));
     if (alignment == 0) alignment = DEFAULT_ALIGNMENT;
-    assert((alignment & (alignment - 1)) == 0); // alignment is a power of two
 
     if (allocator.offset > allocator.memory.length)
         return null;
@@ -338,8 +366,6 @@ private void *fixed_region_aligned_alloc(void *ctx, size_t alignment, size_t all
 
 private void *fixed_region_aligned_calloc(void *ctx, size_t alignment, size_t count, size_t object_size)
 {
-    // Every array element must begin at an address satisfying `alignment`.
-    assert(alignment == 0 || (object_size % alignment) == 0);
     if (object_size != 0 && count > size_t.max / object_size)
         return null;
     return fixed_region_aligned_alloc(ctx, alignment, count * object_size);
@@ -348,14 +374,18 @@ private void *fixed_region_aligned_calloc(void *ctx, size_t alignment, size_t co
 private void *fixed_region_aligned_realloc(void *ctx, void* pointer, size_t alignment, size_t alloc_size, size_t old_size)
 {
     if (ctx is null) return null;
-    FixedRegionAllocator *allocator = cast(FixedRegionAllocator *)ctx;
 
-    if (alloc_size == 0) return null;
-    if (alloc_size <= old_size) return pointer;
     assert(pointer !is null || old_size == 0);
+    // Follows rpmalloc: a request the existing block already satisfies keeps
+    // that block. Zero is such a request, so it returns the current pointer
+    // rather than null, which is reserved for genuine failure.
+    if (alloc_size <= old_size) return pointer;
+
     auto new_pointer = fixed_region_aligned_alloc(ctx, alignment, alloc_size);
-    if (new_pointer == null) return null;
-    memcpy(new_pointer, pointer, old_size);
+    if (new_pointer is null) return null;
+    // memcpy requires a non-null source even for a zero length.
+    if (old_size != 0)
+        memcpy(new_pointer, pointer, old_size);
     // No need to zero tail as its region is already zeroed
     return new_pointer;
 }
@@ -428,9 +458,9 @@ private void *bump_aligned_alloc(
         return null;
     BumpAllocator *allocator = cast(BumpAllocator*) ctx;
 
+    assert(valid_alignment(alignment));
     if (alignment == 0)
         alignment = DEFAULT_ALIGNMENT;
-    assert((alignment & (alignment - 1)) == 0);
 
     if (allocator.current !is null)
     {
@@ -469,7 +499,6 @@ private void *bump_aligned_calloc(
     size_t count,
     size_t object_size)
 {
-    assert(alignment == 0 || (object_size % alignment) == 0);
     if (object_size != 0 && count > size_t.max / object_size)
         return null;
     return bump_aligned_alloc(ctx, alignment, count * object_size);
@@ -482,11 +511,14 @@ private void *bump_aligned_realloc(
     size_t alloc_size,
     size_t old_size)
 {
-    if (ctx is null || alloc_size == 0)
+    if (ctx is null)
         return null;
+
+    assert(pointer !is null || old_size == 0);
+    // Follows rpmalloc, as fixed_region_aligned_realloc does: a request the
+    // existing block already satisfies, zero included, keeps that block.
     if (alloc_size <= old_size)
         return pointer;
-    assert(pointer !is null || old_size == 0);
 
     void *result = bump_aligned_alloc(ctx, alignment, alloc_size);
     if (result is null)

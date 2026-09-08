@@ -871,14 +871,21 @@ reallocation, zeroed heap allocation, bulk heap cleanup, and finalization.
 The `laserd.memory.Arena` facade is created and destroyed explicitly around a
 private rpmalloc-backed callback table. Raw and typed allocation and array
 allocation return zeroed storage; typed operations request the type's required
-alignment while the rpmalloc bridge raises sub-pointer requests to rpmalloc's
-minimum accepted alignment. Reallocation callbacks receive both logical old
-and new byte sizes. On successful growth they preserve the old region and zero
-the newly exposed byte range; on failure the original allocation remains
-valid. Typed array allocation rejects size multiplication overflow and returns
-a null, zero-length slice for a zero count. Allocations must be expanded and
-freed through the same arena, and only complete slices returned by that arena
-may be expanded or freed.
+alignment. A requested alignment of zero, and any request below the module
+default, is raised to `DEFAULT_ALIGNMENT`, which is rpmalloc's minimum
+accepted alignment and applies identically to every backend. Reallocation
+callbacks receive both logical old and new byte sizes. On successful growth
+they preserve the old region and zero the newly exposed byte range; on failure
+the original allocation remains valid. Typed array allocation rejects size
+multiplication overflow and returns a null, zero-length slice for a zero
+count. Allocations must be expanded and freed through the same arena, and only
+complete slices returned by that arena may be expanded or freed.
+
+The facade validates the alignment contract for every backend rather than
+leaving it to each one: aligned entry points require an alignment that is zero
+or a power of two, and aligned array allocation requires the element size to be
+a multiple of the requested alignment. `expandArray` only grows; a new count at
+or below the current length returns the original slice unshortened.
 
 The vendored source omits rpmalloc's separate `malloc.c` override
 implementation; its include is therefore conditional on `ENABLE_OVERRIDE`, as
@@ -1152,10 +1159,18 @@ and exhaustion returns null without changing existing allocations. Its mutable
 allocation cursor is thread-confined and must not be used concurrently.
 
 Aligned allocations align the absolute returned address. Alignment must be a
-power of two; zero requests the backend default. Aligned array allocation also
+power of two; zero requests `DEFAULT_ALIGNMENT`. Aligned array allocation also
 requires the element size to be a multiple of the requested alignment so that
 every element, rather than only the first, is correctly aligned. Size
 multiplication and alignment padding are checked before advancing the cursor.
+
+Every backend follows rpmalloc for reallocation requests that the existing
+allocation already satisfies: the allocation is retained with its bytes intact
+rather than being released or replaced. A zero size is such a request and is
+therefore not a failure, so null is returned only when a backend genuinely
+cannot comply. Because the region and bump backends never reuse released
+space, they return the original pointer in that case; the rpmalloc backend may
+return a different address for an over-aligned block.
 
 The bump arena owns a linked list of fixed regions and also treats individual
 frees as no-ops. Regions are acquired lazily. Ordinary requests consume 8 KiB
@@ -1163,6 +1178,6 @@ regions, with another region added when the current one is exhausted. A request
 larger than 8 KiB receives a dedicated region large enough for that allocation
 and its worst-case alignment padding; the dedicated region does not replace the
 current ordinary region. Reallocation that grows allocates fresh space,
-preserves the old bytes, and relies on the zero-initialized region for the new
-tail. Destroying the bump arena walks and releases every owned region. The list
+preserves the old bytes when there are any to preserve, and relies on the
+zero-initialized region for the new tail. Destroying the bump arena walks and releases every owned region. The list
 and allocation cursor are mutable, so the bump arena is thread-confined.

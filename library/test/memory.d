@@ -80,6 +80,25 @@ private int test_memory(Arena *arena)
     if (ary[0] != 1 || ary[1] != 2)
         return EXIT_FAILURE;
 
+    // Growing a null, zero-length slice must not copy from a null source.
+    int[] grown = arena.expandArray!int(empty, 4);
+    if (grown.ptr is null || grown.length != 4)
+        return EXIT_FAILURE;
+    foreach (int index; 0 .. 4)
+        if (grown[index] != 0)
+            return EXIT_FAILURE;
+    arena.freeArray!int(grown);
+
+    // A request the existing allocation already satisfies keeps that
+    // allocation and preserves its bytes. Zero is such a request, so it is
+    // not a failure; null is returned only when a backend cannot comply.
+    if (arena.realloc(ary.ptr, 2 * int.sizeof, 4 * int.sizeof) is null)
+        return EXIT_FAILURE;
+    if (arena.realloc(ary.ptr, 0, 4 * int.sizeof) is null)
+        return EXIT_FAILURE;
+    if (ary[0] != 1 || ary[1] != 2)
+        return EXIT_FAILURE;
+
     return EXIT_SUCCESS;
 }
 

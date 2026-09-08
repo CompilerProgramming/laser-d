@@ -611,3 +611,50 @@ The hash integration suite runs against both `Arena_create_rpmalloc` and
 `Arena_create_bump`. Immediate-free and deferred whole-Arena reclamation are
 therefore both exercised along with the existing hash behavior, rebuild,
 copying, and allocation-failure paths.
+
+## Arena correctness review (2026-09-08)
+
+A correctness review of `laserd.memory` against the Arena contract recorded in
+DESIGN.md produced the following changes. No defect was reachable as memory
+corruption through the current in-tree callers, but two were latent contract
+violations and one was undefined behavior on a live path.
+
+`fixed_region_aligned_realloc` copied with `memcpy` from a null source whenever
+it grew an allocation whose old size was zero. `memcpy` requires non-null
+arguments even for a zero length, and the path was live: a freshly constructed
+`Array` reaching `reserve` for the first time passes a null pointer and a zero
+old size. The bump backend already guarded this; the region backend now does
+too.
+
+Reallocation to a size the existing allocation already satisfies now follows
+rpmalloc uniformly. Previously the region and bump backends rejected a zero
+size with null while the rpmalloc backend returned the existing block, so the
+same call meant "failure" on two backends and "success" on the third. All three
+now retain the allocation and its bytes, and null is returned only on genuine
+failure. The unused `allocator` local in the region path was removed.
+
+The alignment contract is now validated in the `Arena` facade instead of in
+individual backends. The power-of-two requirement and the rule that aligned
+array allocation needs the element size to be a multiple of the alignment were
+asserted only in the region and bump backends; the rpmalloc bridge checked
+neither, and rpmalloc's own argument validation is compiled out
+(`ENABLE_VALIDATE_ARGS` defaults to 0). Both checks now apply to every backend
+from one place, through the shared `valid_alignment` helper.
+
+`DEFAULT_ALIGNMENT` had two independent definitions: `Value.alignof` for the
+region and bump backends and an inline `(void*).sizeof` repeated in each of the
+three rpmalloc bridges. These agree on the supported 64-bit targets, so the
+collapse to a single `DEFAULT_ALIGNMENT = (void*).sizeof` adopting the rpmalloc
+convention is behavior-preserving; the private `Value` union that existed only
+to spell the old value was removed.
+
+`Arena_destroy` now clears `vtable` and `ctx` before releasing the facade, so a
+stale `Arena*` that has not yet been recycled fails closed through the existing
+null-vtable checks rather than dispatching into a released backend. `Arena`
+documentation now states that `expandArray` only grows and returns the original
+slice unshortened for a smaller count.
+
+`library/test/memory.d` gained coverage, run against all three backends, for
+growing a null zero-length slice and for reallocation requests the existing
+allocation already satisfies, including a zero size. The full library suite
+passes.
