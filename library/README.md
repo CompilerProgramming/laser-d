@@ -84,6 +84,16 @@ bump backend lazily owns a list of 8 KiB fixed regions, uses dedicated regions
 for larger requests, does not reclaim individual allocations, and releases all
 regions on destruction.
 
+`laserd.array` provides Laser-D's arena-backed `Array!T`. It was initially
+derived from Phobos's array container but is not a compatibility module. Every
+usable array is constructed with a borrowed, non-null `Arena*`; copies
+share state, while `dup()` creates independent payload storage in the same
+arena. Call `destroy()` once after the last shared copy and range is finished.
+The port covers indexed access and assignment, slicing/ranges, reserve/resize,
+append and positional insertion, replacement, removal, duplication, and clear.
+Its API uses explicit accessor methods suited to Laser-D's language subset,
+and a packed boolean specialization remains deferred.
+
 `laserd.result` provides the pure Laser-D value types `Optional` and `Result`.
 Laser-D has no exceptions, because D's exception hierarchy is built on classes,
 so a fallible operation reports failure as ordinary returned data. `Optional`

@@ -459,6 +459,26 @@ operations that may grow the table report `ST_ERROR` without discarding the
 existing table. The table does not own pointer-valued keys or values, including
 C-string key storage.
 
+The standard library also provides the Laser-D-owned `laserd.array.Array!T`.
+Its implementation began as a port of Phobos' array container, but it does not
+claim Phobos API compatibility. Construction requires a non-null,
+caller-supplied `laserd.memory.Arena*`. The array borrows
+that arena, uses it for its shared state and all payload growth or release, and
+never destroys it. Ordinary value copies share state, matching Phobos' shared
+copy behaviour without requiring runtime reference counting; `dup` creates an
+independent payload in the same arena. The arena must outlive all arrays and
+ranges. Growth operations return failure without replacing existing storage.
+After all aliases and ranges are finished, the caller invokes `destroy()` once
+to release the shared state through backends that reclaim individual blocks.
+Because Laser-D excludes element destructors and postblits, removal only clears
+the vacated value storage. A packed boolean specialization is deferred because
+it depends on facilities outside the current library subset.
+The API uses explicit `length()`, `capacity()`, `front()`, `back()`, and
+`resize()` methods because Laser-D rejects D's `@property` and `ref`-return
+facilities; indexed writes use `opIndexAssign`.
+Construction from elements accepts an explicit slice because Laser-D rejects
+Phobos' typesafe variadic function parameters.
+
 All `new` expressions are rejected, including scalar, struct, placement, class,
 and array forms. Laser-D has no source-level implicit allocation operation.
 Programs that need dynamic storage must obtain and release it explicitly, for

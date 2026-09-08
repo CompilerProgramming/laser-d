@@ -69,6 +69,14 @@ laserd_add_executable(memory_test
         ${laserd_allocator_platform_libraries})
 add_test(NAME memory_facade COMMAND "${memory_test_EXECUTABLE}")
 
+laserd_add_executable(container_array_test
+    SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/container_array.d"
+    IMPORT_DIRECTORIES ${laserd_library_import_directories}
+    LINK_LIBRARIES
+        laserd_rpmalloc
+        ${laserd_allocator_platform_libraries})
+add_test(NAME container_array COMMAND "${container_array_test_EXECUTABLE}")
+
 laserd_add_executable(hash_test
     SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/hash.d"
     IMPORT_DIRECTORIES ${laserd_library_import_directories}
