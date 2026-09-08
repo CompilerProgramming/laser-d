@@ -94,6 +94,18 @@ append and positional insertion, replacement, removal, duplication, and clear.
 Its API uses explicit accessor methods suited to Laser-D's language subset,
 and a packed boolean specialization remains deferred.
 
+Laser-D standard-library text processing is UTF-8-only. `laserd.utf8proc`
+exposes the allocation-free parts of vendored utf8proc 2.11.3 using their native
+names, including validation/iteration, encoding, Unicode categories, simple
+case mapping, display width, and grapheme-boundary operations. The bundled data
+implements Unicode 17.0.0.
+
+utf8proc's `malloc`-allocating convenience functions are deliberately absent.
+`utf8proc_transform` provides normalization and case folding using a mandatory
+borrowed `Arena*`; `utf8proc_buffer_destroy` releases its complete allocation
+through the same arena. UTF-16/UTF-32 library codecs and the former handwritten
+`laserd.uni` predicates are not part of the supported library surface.
+
 `laserd.result` provides the pure Laser-D value types `Optional` and `Result`.
 Laser-D has no exceptions, because D's exception hierarchy is built on classes,
 so a fallible operation reports failure as ordinary returned data. `Optional`

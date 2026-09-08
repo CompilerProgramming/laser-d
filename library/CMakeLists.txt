@@ -26,6 +26,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(LaserD)
 
 add_subdirectory(rpmalloc)
+add_subdirectory(utf8proc)
 
 if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "Laser-D nsync requires a 64-bit target")

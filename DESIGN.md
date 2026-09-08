@@ -479,6 +479,23 @@ facilities; indexed writes use `opIndexAssign`.
 Construction from elements accepts an explicit slice because Laser-D rejects
 Phobos' typesafe variadic function parameters.
 
+Laser-D's standard-library text-processing API supports UTF-8 only. UTF-16 and
+UTF-32 remain language-level literal and slice element types where required for
+D source compatibility, but the standard library does not provide codecs or
+general text algorithms for those encodings.
+
+The `laserd.utf8proc` module binds the vendored utf8proc 2.11.3 C library,
+which supplies Unicode 17.0.0 data, strict UTF-8 iteration, character
+properties and case mappings, grapheme boundaries, normalization, and case
+folding. Allocation-free native operations retain their `utf8proc_` names so
+the dependency is explicit. Native convenience functions that allocate through
+`malloc`, including `utf8proc_map` and the `utf8proc_NFC` family, are not bound.
+`utf8proc_transform` instead requires a borrowed `Arena*`, obtains both working
+and result storage from it, and returns the complete allocation separately from
+the used UTF-8 slice so `utf8proc_buffer_destroy` can release the correct block.
+Malformed input and allocation failure return utf8proc's native error codes and
+never produce a partial successful result.
+
 All `new` expressions are rejected, including scalar, struct, placement, class,
 and array forms. Laser-D has no source-level implicit allocation operation.
 Programs that need dynamic storage must obtain and release it explicitly, for

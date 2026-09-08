@@ -77,6 +77,15 @@ laserd_add_executable(container_array_test
         ${laserd_allocator_platform_libraries})
 add_test(NAME container_array COMMAND "${container_array_test_EXECUTABLE}")
 
+laserd_add_executable(utf8proc_test
+    SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/utf8proc.d"
+    IMPORT_DIRECTORIES ${laserd_library_import_directories}
+    LINK_LIBRARIES
+        laserd_utf8proc
+        laserd_rpmalloc
+        ${laserd_allocator_platform_libraries})
+add_test(NAME utf8proc COMMAND "${utf8proc_test_EXECUTABLE}")
+
 laserd_add_executable(hash_test
     SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/hash.d"
     IMPORT_DIRECTORIES ${laserd_library_import_directories}
