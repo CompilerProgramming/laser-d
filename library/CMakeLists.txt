@@ -140,7 +140,12 @@ install(FILES
     DESTINATION ".")
 install(FILES README.md
     DESTINATION "."
-    RENAME STANDARD_LIBRARY.md)
+    RENAME STANDARD_LIBRARY.md
+    COMPONENT Documentation)
+install(DIRECTORY docs/
+    DESTINATION docs
+    COMPONENT Documentation
+    FILES_MATCHING PATTERN "*.md")
 install(FILES cmake/LaserD.cmake
     DESTINATION share/laserd/cmake)
 

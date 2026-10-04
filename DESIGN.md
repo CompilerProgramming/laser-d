@@ -783,6 +783,14 @@ result.
 
 ## C standard library bindings
 
+`library/README.md` is the library index. Separate API references under
+`library/docs/` describe each public module or related module family, including
+types, structs, functions, ownership, and native linking requirements. Shared
+build and test instructions live in `library/docs/building.md`. CMake installs
+these pages alongside the index renamed to `STANDARD_LIBRARY.md`, preserving
+its relative documentation links. The references describe the existing library
+surface; they do not expand the supported language or native API subset.
+
 Laser-D supplies a standard-library source tree under `library/`. The initial
 `core.stdc` subset contains C ABI types, constants, and `extern(C)`
 declarations derived from druntime and adapted to compile as Laser-D. These
