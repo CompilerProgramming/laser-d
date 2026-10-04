@@ -1,21 +1,15 @@
 # Processes and byte streams: laserd.system
 
-Source: `library/laserd/system.d`. Initialize [Foundation](foundation.md)
-before using its allocating process/pipe operations. Link `laserd_foundation`,
-`laserd_rpmalloc`, and platform dependencies from [building](building.md).
+`laserd.system` provides child processes, redirected standard streams, and
+unnamed pipes. Configure a process before spawning it. Executable paths,
+working directories, and arguments are copied into the process object.
 
-Foundation process and pipe support is exposed through the narrow
-`laserd.system` module. Processes and streams are opaque.
-Executable paths, working directories, and arguments are copied into the
-process object. Redirected standard streams are borrowed from their process
-and are released when the process is destroyed.
-Before destroying a detached process, callers must successfully wait for it,
-or kill it and then wait for termination.
+Redirected standard streams are borrowed from their process and released when
+it is destroyed. Before destroying a detached process, successfully wait for
+it, or kill it and then wait for termination.
 
-The public stream surface contains raw byte reads and writes and destruction.
-Unnamed pipes support allocation and closing either endpoint. Native handles/file descriptors, stream vtables,
-typed stream serialization, platform-specific process launch modes, and
-process-global exit operations are intentionally not exposed.
+Streams support raw byte reads and writes. Unnamed pipes also support closing
+either endpoint. Reads and writes are blocking; check the returned byte count.
 
 ## Types and constants
 
@@ -59,8 +53,7 @@ errors and a still-active child from ordinary exit codes.
 
 ## Functions
 
-These signatures use public type names; direct aliases retain C linkage and
-slice-converting wrappers use D linkage.
+Signatures below use public type names.
 
 ```d
 Stream* Process_standard_output(Process* process);
@@ -96,9 +89,27 @@ size_t Stream_write(Stream* stream, const(ubyte)[] source);
 | `Stream_read`, `Stream_write` | Blocking raw byte I/O; return actual transferred byte count, which callers must check. |
 | `Stream_destroy` | Destroy an owned pipe stream, never a borrowed process standard stream. |
 
-The native declarations for flush, end-of-stream, and read-availability queries
-are currently private: there are no public `Stream_flush`, `Stream_eos`, or
-`Stream_available_read` functions. Drain redirected output and close input as
-needed before waiting, so a child does not remain blocked on pipe I/O.
+Drain redirected output and close input as needed before waiting, so a child
+does not remain blocked on pipe I/O. Flush, end-of-stream, and read-availability
+queries are not part of the public API.
+
+## Using the library
+
+Initialize [Foundation](foundation.md)
+before using its allocating process/pipe operations. Link `laserd_foundation`,
+`laserd_rpmalloc`, and platform dependencies from [building](building.md).
+
+## Implementation Details
+
+Source: `library/laserd/system.d`.
 
 Integration coverage: `library/test/process_pipe.d` (CTest `foundation_process_pipe`).
+
+These signatures use public type names; direct aliases retain C linkage and
+slice-converting wrappers use D linkage.
+
+The facade uses Foundation process and stream objects. The native declarations
+for flush, end-of-stream, and read-availability queries remain private; no
+`Stream_flush`, `Stream_eos`, or `Stream_available_read` wrapper is exported.
+Native handles/file descriptors, stream vtables, typed serialization,
+platform-specific launch modes, and process-global exit operations are unexposed.

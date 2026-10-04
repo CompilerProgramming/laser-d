@@ -1,16 +1,12 @@
 # Foundation codecs, hashing, and lifecycle
 
-Sources: `library/foundation_lib/laserd/foundation/*.d`. Link
-`laserd_foundation`, `laserd_rpmalloc`, and the platform dependencies described
-in [building](building.md).
+These modules provide Base64 encoding/decoding, byte hashing, and explicit
+Foundation initialization. The codec and hash operations write to caller-owned
+storage or return a value and need no initialization.
 
-The supported Foundation modules are the allocation-free Base64/hash bindings
-and the explicit lifecycle adapter. [Threads](thread.md) and
-[processes/streams](system.md) have separate purpose-oriented facades. Other
-upstream Foundation APIs are not automatically supported: allocating MD5/SHA,
-containers, filesystem, and callback-heavy APIs require separate review.
-Foundation's mutex, semaphore, and beacon APIs remain private; public
-synchronization uses nsync through `laserd.thread`.
+Use [laserd.thread](thread.md) for threads and synchronization and
+[laserd.system](system.md) for processes and streams. Only the APIs listed in
+these references are supported.
 
 ## laserd.foundation.base64
 
@@ -61,11 +57,25 @@ void finalize();
 bool isInitialized();
 ```
 
-`laserd.foundation.lifecycle` initializes Foundation with rpmalloc through a
-native adapter. Foundation owns the process-wide rpmalloc lifecycle between
-`initialize` and `finalize`; an application must not independently initialize
-or finalize rpmalloc during that interval. Foundation-created threads invoke
-rpmalloc's per-thread initialization and finalization callbacks. Initialization
-and finalization are idempotent.
+Foundation owns the process-wide rpmalloc lifecycle between `initialize` and
+`finalize`; do not independently initialize or finalize rpmalloc during that
+interval. Initialization and finalization are idempotent.
+
+## Using the library
+
+Link `laserd_foundation`, `laserd_rpmalloc`, and the platform dependencies described
+in [building](building.md).
+
+## Implementation Details
+
+Sources: `library/foundation_lib/laserd/foundation/*.d`.
 
 Integration coverage: `library/test/foundation.d` (CTest `foundation_interop`), plus the thread and process integration programs.
+
+A native adapter initializes Foundation with rpmalloc as its memory system.
+Foundation-created threads invoke rpmalloc's per-thread initialization and
+finalization callbacks. The slice APIs wrap raw C entry points.
+
+Foundation's internal mutex, semaphore, and beacon APIs remain private; public
+synchronization uses nsync. Other upstream APIs, including allocating MD5/SHA,
+containers, filesystem, and callback-heavy operations, require separate review.

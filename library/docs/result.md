@@ -1,34 +1,17 @@
 # Optional and result values: laserd.result
 
-Source: `library/laserd/result.d`. No native archive or initialization is required.
+`laserd.result` provides `Optional!T` for a value that may be absent and
+`Result!(T, E)` for a value or an error. `Result!(void, E)` represents operations
+that succeed without producing a value. Neither type allocates memory.
 
-`laserd.result` provides the pure Laser-D value types `Optional` and `Result`.
-Laser-D has no exceptions, because D's exception hierarchy is built on classes,
-so a fallible operation reports failure as ordinary returned data. `Optional`
-carries a value which may be absent; `Result` carries either a value or an
-error, and its value type may be `void` for operations which produce no value
-on success. Both are plain value types with no allocation, runtime metadata, or
-hidden control flow. A `Result` stores its value and error in overlapping
-storage, which is sound because Laser-D rejects destructors, postblits, and
-copy or move constructors, so no member carries lifecycle behaviour.
-
-Every accessor is total. The language cannot require a caller to inspect a
-result: `@disable` is rejected, so construction cannot be routed through a
-checked path, and destructors are rejected, so an ignored value cannot be
-detected when it goes out of scope. The module therefore has no operation which
-is undefined on the absent side. A caller supplies a fallback with `orElse`,
-`valueOr`, or `errorOr`, or takes a pointer accessor which is `null` in the
-states carrying no data. Pointer accessors refer into the value they were taken
-from and do not outlive it. `mapValue` and `mapValueContext` transform a
-successful value through an ordinary function pointer, with context passed
-explicitly because Laser-D has no capturing delegates. The representation is
-uniform for every element type; a pointer element deliberately does not use
-`null` as its empty representation, since a Laser-D pointer is nullable and a
-present `null` would otherwise be indistinguishable from an absent value.
+Accessors return a caller-supplied fallback or a null pointer when the requested
+value is absent. A present null pointer remains distinct from an absent value.
+Pointers returned by accessors are borrowed and remain valid only while the
+originating value is alive and unmodified.
 
 ## Optional(T)
 
-Default initialization produces an absent value. Its storage is private.
+Default initialization produces an absent value.
 
 ```d
 struct Optional(T)
@@ -48,8 +31,7 @@ the value or its fallback; `ptr` returns an interior pointer or null.
 
 ## Result(T, E)
 
-Default initialization produces an error containing `E.init`. Storage is
-private. The common API is:
+Default initialization produces an error containing `E.init`. The common API is:
 
 ```d
 struct Result(T, E)
@@ -82,4 +64,23 @@ For `T == void`, only `static Result ok()` replaces this group; there is no
 value accessor or mapping member. Interior pointers remain valid only while
 their originating value is alive and unmodified.
 
+## Using the library
+
+No native archive or initialization is required.
+
+## Implementation Details
+
+Source: `library/laserd/result.d`.
+
 Integration coverage: `library/test/result.d` (CTest `result`).
+
+`Result` stores its value and error in overlapping storage. Laser-D rejects
+destructors, postblits, and copy or move constructors, so members do not carry
+lifecycle behavior. Representation is uniform across element types; null is
+not used as the empty-state representation for pointer elements.
+
+The API uses ordinary returned data because Laser-D has no exceptions. The
+language cannot require inspection of a result: `@disable` and destructors are
+rejected. Total accessors provide defined fallback behavior instead. Mapping
+uses ordinary function pointers and explicit context because capturing
+delegates are unavailable. No runtime metadata or hidden control flow is used.

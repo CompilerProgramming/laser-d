@@ -1,9 +1,8 @@
 # Compile-time traits: std.traits
 
-Source: `library/std/traits.d`. No native archive, allocation, or runtime
-initialization is required. This is a deliberately reduced Phobos-compatible
-module; it has templates, aliases, and compile-time values, but no public
-structs or runtime functions.
+`std.traits` provides compile-time type predicates, symbol inspection, and
+type transformations. It is a reduced Phobos-compatible API with no public
+structs or runtime functions, and it allocates no memory.
 
 ## Type and symbol inspection
 
@@ -48,6 +47,17 @@ does not make the corresponding language feature available in Laser-D.
 
 Function inspection takes a function symbol. Invalid arguments to
 `ReturnType`/`Parameters` produce a compile-time error. Other Phobos facilities
-are not implicitly available; deferred groups remain listed in the source.
+are not implicitly available.
+
+## Using the library
+
+No native archive or runtime initialization is required.
+
+## Implementation Details
+
+Source: `library/std/traits.d`.
 
 Integration coverage: `library/test/traits.d` (CTest `std_traits`).
+
+The module is derived from Phobos and uses frontend type/symbol traits.
+Deferred upstream groups remain listed in source comments as a review inventory.

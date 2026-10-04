@@ -1,17 +1,8 @@
 # Native allocation: laserd.rpmalloc
 
-Source: `library/rpmalloc/laserd/rpmalloc.d`. Link `laserd_rpmalloc` and platform
-dependencies from [building](building.md).
-
-The `rpmalloc` component is the first production C-backed library. It builds
-rpmalloc 2.0.1 as `laserd_rpmalloc`, without replacing the process-wide C
-allocator, and enables both its general allocation API and its explicit,
-single-thread-owned heap API. Laser-D programs import the
-`laserd.rpmalloc` module and use rpmalloc's native names directly, including
-`rpmalloc_heap_t`, `rpmalloc`, `rpfree`, `rpmalloc_heap_acquire`, and
-`rpmalloc_heap_alloc`. The binding adds no D aliases for functions, types, or
-constants, keeping direct allocator use obvious. The CTest integration program
-exercises both API families.
+`laserd.rpmalloc` provides general allocation functions and explicit heaps
+for allocations managed by one thread at a time. Use its native names, such
+as `rpmalloc`, `rpfree`, and `rpmalloc_heap_acquire`.
 
 Use selective imports for `rpmalloc` itself to avoid collision with the module
 name, for example `import laserd.rpmalloc : rpmalloc, rpfree;`.
@@ -228,4 +219,18 @@ void rpmalloc_heap_thread_set_current(rpmalloc_heap_t* heap);
 rpmalloc_heap_t* rpmalloc_get_heap_for_ptr(void* pointer);
 ```
 
+## Using the library
+
+Link `laserd_rpmalloc` and platform
+dependencies from [building](building.md).
+
+## Implementation Details
+
+Source: `library/rpmalloc/laserd/rpmalloc.d`.
+
 Integration coverage: `library/test/rpmalloc.d` (CTest `rpmalloc_c_interop`).
+
+The native archive builds rpmalloc 2.0.1 with process-wide C allocator
+replacement disabled and the first-class heap API enabled. The binding retains
+native names without additional D aliases. Its integration program exercises
+both general allocation and explicit heaps.

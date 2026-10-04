@@ -1,21 +1,13 @@
 # Threads and synchronization: laserd.thread
 
-Source: `library/laserd/thread.d`. Thread management uses `laserd_foundation`
-and `laserd_rpmalloc`; synchronization uses `laserd_nsync` (vendored nsync
-1.30.0). See [building](building.md) for platform linking. Foundation must be
-initialized before creating workers. Supported native targets are x86-64
-Windows, Linux, and macOS.
+`laserd.thread` provides worker threads, reader/writer mutexes, and condition
+variables. Workers run a callback with a caller-supplied data pointer. Keep that
+data alive until the worker has been joined.
 
-`laserd.thread` provides the initial thread-management surface:
-opaque thread handles, callback-based creation, start, join, destruction,
-status queries, current-thread identifiers, sleep, and yield. Foundation must
-be initialized first. A Foundation-created worker automatically establishes
-and releases Foundation and rpmalloc per-thread state around its callback.
-Destruction joins a started worker if it has not already been joined.
-
-Thread signalling, affinity, externally-created thread registration, and
-caller-owned `Thread` storage is not yet exposed. Synchronization uses nsync
-mutexes and condition variables through this same module.
+Initialize [Foundation](foundation.md) before creating workers. Destruction
+joins a started worker if it has not already been joined. Thread signalling,
+affinity, externally-created thread registration, and caller-owned `Thread`
+storage are not exposed.
 
 ## Types and constants
 
@@ -38,15 +30,14 @@ enum ThreadPriority THREAD_PRIORITY_TIME_CRITICAL = 5;
 
 `Thread` is an opaque handle type; use `Thread*`, not caller-owned storage.
 `ThreadFunction` is a C callback receiving the supplied data pointer and
-returning a result pointer. `Mutex` and `Condition` alias private native
-structs, each 16 bytes on the supported ABI. Zero initialization makes both
-valid; explicit init functions are also available. Do not copy active locks
-or conditions or release their storage while in use.
+returning a result pointer. `Mutex` is a reader/writer lock and `Condition`
+is a condition variable. Zero initialization makes both valid; explicit init
+functions are also available. Do not copy active locks or conditions or release
+their storage while in use.
 
 ## Functions
 
-Signatures below use public type names. Most functions are public aliases to
-private C entry points; only `Thread_create` needs a slice-converting wrapper.
+Signatures below use public type names.
 
 ```d
 void Mutex_init(Mutex* mutex);
@@ -122,5 +113,23 @@ Timed waits, cancellation notes, counters, once initialization, wait sets, and
 conditional critical sections remain unexposed pending focused API and ABI
 review.
 
+## Using the library
+
+Link `laserd_foundation`, `laserd_rpmalloc`, and `laserd_nsync`, with the
+platform dependencies described in [building](building.md). Supported targets
+are x86-64 Windows, Linux, and macOS.
+
+## Implementation Details
+
+Source: `library/laserd/thread.d`.
 
 Integration coverage: `library/test/thread_sync.d` (CTest `nsync_interop`).
+
+Signatures below use public type names. Most functions are public aliases to
+private C entry points; only `Thread_create` needs a slice-converting wrapper.
+
+Foundation provides thread management and establishes/releases Foundation
+and rpmalloc per-thread state around worker callbacks. Vendored nsync 1.30.0
+provides synchronization. `Mutex` and `Condition` alias private native structs;
+each occupies 16 bytes on the supported ABI. Native C and Laser-D static
+assertions check their layouts.

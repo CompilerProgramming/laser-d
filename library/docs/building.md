@@ -65,11 +65,8 @@ laserd_add_executable(target
     LINK_LIBRARIES native_target_or_link_argument)
 ```
 
-It uses `LASERD_COMPILER`, compiles imported D modules with `-i`, tracks imports
-through `-makedeps` and CMake `DEPFILE`, and adds `-fPIC` on Linux. Its custom
-link command receives native target archive paths; follow `library/test/CMakeLists.txt`
-when supplying platform link arguments. Native CMake targets also declare their
-transitive system dependencies for consumers using ordinary CMake linking.
+Set `LASERD_COMPILER` to the compiler executable. When supplying platform link
+arguments, follow `library/test/CMakeLists.txt` and the requirements below.
 
 On Windows, direct links involving `laserd_rpmalloc.lib` also need
 `advapi32.lib`, including when reached through Arena, arrays, or hash tables:
@@ -84,12 +81,20 @@ A direct Foundation link additionally includes `laserd_foundation.lib`,
 CoreFoundation, and m on macOS; nsync uses pthread on Unix. Preserve platform
 dependencies when writing a custom build.
 
-## Layout and scope
+`std.typecons` is not distributed. The focused JSON program in
+`library/test/typedesc_json.d` is a demonstration, not a public JSON library.
+
+## Implementation Details
+
+It uses `LASERD_COMPILER`, compiles imported D modules with `-i`, tracks imports
+through `-makedeps` and CMake `DEPFILE`, and adds `-fPIC` on Linux. Its custom
+link command receives native target archive paths; follow `library/test/CMakeLists.txt`
+when supplying platform link arguments. Native CMake targets also declare their
+transitive system dependencies for consumers using ordinary CMake linking.
+
+### Source layout
 
 Laser-D-owned modules and facades live under `library/laserd`. Native bindings
 live under their dependency's `laserd` directory and C adapters under
 `laserd/c`. Vendored dependency READMEs describe upstream projects, not the
 complete supported Laser-D API.
-
-`std.typecons` is not distributed. The focused JSON program in
-`library/test/typedesc_json.d` is a demonstration, not a public JSON library.

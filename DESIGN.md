@@ -785,8 +785,12 @@ result.
 
 `library/README.md` is the library index. Separate API references under
 `library/docs/` describe each public module or related module family, including
-types, structs, functions, ownership, and native linking requirements. Shared
-build and test instructions live in `library/docs/building.md`. CMake installs
+types, structs, functions, ownership, and native linking requirements.
+API descriptions and caller requirements come first in each reference. Source
+layout, backend mechanics, representation choices, and test coverage belong in
+a final `Implementation Details` section. Ownership, failure behavior, and
+thread-safety requirements remain with the API because they govern correct use.
+Shared build and test instructions live in `library/docs/building.md`. CMake installs
 these pages alongside the index renamed to `STANDARD_LIBRARY.md`, preserving
 its relative documentation links. The references describe the existing library
 surface; they do not expand the supported language or native API subset.

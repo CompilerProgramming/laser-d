@@ -1,26 +1,18 @@
 # Insertion-ordered hash tables: laserd.hash
 
-Source: `library/laserd/hash.d`. Uses [Arena](memory.md); link `laserd_rpmalloc`
-and its platform dependencies and initialize the allocator first.
+`laserd.hash` provides insertion-ordered hash tables whose keys and values
+are machine words, suitable for integers or pointers on 64-bit targets.
+Choose a numeric or C-string policy, or supply your own comparison and hash
+callbacks.
 
-The pure Laser-D module `laserd.hash` is an
-insertion-ordered port of the public-domain `st` C hash table with machine-word
-keys and values. It retains the original binless linear-search representation
-for small tables, the packed 8/16/32/64-bit bin indices for larger tables, the
-combined entries-and-bins allocation, probing sequence, and rebuild thresholds.
-A fidelity test checks the original numeric, C-string, case-insensitive, and
-incremental hash algorithms against vectors produced by the C source.
-Comparison callbacks and iteration may rebuild the table; searches detect the
-changed rebuild counter, discard cached entry locations, and retry.
-A caller supplies and retains ownership of a `laserd.memory.Arena`; a table
-uses that Arena for its own allocation and growth but never destroys it.
-`st_free_table` releases table storage through the Arena, so immediate memory
-reclamation depends on the selected backend; bump and fixed-region storage is
-reclaimed when the caller destroys the Arena.
-Numeric, C-string, and ASCII case-insensitive C-string policies are predefined,
-and callers may supply compatible hash and comparison function pointers.
-Allocation failure is returned as `null` from creation/copying and as
-`ST_ERROR` from operations that may grow the table.
+A table borrows its [Arena](memory.md); keep the arena alive until the table
+is freed. `st_free_table` releases table storage without destroying the arena
+or freeing objects referenced by keys and values. Immediate reclamation
+depends on the arena: fixed-region and bump storage is reclaimed on arena
+destruction.
+
+Creation and copying return null on allocation failure. Operations that grow
+the table report failure with `ST_ERROR`.
 
 ## Types, callbacks, and constants
 
@@ -56,12 +48,10 @@ struct st_hash_type
 }
 ```
 
-`st_table` stores the borrowed `Arena* arena`, policy pointer `type`, entry count
-`num_entries`, and implementation bookkeeping (`entry_power`, `bin_power`,
-`size_ind`, `entries_start`, `entries_bound`, `rebuilds_num`, `entries`). Use
-functions below to manage it rather than modifying those fields. The entry
-record type is private. The immutable policies `st_hashtype_num`,
-`st_hashtype_str`, and `st_hashtype_strcase` are `st_hash_type` values.
+`st_table` represents a table; create and manage it through the functions
+below. `st_hash_type` supplies the comparison and hash callbacks. The immutable
+`st_hashtype_num`, `st_hashtype_str`, and `st_hashtype_strcase` values provide
+numeric, C-string, and ASCII case-insensitive C-string policies.
 
 Comparators return zero for equal keys; equal keys must have equal hashes.
 Custom policy storage and any referenced keys/values must outlive their use
@@ -203,5 +193,30 @@ replacement callback on key/value pointers. Iteration returns zero on normal
 completion or stop, one for a check/action error, or `ST_ERROR` for a forbidden
 replacement-callback rebuild.
 
+## Using the library
+
+Uses [Arena](memory.md); link `laserd_rpmalloc`
+and its platform dependencies and initialize the allocator first.
+
+## Implementation Details
+
+Source: `library/laserd/hash.d`.
+
 Integration coverage: `library/test/hash.d` (CTest `hash_table`), including
 vectors from the original C algorithms and callback-driven rebuilds.
+
+`st_table` stores the borrowed `Arena* arena`, policy pointer `type`, entry count
+`num_entries`, and implementation bookkeeping (`entry_power`, `bin_power`,
+`size_ind`, `entries_start`, `entries_bound`, `rebuilds_num`, `entries`). Use
+functions below to manage it rather than modifying those fields. The entry
+record type is private. The immutable policies `st_hashtype_num`,
+`st_hashtype_str`, and `st_hashtype_strcase` are `st_hash_type` values.
+
+The module is a port of the public-domain `st` C hash table. Small tables
+use a binless linear search; larger tables use packed 8/16/32/64-bit bin
+indices and a combined entries-and-bins allocation. The port retains the
+original probing sequence and rebuild thresholds.
+
+Searches and iteration track rebuild counters and retry or re-find entries
+after callbacks change storage. Fidelity tests compare numeric, C-string,
+case-insensitive, and incremental hashes with vectors from the C source.

@@ -1,17 +1,12 @@
 # Arena-backed arrays: laserd.array
 
-Source: `library/laserd/array.d`. Uses [Arena](memory.md); link `laserd_rpmalloc`
-and its platform dependencies and initialize the allocator first.
+`laserd.array` provides `Array!T`, a growable array with indexed access,
+ranges, insertion, replacement, removal, and duplication.
 
-`laserd.array` provides Laser-D's arena-backed `Array!T`. It was initially
-derived from Phobos's array container but is not a compatibility module. Every
-usable array is constructed with a borrowed, non-null `Arena*`; copies
-share state, while `dup()` creates independent payload storage in the same
-arena. Call `destroy()` once after the last shared copy and range is finished.
-The port covers indexed access and assignment, slicing/ranges, reserve/resize,
-append and positional insertion, replacement, removal, duplication, and clear.
-Its API uses explicit accessor methods suited to Laser-D's language subset,
-and a packed boolean specialization remains deferred.
+Each usable array borrows a non-null [Arena](memory.md). Copies share contents;
+`dup()` creates independent array storage in the same arena. Keep the arena
+alive until every copy and range is finished, then call `destroy()` once.
+This is a Laser-D-specific API, not a Phobos compatibility module.
 
 ## Types and construction
 
@@ -25,9 +20,9 @@ struct Array(T) if (!is(immutable T == immutable bool))
 ```
 
 The arena must be non-null and outlive all arrays and ranges. Constructors and
-`dup` require their allocations to succeed (the implementation asserts this
-precondition); they do not return a recoverable allocation status. A default
-`Array!T.init` is uninitialized. Construct an array before using mutators or
+`dup` require their allocations to succeed; they do not return a recoverable
+allocation status. A default `Array!T.init` is uninitialized. Construct an
+array before using mutators or
 `dup`. `Array!bool` is excluded.
 
 ## Array methods
@@ -85,9 +80,9 @@ void destroy();
 | `clear`, `destroy` | Clear releases payload and retains shared state for reuse. Destroy also releases state and invalidates every shared copy/range. Call destroy once. |
 
 The `stable*` names are aliases, not additional storage-stability guarantees.
-Growth may invalidate raw slices/pointers from `data`. Ranges retain indices
-into shared state; insertion/removal can change what those indices mean or
-make them invalid. Obtain fresh ranges after structural changes.
+Growth may invalidate raw slices/pointers from `data`. Insertion and removal
+can change the elements selected by a range or invalidate the range. Obtain
+fresh ranges after structural changes.
 
 ## Range methods
 
@@ -111,4 +106,19 @@ Range indexing is relative to its start. `save` copies the view, not payload;
 pop operations move only the view's endpoints. Assignment updates shared
 elements. Range front/back/pop operations require a nonempty view.
 
+## Using the library
+
+Uses [Arena](memory.md); link `laserd_rpmalloc`
+and its platform dependencies and initialize the allocator first.
+
+## Implementation Details
+
+Source: `library/laserd/array.d`.
+
 Integration coverage: `library/test/container_array.d` (CTest `container_array`).
+
+The array began as a port of Phobos's array container. Each array holds a
+pointer to shared state containing its arena, storage, and used length. Ranges
+hold the same state pointer and a pair of indices. Constructors and `dup`
+express allocation-success preconditions with assertions. A packed Boolean
+specialization remains deferred.

@@ -1,26 +1,15 @@
 # Compile-time type descriptions: laserd.typedesc
 
-Source: `library/laserd/typedesc.d`. No native archive or initialization is required.
-
-`laserd.typedesc` provides opt-in compile-time descriptions as ordinary struct
-values. Its initial surface covers primitive types, pointers, function types,
-structs, static arrays, non-owning slices, and strings, including typed
-traversal of pointer targets, function signatures, array and slice elements,
-and named struct fields. Character slices receive the specific string
-description. Description construction does not use Druntime `TypeInfo`,
-`typeid`, allocation, or hidden compiler metadata.
-
-The focused JSON demonstration serializes a described struct into
-caller-provided storage and reconstructs string storage using a caller-provided
-`Arena`. Its containing struct uses fixed-size arrays of primitives and structs.
-The demonstration covers only the grammar needed to show recursive description
-traversal and is not a public general-purpose JSON module.
+`laserd.typedesc` describes types as ordinary struct values. It supports
+primitive types, pointers, function types, structs, fixed-size arrays, slices,
+and strings. Use the descriptor members to traverse field types, function
+signatures, pointer targets, and element types without allocating memory.
 
 ## Entry points
 
 ```d
 template TypeDescription(T); // Selects a descriptor struct type.
-TypeDescription!T TypeDescription_of(T)(); // Returns that type's .init value.
+TypeDescription!T TypeDescription_of(T)(); // Returns a descriptor for T.
 ```
 
 Use `enum description = TypeDescription_of!T();` for a compile-time value.
@@ -59,8 +48,54 @@ All descriptors expose `DescribedType`, `kind`, `size_in_bytes`, and `name`.
 Function types have size zero because they are not value types. Array size is
 the inline array's size; slice/string size is the slice representation's size,
 not the number of elements it references. Indices below are compile-time
-indices and must be in range. The following declarations list the additional
-type aliases, fields, and compile-time traversal values for each struct:
+indices and must be in range. Each descriptor has the common members below:
+
+| Member | Meaning |
+| --- | --- |
+| `DescribedType` | Alias for the described type `T`. |
+| `kind` | `TypeDescriptionKind` identifying the descriptor category. |
+| `size_in_bytes` | Size of the described value, or zero for a function type. |
+| `name` | Immutable character slice naming the described type. |
+
+The public descriptor structs provide these additional members. Names ending
+in `Type`, `Types`, or `Description` are type aliases; lowercase traversal
+members are compile-time values. Parameter and field members taking `index`
+use a compile-time index.
+
+| Struct | Additional members |
+| --- | --- |
+| `PrimitiveTypeDescription!T` | `primitive_type`: `PrimitiveTypeKind` classifying void, Boolean, signed/unsigned integer, character, or floating point. |
+| `PointerTypeDescription!T` | `TargetType`, `TargetDescription`, `target_description`. |
+| `FunctionTypeDescription!T` | `ReturnType`, `ReturnDescription`, `return_description`; `ParameterTypes`, `parameter_count`, `ParameterType!index`, `ParameterDescription!index`, `parameter_description!index`. |
+| `StructTypeDescription!T` | `alignment_in_bytes`; `FieldTypes`, `field_count`, `FieldType!index`, `FieldDescription!index`, `field_description!index`, `field_name!index`, `field_offset_in_bytes!index`. |
+| `ArrayTypeDescription!T` | `ElementType`, `ElementDescription`, `element_count`, `element_description`. |
+| `StringTypeDescription!T` | `CharacterType`. |
+| `SliceTypeDescription!T` | `ElementType`, `ElementDescription`, `element_description`. |
+
+## Using the library
+
+No native archive or initialization is required.
+
+## Implementation Details
+
+Source: `library/laserd/typedesc.d`.
+
+Integration coverage: `library/test/typedesc.d` (CTest
+`compile_time_type_description`) and `library/test/typedesc_json.d` (CTest
+`type_description_json_demo`). The latter requires an Arena for reconstructed
+strings and rejects unsupported pointer, function, and non-string slice fields.
+
+The focused JSON demonstration serializes a described struct into
+caller-provided storage and reconstructs string storage using a caller-provided
+`Arena`. Its containing struct uses fixed-size arrays of primitives and structs.
+The demonstration covers only the grammar needed to show recursive description
+traversal and is not a public general-purpose JSON module.
+
+### Descriptor construction
+
+These declaration expansions show how the public members are computed. Names
+such as `primitive_type_of`, `FunctionReturn`, `FunctionParameters`, and
+`ArrayElement` are private implementation helpers.
 
 ```d
 struct PrimitiveTypeDescription(T)
@@ -163,7 +198,6 @@ struct SliceTypeDescription(T)
 }
 ```
 
-Integration coverage: `library/test/typedesc.d` (CTest
-`compile_time_type_description`) and `library/test/typedesc_json.d` (CTest
-`type_description_json_demo`). The latter requires an Arena for reconstructed
-strings and rejects unsupported pointer, function, and non-string slice fields.
+`TypeDescription` selects a descriptor type, and `TypeDescription_of` returns
+its `.init` value. Construction uses templates and frontend traits rather than
+Druntime `TypeInfo`, `typeid`, or hidden runtime metadata.

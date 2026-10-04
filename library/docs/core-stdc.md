@@ -1,8 +1,8 @@
 # C runtime bindings: core.stdc
 
-Sources: `library/core/stdc/*.d`. These are declarations bound directly to
-the platform C runtime, with no Laser-D archive or hidden initialization.
-The following is the shipped subset, not all of the C standard library.
+`core.stdc` provides C-compatible types and functions for allocation, numeric
+conversion, byte/string operations, and file I/O. The declarations below cover
+the distributed subset of the C standard library.
 
 C pointer APIs retain their native buffer, lifetime, and termination contracts.
 Pass zero-terminated strings where a C string is required; a D slice does not
@@ -10,8 +10,6 @@ automatically supply a terminator. Pair C allocations with C `free`, and opened
 `FILE*` streams with `fclose`. Counts in `fread`/`fwrite` are element counts;
 memory operations use byte counts. `memcpy` requires nonoverlapping regions;
 use `memmove` when they overlap. Variadic calls require C-compatible arguments.
-
-Integration coverage: `library/test/core_stdc.d` (CTest `core_stdc`).
 
 ## core.stdc.config
 
@@ -96,32 +94,9 @@ enum UINTMAX_MAX = uintmax_t.max;
 
 ## core.stdc.stdarg
 
-C variadic ABI storage on x86-64. The Unix structure contains register offsets and argument-area pointers; no `va_start`/`va_arg` functions are declared here.
-
-```d
-module core.stdc.stdarg;
-
-version (X86_64)
-{
-    version (Windows)
-    {
-        alias va_list = char*;
-    }
-    else
-    {
-        struct __va_list_tag
-        {
-            uint offset_regs;
-            uint offset_fpregs;
-            void* stack_args;
-            void* reg_args;
-        }
-
-        alias __va_list = __va_list_tag;
-        alias va_list = __va_list*;
-    }
-}
-```
+`va_list` is the platform's C variadic argument-list type on x86-64. Use it
+when interoperating with C variadic APIs; no `va_start`/`va_arg` functions are
+declared here. Its platform representation is listed under Implementation Details.
 
 ## core.stdc.stdio
 
@@ -275,3 +250,45 @@ extern(C)
     size_t strxfrm(char* destination, const char* source, size_t count);
 }
 ```
+
+## Using the library
+
+Link to the platform C runtime; no Laser-D archive or initialization is required.
+
+## Implementation Details
+
+Sources: `library/core/stdc/*.d`.
+
+Integration coverage: `library/test/core_stdc.d` (CTest `core_stdc`).
+
+### Variadic ABI representation
+
+C variadic ABI storage on x86-64. The Unix structure contains register offsets and argument-area pointers; no `va_start`/`va_arg` functions are declared here.
+
+```d
+module core.stdc.stdarg;
+
+version (X86_64)
+{
+    version (Windows)
+    {
+        alias va_list = char*;
+    }
+    else
+    {
+        struct __va_list_tag
+        {
+            uint offset_regs;
+            uint offset_fpregs;
+            void* stack_args;
+            void* reg_args;
+        }
+
+        alias __va_list = __va_list_tag;
+        alias va_list = __va_list*;
+    }
+}
+```
+
+The modules contain C ABI declarations derived from druntime and adapted to
+Laser-D. Function symbols are supplied by the platform C runtime.

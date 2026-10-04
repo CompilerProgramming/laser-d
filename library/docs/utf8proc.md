@@ -1,20 +1,14 @@
 # UTF-8 processing: laserd.utf8proc
 
-Source: `library/laserd/utf8proc.d`. Link `laserd_utf8proc`; Arena-backed
-transforms also use `laserd_rpmalloc` and its platform dependencies. See
-[building](building.md) and [Arena](memory.md).
+`laserd.utf8proc` provides UTF-8 validation, decoding and encoding, Unicode
+categories, case mapping, display width, grapheme boundaries, normalization,
+and case folding. The supported character data is Unicode 17.0.0.
 
-Laser-D standard-library text processing is UTF-8-only. `laserd.utf8proc`
-exposes the allocation-free parts of vendored utf8proc 2.11.3 using their native
-names, including validation/iteration, encoding, Unicode categories, simple
-case mapping, display width, and grapheme-boundary operations. The bundled data
-implements Unicode 17.0.0.
-
-utf8proc's `malloc`-allocating convenience functions are deliberately absent.
-`utf8proc_transform` provides normalization and case folding using a mandatory
-borrowed `Arena*`; `utf8proc_buffer_destroy` releases its complete allocation
-through the same arena. UTF-16/UTF-32 library codecs and the former handwritten
-`laserd.uni` predicates are not part of the supported library surface.
+Inspection functions use caller-owned storage or return values.
+`utf8proc_transform` allocates its result through a borrowed [Arena](memory.md);
+release it with `utf8proc_buffer_destroy`. UTF-16/UTF-32 codecs and
+malloc-allocating convenience functions such as `utf8proc_map` and
+`utf8proc_NFC` are not provided.
 
 ## Scalar types and constants
 
@@ -168,4 +162,19 @@ and can contain NUL bytes when `UTF8PROC_NULLTERM` is not set. That native flag
 requests zero-terminated processing instead, so do not set it for arbitrary
 slices. Empty successful output may have null data and allocation pointers.
 
+## Using the library
+
+Link `laserd_utf8proc`; Arena-backed
+transforms also use `laserd_rpmalloc` and its platform dependencies. See
+[building](building.md) and [Arena](memory.md).
+
+## Implementation Details
+
+Source: `library/laserd/utf8proc.d`.
+
 Integration coverage: `library/test/utf8proc.d` (CTest `utf8proc`).
+
+The binding uses vendored utf8proc 2.11.3 and preserves native names for its
+allocation-free functions. `utf8proc_transform` uses `utf8proc_decompose` and
+`utf8proc_reencode` with arena-owned working storage. The former handwritten
+`laserd.uni` predicates are not part of the supported library surface.
