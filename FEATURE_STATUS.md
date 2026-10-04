@@ -345,7 +345,7 @@ Each chapter should be split into individual features as it is investigated.
 
 | Feature | Status | Decision | Tests |
 | --- | --- | --- | --- |
-| Modern struct operators | Supported | Unary, binary, right-hand binary, equality, ordering, cast, call, assignment, compound assignment, and POD postfix operators lower to runtime-free method calls. | `operator_overloading_accepted.d` |
+| Modern struct operators | Supported | Unary, binary, right-hand binary, equality, ordering, cast, call, assignment, compound assignment, and POD postfix operators lower to runtime-free method calls. Assignment overload selection by right-hand type is tested with a tagged union whose hook updates both its discriminator and selected member. | `operator_overloading_accepted.d` |
 | Indexing and slicing hooks | Supported | Value-returning indexing, index assignment, index compound assignment, one-dimensional slicing, slice assignment, and `$` are supported. Non-owning slice results retain the normal array restrictions. | `operator_overloading_accepted.d` |
 | Operator forwarding | Supported | `opDispatch` forwarding through supported templates is retained. | `operator_overloading_accepted.d` |
 | Immutable receiver operators | Supported | Operators may be declared for and invoked on immutable struct values without using the rejected postfix `const` receiver qualifier. | `operator_overloading_accepted.d` |

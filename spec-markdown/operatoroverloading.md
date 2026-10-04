@@ -130,6 +130,11 @@ destination.opAssign(source)
 
 Initialization of a newly declared value remains initialization.
 
+Assignment overloads may select different value representations. For example,
+a tagged union can overload `opAssign` for each supported member type, store
+the right-hand value in that union member, and update its discriminator in the
+same method. Overload resolution uses the right-hand operand type.
+
 Compound assignment may call:
 
 ```d

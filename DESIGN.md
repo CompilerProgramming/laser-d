@@ -608,6 +608,12 @@ that is supported for ordinary value-copyable structs, but cannot introduce a
 rejected postblit. Any array or slice value produced by an overload remains
 subject to the normal non-owning-array restrictions.
 
+Assignment overloads can provide type-directed mutation of explicit value
+representations. The conformance suite includes a tagged union with separate
+integer and floating-point `opAssign` hooks; each hook writes the selected
+union member and updates the enum discriminator without allocation or hidden
+runtime state.
+
 Legacy D1-style operator hooks are rejected as aggregate instance methods.
 Laser-D uses the modern templated hooks exclusively, avoiding a second set of
 names for the same operations.

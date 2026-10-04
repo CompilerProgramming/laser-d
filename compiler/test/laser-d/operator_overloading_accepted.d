@@ -114,6 +114,36 @@ struct ImmutableNumber
     }
 }
 
+enum ValueKind : ubyte
+{
+    none,
+    integer,
+    floating,
+}
+
+struct TaggedValue
+{
+    ValueKind kind;
+
+    union
+    {
+        int integer;
+        float floating;
+    }
+
+    void opAssign(int replacement)
+    {
+        integer = replacement;
+        kind = ValueKind.integer;
+    }
+
+    void opAssign(float replacement)
+    {
+        floating = replacement;
+        kind = ValueKind.floating;
+    }
+}
+
 static assert(Number(6)(7) == 42);
 static assert(cast(int) Number(9) == 9);
 static assert(cast(bool) Number(1));
@@ -168,5 +198,17 @@ extern(C) int main()
 
     immutable ImmutableNumber immutableLeft = ImmutableNumber(5);
     immutable ImmutableNumber immutableRight = ImmutableNumber(5);
-    return immutableLeft == immutableRight ? 0 : 12;
+    if (immutableLeft != immutableRight)
+        return 12;
+
+    TaggedValue tagged;
+    tagged = 42;
+    if (tagged.kind != ValueKind.integer || tagged.integer != 42)
+        return 13;
+
+    tagged = 1.5f;
+    if (tagged.kind != ValueKind.floating || tagged.floating != 1.5f)
+        return 14;
+
+    return 0;
 }
